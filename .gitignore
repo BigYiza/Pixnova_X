@@ -1,0 +1,6 @@
+DerivedData/
+build/
+*.xcuserstate
+xcuserdata/
+
+!iPxavno/Info.plist
