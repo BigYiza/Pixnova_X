@@ -19,10 +19,10 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneWillEnterForeground(_ scene: UIScene) {
         Task {
             do {
-                try await AppRuntime.shared.container.accountRepository.refreshSessionIfNeeded(force: false)
+                try await AppRuntime.shared.container.membershipHandler.maintainStatusAfterSessionPrepared()
             } catch {
                 AppRuntime.shared.container.analytics.record(
-                    AnalyticsEvent(name: "session_foreground_refresh_failed", properties: ["reason": error.localizedDescription])
+                    AnalyticsEvent(name: "membership_foreground_refresh_failed", properties: ["reason": error.localizedDescription])
                 )
             }
         }

@@ -229,7 +229,11 @@ extension CategoryTemplateListViewController: UICollectionViewDelegate {
               cards[selectedIndex].templates.indices.contains(indexPath.item) else {
             return
         }
-        viewModel.didSelectTemplate(cards[selectedIndex].templates[indexPath.item])
+        let template = cards[selectedIndex].templates[indexPath.item]
+        viewModel.didSelectTemplate(template)
+        guard template.kind.isFilterGenerationWorkflow else { return }
+        let viewController = viewModel.makeFilterGenerationViewController(for: template)
+        navigationController?.pushViewController(viewController, animated: true)
     }
 }
 
@@ -415,5 +419,16 @@ private final class CategoryTemplateGradientView: UIView {
     override func layoutSubviews() {
         super.layoutSubviews()
         gradientLayer.frame = bounds
+    }
+}
+
+private extension CreativeKind {
+    var isFilterGenerationWorkflow: Bool {
+        switch self {
+        case .filter, .hair, .cutout, .photo, .outfit, .baby, .makeup, .avatar, .textToImage, .imageToImage:
+            return true
+        case .video, .textToVideo, .imageToVideo, .multiImageToVideo, .videoEnhance, .collection, .unknown:
+            return false
+        }
     }
 }

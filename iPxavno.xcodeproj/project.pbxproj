@@ -11,9 +11,13 @@
 		063B22F587CA2CAFDFD53CBD /* Observable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36D8C2F2FAEE6C46ED498451 /* Observable.swift */; };
 		0AE03B337A5BE21D135034B1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9D719FB358B97C9BD2281192 /* Assets.xcassets */; };
 		101E79FF3958D329F544FD7F /* AccountNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E9951A1EDA519F52E6F3936 /* AccountNotifications.swift */; };
+		10C7A9F56B4D922AA1F33415 /* MembershipHandling.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9F8B821F395D0C97BA36E44 /* MembershipHandling.swift */; };
 		115D7D43C4616F6998B6181C /* AppCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E64D12005CBD10F373905ED /* AppCoordinator.swift */; };
+		1275B6AF7D0887DB88E48354 /* BaseGenerationWorkflowViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8083516F5099E2E31E60877 /* BaseGenerationWorkflowViewController.swift */; };
+		14F6C1F3701A4F2DA5B6C8D9 /* FilterGenerationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A09E2B49CC04EB1B59AD401 /* FilterGenerationViewController.swift */; };
 		1972924B42A33950605905B3 /* OnboardingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47F584B372891B8DBF9785E0 /* OnboardingViewController.swift */; };
 		19A608FAB6B961CAB6BB4C34 /* SessionProviding.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DF84507A89836FCA7ECDD9 /* SessionProviding.swift */; };
+		1D2805F68476B3157A3D143A /* ImageSelectionCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7108E98F5CB04D1BA60C03BE /* ImageSelectionCoordinator.swift */; };
 		255B29F11CE4CC760246CABA /* PrimaryButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC87C25ED745CDC6CE7E4CB6 /* PrimaryButton.swift */; };
 		2744C40F206F6340B35018B0 /* ContentRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1E14D0303CF51A3395116F /* ContentRepository.swift */; };
 		28C19CFCCCD2B90B1923F727 /* CreationHubViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 443267AFFD42629E78D3C6D3 /* CreationHubViewModel.swift */; };
@@ -31,6 +35,7 @@
 		5042C72B64C4C2773E6E0F25 /* DeviceIdentifying.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D627C37F9D7ECD11FA74400 /* DeviceIdentifying.swift */; };
 		5209F09158C7936C613217CD /* DiscoverViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E82768F5C799BC7C6418A37F /* DiscoverViewModel.swift */; };
 		5B2566288124D2FC65A11E83 /* HomeDesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77B38369BFF483A927A847C4 /* HomeDesignTokens.swift */; };
+		5F82A6430A37DB9316AC5E18 /* DefaultMembershipHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09A67C03F2C45B0D1472D29E /* DefaultMembershipHandler.swift */; };
 		6340DFD977FFCFA5EB627B9E /* RequestHeaderProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15C585D72DC5DE85467CB058 /* RequestHeaderProvider.swift */; };
 		6475294B7CE3F60E9C3A26C7 /* DiscoverViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55BC748012E2695A74105EA8 /* DiscoverViewController.swift */; };
 		68D57A2F88928B508CB82150 /* DependencyContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01761D8E61095BB3A4E78485 /* DependencyContainer.swift */; };
@@ -65,6 +70,7 @@
 
 /* Begin PBXFileReference section */
 		01761D8E61095BB3A4E78485 /* DependencyContainer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DependencyContainer.swift; sourceTree = "<group>"; };
+		09A67C03F2C45B0D1472D29E /* DefaultMembershipHandler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DefaultMembershipHandler.swift; sourceTree = "<group>"; };
 		15C585D72DC5DE85467CB058 /* RequestHeaderProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RequestHeaderProvider.swift; sourceTree = "<group>"; };
 		17FC4EB3C55B0F1217D7FCFA /* AccountStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AccountStore.swift; sourceTree = "<group>"; };
 		1B47505387E471C12232CEE3 /* ContentCatalogStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ContentCatalogStore.swift; sourceTree = "<group>"; };
@@ -84,8 +90,10 @@
 		5A67D3A82CC3A22730118AFC /* ProfileViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ProfileViewModel.swift; sourceTree = "<group>"; };
 		615CBA10848930C1841FF078 /* RemoteContentRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RemoteContentRepository.swift; sourceTree = "<group>"; };
 		679D56C1EA13336CEE20D59B /* ContentNotifications.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ContentNotifications.swift; sourceTree = "<group>"; };
+		6A09E2B49CC04EB1B59AD401 /* FilterGenerationViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FilterGenerationViewController.swift; sourceTree = "<group>"; };
 		67C2201A59E4A1DE0FC104F0 /* AppDelegate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		6BDD8853D67D096C1B84B9EC /* DeviceIdentifierProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeviceIdentifierProvider.swift; sourceTree = "<group>"; };
+		7108E98F5CB04D1BA60C03BE /* ImageSelectionCoordinator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ImageSelectionCoordinator.swift; sourceTree = "<group>"; };
 		76F3C6F70089698F60CFDF4D /* AppTheme.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
 		77B38369BFF483A927A847C4 /* HomeDesignTokens.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeDesignTokens.swift; sourceTree = "<group>"; };
 		7A951426D2B18B72D8202983 /* SceneDelegate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -103,6 +111,7 @@
 		A4D859BD316CA71FDBB35AA0 /* APIClient.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
 		A68199643479BF18EAC94156 /* GenerationRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GenerationRepository.swift; sourceTree = "<group>"; };
 		A873ED240D656D21A573494F /* RemoteImageView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RemoteImageView.swift; sourceTree = "<group>"; };
+		A9F8B821F395D0C97BA36E44 /* MembershipHandling.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MembershipHandling.swift; sourceTree = "<group>"; };
 		AA1E14D0303CF51A3395116F /* ContentRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ContentRepository.swift; sourceTree = "<group>"; };
 		B50CE59AC50797769F95AFD8 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		B5DF84507A89836FCA7ECDD9 /* SessionProviding.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SessionProviding.swift; sourceTree = "<group>"; };
@@ -112,6 +121,7 @@
 		CF908F48255844F18352C2DA /* GenerationModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GenerationModels.swift; sourceTree = "<group>"; };
 		D1B3E9F76C77087D7DCA1A03 /* DesignTabBarView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DesignTabBarView.swift; sourceTree = "<group>"; };
 		D20A833F4D94D7C5F61A41D3 /* ProfileViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ProfileViewController.swift; sourceTree = "<group>"; };
+		D8083516F5099E2E31E60877 /* BaseGenerationWorkflowViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BaseGenerationWorkflowViewController.swift; sourceTree = "<group>"; };
 		DA433CE0D4DB81B559360404 /* KeyValueStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyValueStore.swift; sourceTree = "<group>"; };
 		E6580D153EF37146F52FD27C /* ContentModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ContentModels.swift; sourceTree = "<group>"; };
 		E70EDF840A1399A68781F738 /* CategoryTemplateListViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CategoryTemplateListViewController.swift; sourceTree = "<group>"; };
@@ -244,6 +254,7 @@
 			children = (
 				76F3C6F70089698F60CFDF4D /* AppTheme.swift */,
 				327E78347D9622501A5F42D8 /* BaseViewController.swift */,
+				7108E98F5CB04D1BA60C03BE /* ImageSelectionCoordinator.swift */,
 				BC87C25ED745CDC6CE7E4CB6 /* PrimaryButton.swift */,
 				A873ED240D656D21A573494F /* RemoteImageView.swift */,
 			);
@@ -307,6 +318,7 @@
 				17FC4EB3C55B0F1217D7FCFA /* AccountStore.swift */,
 				867DB66E94D1F0BC34CD2720 /* ConsoleAnalyticsTracker.swift */,
 				1B47505387E471C12232CEE3 /* ContentCatalogStore.swift */,
+				09A67C03F2C45B0D1472D29E /* DefaultMembershipHandler.swift */,
 				6BDD8853D67D096C1B84B9EC /* DeviceIdentifierProvider.swift */,
 				7F193BB79AF0ED9FB75981CE /* SessionVault.swift */,
 			);
@@ -319,6 +331,7 @@
 			children = (
 				B8F811744A76CED156BC0AAE /* Creation */,
 				5EF67B0549F8441DAAA733F3 /* Discovery */,
+				D7B3FE73681B5714D3455CF0 /* Generation */,
 				8C5DE8805324AD116AE58B25 /* Launch */,
 				93B35FBD09461785D10F1F17 /* Main */,
 				01009C71FF3F06ED92B1A188 /* Onboarding */,
@@ -357,6 +370,16 @@
 			path = Profile;
 			sourceTree = "<group>";
 		};
+		D7B3FE73681B5714D3455CF0 /* Generation */ = {
+			isa = PBXGroup;
+			children = (
+				D8083516F5099E2E31E60877 /* BaseGenerationWorkflowViewController.swift */,
+				6A09E2B49CC04EB1B59AD401 /* FilterGenerationViewController.swift */,
+			);
+			name = Generation;
+			path = Generation;
+			sourceTree = "<group>";
+		};
 		DCF6C83D4088E003FC74537A /* Services */ = {
 			isa = PBXGroup;
 			children = (
@@ -364,6 +387,7 @@
 				94BCA6E916871687AAEEB140 /* AnalyticsTracking.swift */,
 				679D56C1EA13336CEE20D59B /* ContentNotifications.swift */,
 				8D627C37F9D7ECD11FA74400 /* DeviceIdentifying.swift */,
+				A9F8B821F395D0C97BA36E44 /* MembershipHandling.swift */,
 				B5DF84507A89836FCA7ECDD9 /* SessionProviding.swift */,
 			);
 			name = Services;
@@ -487,6 +511,7 @@
 				BF8D05CA9BB9A1A4330B2FC1 /* KeyValueStore.swift in Sources */,
 				EF77CAE61AFAAD29EF9901FA /* AppTheme.swift in Sources */,
 				80F0B328363588067CC92D51 /* BaseViewController.swift in Sources */,
+				1D2805F68476B3157A3D143A /* ImageSelectionCoordinator.swift in Sources */,
 				255B29F11CE4CC760246CABA /* PrimaryButton.swift in Sources */,
 				BA6FA57D017C466A947D4DDC /* RemoteImageView.swift in Sources */,
 				C601C56A0B2FE5E9B842D7B9 /* AccountModels.swift in Sources */,
@@ -499,9 +524,12 @@
 				E66DE3DB1A043ED1541B2AB3 /* AnalyticsTracking.swift in Sources */,
 				4A062348D0EF0B79150350A4 /* ContentNotifications.swift in Sources */,
 				5042C72B64C4C2773E6E0F25 /* DeviceIdentifying.swift in Sources */,
+				10C7A9F56B4D922AA1F33415 /* MembershipHandling.swift in Sources */,
 				19A608FAB6B961CAB6BB4C34 /* SessionProviding.swift in Sources */,
 				F4A95F394663A930D8E17369 /* CreationHubViewController.swift in Sources */,
 				28C19CFCCCD2B90B1923F727 /* CreationHubViewModel.swift in Sources */,
+				1275B6AF7D0887DB88E48354 /* BaseGenerationWorkflowViewController.swift in Sources */,
+				14F6C1F3701A4F2DA5B6C8D9 /* FilterGenerationViewController.swift in Sources */,
 				4BB8FEDCAA0EAE9F51EC5936 /* CategoryTemplateListViewController.swift in Sources */,
 				38C8FC6585B0E28D577AE426 /* CategoryTemplateListViewModel.swift in Sources */,
 				6475294B7CE3F60E9C3A26C7 /* DiscoverViewController.swift in Sources */,
@@ -525,6 +553,7 @@
 				F3BC39040BE2FE364692FBBC /* AccountStore.swift in Sources */,
 				B2E002336FB4EAFF167D3364 /* ConsoleAnalyticsTracker.swift in Sources */,
 				B6F1365F682D8F9120020288 /* ContentCatalogStore.swift in Sources */,
+				5F82A6430A37DB9316AC5E18 /* DefaultMembershipHandler.swift in Sources */,
 				7C8C0AA7E1AF4D7628F5978F /* DeviceIdentifierProvider.swift in Sources */,
 				49168DF93B3CC225DFB9942D /* SessionVault.swift in Sources */,
 				B3F9E7E99E5B8D9970E0B503 /* SceneDelegate.swift in Sources */,

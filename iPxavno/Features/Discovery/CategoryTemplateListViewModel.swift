@@ -24,16 +24,22 @@ final class CategoryTemplateListViewModel {
 
     private let sourceSection: ContentSection
     private let contentRepository: ContentRepository
+    private let membershipHandler: MembershipHandling
+    private let generationRepository: GenerationRepository
     private let analytics: AnalyticsTracking
     private var contentObserver: NSObjectProtocol?
 
     init(
         sourceSection: ContentSection,
         contentRepository: ContentRepository,
+        membershipHandler: MembershipHandling,
+        generationRepository: GenerationRepository,
         analytics: AnalyticsTracking
     ) {
         self.sourceSection = sourceSection
         self.contentRepository = contentRepository
+        self.membershipHandler = membershipHandler
+        self.generationRepository = generationRepository
         self.analytics = analytics
         state = Observable(CategoryTemplateListState.initial(sourceSection: sourceSection))
         observeContentCatalogChanges()
@@ -67,11 +73,27 @@ final class CategoryTemplateListViewModel {
         )
     }
 
+    func makeFilterGenerationViewController(for template: CreativeTemplate) -> FilterGenerationViewController {
+        FilterGenerationViewController(
+            initialTemplate: template,
+            sourceSection: sourceSection,
+            contentRepository: contentRepository,
+            membershipHandler: membershipHandler,
+            generationRepository: generationRepository,
+            analytics: analytics
+        )
+    }
+
     func didSelectTemplate(_ template: CreativeTemplate) {
+        let membershipAccess = membershipHandler.access(to: template)
         analytics.record(
             AnalyticsEvent(
                 name: "category_template_selected",
-                properties: ["template_id": "\(template.id)", "title": template.title]
+                properties: [
+                    "template_id": "\(template.id)",
+                    "title": template.title,
+                    "membership_access": membershipAccess.isAllowed ? "allowed" : "blocked"
+                ]
             )
         )
     }

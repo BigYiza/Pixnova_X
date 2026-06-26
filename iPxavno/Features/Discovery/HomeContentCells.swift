@@ -356,6 +356,9 @@ private final class GradientOverlayView: UIView {
 
     override func layoutSubviews() {
         super.layoutSubviews()
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
         gradientLayer.frame = bounds
+        CATransaction.commit()
     }
 }

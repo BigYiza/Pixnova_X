@@ -120,29 +120,37 @@ final class DiscoverViewModel {
     let state = Observable(DiscoverViewState.initial)
 
     let tab: HomePageTab
+    var currentMembershipState: HomeMembershipState {
+        membershipState(from: membershipHandler.cachedMembership)
+    }
+
     private let contentRepository: ContentRepository
-    private let accountRepository: AccountRepository
+    private let membershipHandler: MembershipHandling
+    private let generationRepository: GenerationRepository
     private let analytics: AnalyticsTracking
     private var accountObserver: NSObjectProtocol?
 
     init(
         tab: HomePageTab = .home,
         contentRepository: ContentRepository,
-        accountRepository: AccountRepository,
+        membershipHandler: MembershipHandling,
+        generationRepository: GenerationRepository,
         analytics: AnalyticsTracking
     ) {
         self.tab = tab
         self.contentRepository = contentRepository
-        self.accountRepository = accountRepository
+        self.membershipHandler = membershipHandler
+        self.generationRepository = generationRepository
         self.analytics = analytics
         observeAccountChanges()
 
         let cachedSections = contentRepository.cachedHomePage(tab: tab).map(makeHomeSections(from:)) ?? []
+        let cachedMembership = membershipHandler.cachedMembership
 
-        if let account = accountRepository.cachedAccount {
+        if !cachedMembership.account.userID.isEmpty {
             state.value = DiscoverViewState(
                 isLoading: false,
-                membership: membershipState(from: account),
+                membership: membershipState(from: cachedMembership),
                 sections: cachedSections,
                 errorMessage: nil
             )
@@ -165,19 +173,19 @@ final class DiscoverViewModel {
     func load() {
         state.value = DiscoverViewState(
             isLoading: true,
-            membership: state.value.membership,
+            membership: currentMembershipState,
             sections: state.value.sections,
             errorMessage: nil
         )
 
         Task {
             do {
-                let accountSnapshot = try await accountRepository.refreshSessionIfNeeded(force: false)
+                _ = try await membershipHandler.membershipStatus(forceRefresh: false)
                 let snapshot = try await contentRepository.fetchHomePage(tab: tab)
                 Task {
-                    _ = try? await accountRepository.synchronizeAccount()
+                    _ = try? await membershipHandler.membershipStatus(forceRefresh: true)
                 }
-                let resolvedMembership = membershipState(from: accountSnapshot)
+                let resolvedMembership = currentMembershipState
 
                 analytics.record(
                     AnalyticsEvent(
@@ -194,7 +202,7 @@ final class DiscoverViewModel {
             } catch {
                 state.value = DiscoverViewState(
                     isLoading: false,
-                    membership: state.value.membership,
+                    membership: currentMembershipState,
                     sections: state.value.sections,
                     errorMessage: error.localizedDescription
                 )
@@ -221,25 +229,33 @@ final class DiscoverViewModel {
         return CategoryTemplateListViewModel(
             sourceSection: section,
             contentRepository: contentRepository,
+            membershipHandler: membershipHandler,
+            generationRepository: generationRepository,
+            analytics: analytics
+        )
+    }
+
+    func makeFilterGenerationViewController(
+        for template: CreativeTemplate,
+        sourceSection: ContentSection
+    ) -> FilterGenerationViewController {
+        FilterGenerationViewController(
+            initialTemplate: template,
+            sourceSection: sourceSection,
+            contentRepository: contentRepository,
+            membershipHandler: membershipHandler,
+            generationRepository: generationRepository,
             analytics: analytics
         )
     }
 
     private func observeAccountChanges() {
-        accountObserver = NotificationCenter.default.addObserver(
-            forName: AccountNotifications.accountDidChange,
-            object: nil,
-            queue: .main
-        ) { [weak self] notification in
-            guard let self,
-                  let account = notification.userInfo?[AccountNotificationUserInfoKey.account] as? AccountSnapshot else {
-                return
-            }
-
+        accountObserver = membershipHandler.observeMembershipChanges { [weak self] membership in
+            guard let self else { return }
             Task { @MainActor in
                 self.state.value = DiscoverViewState(
                     isLoading: self.state.value.isLoading,
-                    membership: self.membershipState(from: account),
+                    membership: self.membershipState(from: membership),
                     sections: self.state.value.sections,
                     errorMessage: self.state.value.errorMessage
                 )
@@ -247,8 +263,8 @@ final class DiscoverViewModel {
         }
     }
 
-    private func membershipState(from account: AccountSnapshot) -> HomeMembershipState {
-        HomeMembershipState(isVIP: account.isVIP, diamonds: account.diamonds)
+    private func membershipState(from membership: MembershipSnapshot) -> HomeMembershipState {
+        HomeMembershipState(isVIP: membership.isVIP, diamonds: membership.diamonds)
     }
 
     private func makeHomeSections(from snapshot: DiscoverySnapshot) -> [HomeContentSection] {

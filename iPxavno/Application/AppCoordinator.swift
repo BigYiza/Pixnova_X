@@ -24,11 +24,17 @@ final class AppCoordinator {
         async let minimumLaunchDelay: Void = waitForLaunchRhythm()
 
         do {
-            try await container.accountRepository.synchronizeAccount()
+            let membership = try await container.membershipHandler.maintainStatusAfterSessionPrepared()
+            container.analytics.record(
+                AnalyticsEvent(
+                    name: "launch_membership_maintained",
+                    properties: ["member": "\(membership.isVIP)", "diamonds": "\(membership.diamonds)"]
+                )
+            )
             refreshContentCatalog()
         } catch {
             container.analytics.record(
-                AnalyticsEvent(name: "session_prepare_failed", properties: ["reason": error.localizedDescription])
+                AnalyticsEvent(name: "launch_membership_maintain_failed", properties: ["reason": error.localizedDescription])
             )
             refreshContentCatalog()
         }

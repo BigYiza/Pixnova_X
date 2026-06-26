@@ -28,12 +28,12 @@ struct ProfileViewState {
 final class ProfileViewModel {
     let state = Observable(ProfileViewState.initial)
 
-    private let accountRepository: AccountRepository
+    private let membershipHandler: MembershipHandling
     private let analytics: AnalyticsTracking
     private var accountObserver: NSObjectProtocol?
 
-    init(accountRepository: AccountRepository, analytics: AnalyticsTracking) {
-        self.accountRepository = accountRepository
+    init(membershipHandler: MembershipHandling, analytics: AnalyticsTracking) {
+        self.membershipHandler = membershipHandler
         self.analytics = analytics
         observeAccountChanges()
     }
@@ -45,8 +45,9 @@ final class ProfileViewModel {
     }
 
     func load() {
-        if let cachedAccount = accountRepository.cachedAccount {
-            state.value = makeState(from: cachedAccount, isLoading: true, errorMessage: nil)
+        let cachedMembership = membershipHandler.cachedMembership
+        if !cachedMembership.account.userID.isEmpty {
+            state.value = makeState(from: cachedMembership, isLoading: true, errorMessage: nil)
         } else {
             state.value = ProfileViewState(
                 isLoading: true,
@@ -63,14 +64,17 @@ final class ProfileViewModel {
 
         Task {
             do {
-                let account = try await accountRepository.synchronizeAccount()
-                analytics.record(AnalyticsEvent(name: "profile_loaded", properties: ["member": "\(account.isVIP)"]))
-                state.value = makeState(from: account, isLoading: false, errorMessage: nil)
+                let membership = try await membershipHandler.membershipStatus(forceRefresh: true)
+                analytics.record(AnalyticsEvent(name: "profile_loaded", properties: ["member": "\(membership.isVIP)"]))
+                state.value = makeState(from: membership, isLoading: false, errorMessage: nil)
             } catch {
-                let cachedAccount = accountRepository.cachedAccount
-                state.value = cachedAccount.map {
-                    makeState(from: $0, isLoading: false, errorMessage: nil)
-                } ?? ProfileViewState(
+                let cachedMembership = membershipHandler.cachedMembership
+                if !cachedMembership.account.userID.isEmpty {
+                    state.value = makeState(from: cachedMembership, isLoading: false, errorMessage: nil)
+                    return
+                }
+
+                state.value = ProfileViewState(
                     isLoading: false,
                     displayName: "Guest Creator",
                     subtitle: "Offline account snapshot",
@@ -86,48 +90,42 @@ final class ProfileViewModel {
     }
 
     private func observeAccountChanges() {
-        accountObserver = NotificationCenter.default.addObserver(
-            forName: AccountNotifications.accountDidChange,
-            object: nil,
-            queue: .main
-        ) { [weak self] notification in
-            guard let self,
-                  let account = notification.userInfo?[AccountNotificationUserInfoKey.account] as? AccountSnapshot else {
-                return
-            }
+        accountObserver = membershipHandler.observeMembershipChanges { [weak self] membership in
+            guard let self else { return }
             Task { @MainActor in
-                self.state.value = self.makeState(from: account, isLoading: false, errorMessage: nil)
+                self.state.value = self.makeState(from: membership, isLoading: false, errorMessage: nil)
             }
         }
     }
 
     private func makeState(
-        from account: AccountSnapshot,
+        from membership: MembershipSnapshot,
         isLoading: Bool,
         errorMessage: String?
     ) -> ProfileViewState {
-        ProfileViewState(
+        let account = membership.account
+        return ProfileViewState(
             isLoading: isLoading,
-            displayName: account.isVIP ? "Member Creator" : "Guest Creator",
-            subtitle: account.isVIP ? membershipSubtitle(account) : "Free workspace",
+            displayName: membership.isVIP ? "Member Creator" : "Guest Creator",
+            subtitle: membership.isVIP ? membershipSubtitle(membership) : "Free workspace",
             userID: account.userID.isEmpty ? "-" : account.userID,
-            diamonds: "\(account.diamonds)",
-            videoCredits: "\(account.videoTimes)",
-            membership: account.isVIP ? "Active" : "Free",
+            diamonds: "\(membership.diamonds)",
+            videoCredits: "\(membership.videoTimes)",
+            membership: membership.isVIP ? "Active" : "Free",
             inviteState: inviteStateText(account.invitationRedeemState),
             errorMessage: errorMessage
         )
     }
 
-    private func membershipSubtitle(_ account: AccountSnapshot) -> String {
-        guard let vipExpirationTime = account.vipExpirationTime, vipExpirationTime > 0 else {
+    private func membershipSubtitle(_ membership: MembershipSnapshot) -> String {
+        guard let expirationDate = membership.expirationDate else {
             return "Membership active"
         }
 
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         formatter.timeStyle = .none
-        return "Valid until \(formatter.string(from: Date(timeIntervalSince1970: vipExpirationTime)))"
+        return "Valid until \(formatter.string(from: expirationDate))"
     }
 
     private func inviteStateText(_ state: InvitationRedeemState) -> String {

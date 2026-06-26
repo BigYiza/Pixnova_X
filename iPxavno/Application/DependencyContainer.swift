@@ -4,6 +4,7 @@ struct DependencyContainer {
     let sessionVault: SessionVault
     let deviceIdentifier: DeviceIdentifying
     let accountRepository: AccountRepository
+    let membershipHandler: MembershipHandling
     let contentRepository: ContentRepository
     let generationRepository: GenerationRepository
     let analytics: AnalyticsTracking
@@ -29,6 +30,7 @@ struct DependencyContainer {
             sessionVault: sessionVault,
             accountStore: accountStore
         )
+        let membershipHandler = DefaultMembershipHandler(accountRepository: accountRepository)
         apiClient.tokenRefreshHandler = { [weak accountRepository] in
             guard let accountRepository else {
                 throw AppError.tokenExpired
@@ -40,6 +42,7 @@ struct DependencyContainer {
             sessionVault: sessionVault,
             deviceIdentifier: deviceIdentifier,
             accountRepository: accountRepository,
+            membershipHandler: membershipHandler,
             contentRepository: remoteContent,
             generationRepository: RemoteGenerationRepository(apiClient: apiClient),
             analytics: ConsoleAnalyticsTracker(),

@@ -41,7 +41,8 @@ final class MainTabBarController: UIViewController {
             viewModel: DiscoverViewModel(
                 tab: .home,
                 contentRepository: container.contentRepository,
-                accountRepository: container.accountRepository,
+                membershipHandler: container.membershipHandler,
+                generationRepository: container.generationRepository,
                 analytics: container.analytics
             )
         )
@@ -53,7 +54,7 @@ final class MainTabBarController: UIViewController {
 
         let profile = ProfileViewController(
             viewModel: ProfileViewModel(
-                accountRepository: container.accountRepository,
+                membershipHandler: container.membershipHandler,
                 analytics: container.analytics
             )
         )
@@ -73,7 +74,8 @@ final class MainTabBarController: UIViewController {
             viewModel: DiscoverViewModel(
                 tab: tab,
                 contentRepository: container.contentRepository,
-                accountRepository: container.accountRepository,
+                membershipHandler: container.membershipHandler,
+                generationRepository: container.generationRepository,
                 analytics: container.analytics
             )
         )

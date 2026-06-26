@@ -64,14 +64,15 @@ final class DiscoverViewController: BaseViewController {
 
     private func bindViewModel() {
         viewModel.state.bind { [weak self] state in
-            self?.setLoading(state.isLoading)
+            guard let self else { return }
+            self.setLoading(state.isLoading)
             if !state.isLoading {
-                self?.refreshControl.endRefreshing()
+                self.refreshControl.endRefreshing()
             }
-            self?.topBarView.configure(membership: state.membership)
-            self?.sections = state.sections
-            self?.collectionView.reloadData()
-            self?.presentErrorIfNeeded(state.errorMessage)
+            self.topBarView.configure(membership: self.viewModel.currentMembershipState)
+            self.sections = state.sections
+            self.collectionView.reloadData()
+            self.presentErrorIfNeeded(state.errorMessage)
         }
     }
 
@@ -216,11 +217,21 @@ extension DiscoverViewController: UICollectionViewDelegate {
         switch section.kind {
         case .mosaic:
             if let template = section.templates.first {
-                viewModel.didSelectTemplate(template)
+                openTemplate(template, sourceSection: section.source)
             }
         case .horizontal, .doubleLine:
-            viewModel.didSelectTemplate(section.templates[indexPath.item])
+            openTemplate(section.templates[indexPath.item], sourceSection: section.source)
         }
+    }
+
+    private func openTemplate(_ template: CreativeTemplate, sourceSection: ContentSection) {
+        viewModel.didSelectTemplate(template)
+        guard template.kind.isFilterGenerationWorkflow else { return }
+        let viewController = viewModel.makeFilterGenerationViewController(
+            for: template,
+            sourceSection: sourceSection
+        )
+        navigationController?.pushViewController(viewController, animated: true)
     }
 }
 
@@ -230,5 +241,16 @@ private extension HomeSectionKind {
             return true
         }
         return false
+    }
+}
+
+private extension CreativeKind {
+    var isFilterGenerationWorkflow: Bool {
+        switch self {
+        case .filter, .hair, .cutout, .photo, .outfit, .baby, .makeup, .avatar, .textToImage, .imageToImage:
+            return true
+        case .video, .textToVideo, .imageToVideo, .multiImageToVideo, .videoEnhance, .collection, .unknown:
+            return false
+        }
     }
 }
