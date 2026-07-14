@@ -126,7 +126,9 @@ final class DiscoverViewModel {
 
     private let contentRepository: ContentRepository
     private let membershipHandler: MembershipHandling
+    private let membershipPurchaseHandler: MembershipPurchaseHandling
     private let generationRepository: GenerationRepository
+    private let generationWorkflowRunner: GenerationWorkflowRunning
     private let analytics: AnalyticsTracking
     private var accountObserver: NSObjectProtocol?
 
@@ -134,13 +136,17 @@ final class DiscoverViewModel {
         tab: HomePageTab = .home,
         contentRepository: ContentRepository,
         membershipHandler: MembershipHandling,
+        membershipPurchaseHandler: MembershipPurchaseHandling,
         generationRepository: GenerationRepository,
+        generationWorkflowRunner: GenerationWorkflowRunning,
         analytics: AnalyticsTracking
     ) {
         self.tab = tab
         self.contentRepository = contentRepository
         self.membershipHandler = membershipHandler
+        self.membershipPurchaseHandler = membershipPurchaseHandler
         self.generationRepository = generationRepository
+        self.generationWorkflowRunner = generationWorkflowRunner
         self.analytics = analytics
         observeAccountChanges()
 
@@ -231,6 +237,7 @@ final class DiscoverViewModel {
             contentRepository: contentRepository,
             membershipHandler: membershipHandler,
             generationRepository: generationRepository,
+            generationWorkflowRunner: generationWorkflowRunner,
             analytics: analytics
         )
     }
@@ -245,7 +252,30 @@ final class DiscoverViewModel {
             contentRepository: contentRepository,
             membershipHandler: membershipHandler,
             generationRepository: generationRepository,
+            generationWorkflowRunner: generationWorkflowRunner,
             analytics: analytics
+        )
+    }
+
+    func makeTemplateVideoGenerationViewController(
+        for template: CreativeTemplate
+    ) -> TemplateVideoGenerationViewController {
+        TemplateVideoGenerationViewController(
+            template: template,
+            membershipHandler: membershipHandler,
+            generationRepository: generationRepository,
+            generationWorkflowRunner: generationWorkflowRunner,
+            analytics: analytics
+        )
+    }
+
+    func makeMembershipPaywallViewController() -> MembershipPaywallViewController {
+        MembershipPaywallViewController(
+            viewModel: MembershipPaywallViewModel(
+                membershipHandler: membershipHandler,
+                purchaseHandler: membershipPurchaseHandler,
+                analytics: analytics
+            )
         )
     }
 

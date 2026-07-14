@@ -14,10 +14,15 @@ final class FilterGenerationViewController: BaseGenerationWorkflowViewController
     private var contentObserver: NSObjectProtocol?
     private var pendingSegmentScrollIndex: Int?
     private var pendingTemplateScrollIndexPath: IndexPath?
+    private var hasSelectedPhoto: Bool {
+        selectedPhotoURLs.first != nil
+    }
 
     private let backButton = UIButton(type: .system)
     private let titleLabel = UILabel()
-    private let saveButton = UIButton(type: .system)
+    private let diamondPill = UIControl()
+    private let diamondIcon = UIImageView(image: UIImage(systemName: "suit.diamond.fill"))
+    private let diamondLabel = UILabel()
     private let photoPlaceholderView = FilterPhotoPlaceholderView()
     private let resultPreviewView = FilterResultPreviewView()
     private let arrowImageView = UIImageView(image: UIImage(systemName: "arrow.right"))
@@ -33,6 +38,7 @@ final class FilterGenerationViewController: BaseGenerationWorkflowViewController
         contentRepository: ContentRepository,
         membershipHandler: MembershipHandling,
         generationRepository: GenerationRepository,
+        generationWorkflowRunner: GenerationWorkflowRunning,
         analytics: AnalyticsTracking
     ) {
         selectedTemplate = initialTemplate
@@ -41,6 +47,7 @@ final class FilterGenerationViewController: BaseGenerationWorkflowViewController
         super.init(
             membershipHandler: membershipHandler,
             generationRepository: generationRepository,
+            generationWorkflowRunner: generationWorkflowRunner,
             analytics: analytics
         )
         hidesBottomBarWhenPushed = true
@@ -65,6 +72,11 @@ final class FilterGenerationViewController: BaseGenerationWorkflowViewController
         )
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        updateDiamondBalance()
+    }
+
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         scrollPendingItems()
@@ -79,21 +91,27 @@ final class FilterGenerationViewController: BaseGenerationWorkflowViewController
     }
 
     override func makeGenerationWorkflowRequest() async throws -> GenerationWorkflowRequest {
-        guard !selectedPhotoURLs.isEmpty else {
-            throw AppError.unsupported
-        }
-
+        let mediaInputs: [GenerationMediaInput] = selectedPhotoURLs.first.map { [.localImage($0)] } ?? [.empty]
         let draft = CreationDraft(
             templateID: selectedTemplate.id,
-            mediaURLs: selectedPhotoURLs,
+            mediaInputs: mediaInputs,
             prompt: selectedTemplate.prompt,
-            externalArguments: [:]
+            negativePrompt: nil,
+            externalArguments: [:],
+            combineConfigs: selectedTemplate.combineConfigs
         )
         return GenerationWorkflowRequest(
             kind: .filter,
             template: selectedTemplate,
-            draft: draft
+            draft: draft,
+            inputRequirement: GenerationWorkflowInputRequirement(requiredMediaCount: 1)
         )
+    }
+
+    override func presentGenerationMediaPicker(kind: GenerationWorkflowMediaKind, index: Int) -> Bool {
+        guard kind == .image else { return false }
+        handleChoosePhoto()
+        return true
     }
 
     private func configureView() {
@@ -105,7 +123,9 @@ final class FilterGenerationViewController: BaseGenerationWorkflowViewController
 
         view.addSubview(backButton)
         view.addSubview(titleLabel)
-        view.addSubview(saveButton)
+        view.addSubview(diamondPill)
+        diamondPill.addSubview(diamondIcon)
+        diamondPill.addSubview(diamondLabel)
         view.addSubview(photoPlaceholderView)
         view.addSubview(resultPreviewView)
         view.addSubview(arrowImageView)
@@ -124,12 +144,21 @@ final class FilterGenerationViewController: BaseGenerationWorkflowViewController
             titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             titleLabel.centerYAnchor.constraint(equalTo: backButton.centerYAnchor),
             titleLabel.leadingAnchor.constraint(greaterThanOrEqualTo: backButton.trailingAnchor, constant: 18),
-            titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: saveButton.leadingAnchor, constant: -18),
+            titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: diamondPill.leadingAnchor, constant: -14),
 
-            saveButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -22),
-            saveButton.centerYAnchor.constraint(equalTo: backButton.centerYAnchor),
-            saveButton.widthAnchor.constraint(equalToConstant: 48),
-            saveButton.heightAnchor.constraint(equalToConstant: 34),
+            diamondPill.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -22),
+            diamondPill.centerYAnchor.constraint(equalTo: backButton.centerYAnchor),
+            diamondPill.widthAnchor.constraint(greaterThanOrEqualToConstant: 90),
+            diamondPill.heightAnchor.constraint(equalToConstant: 45),
+
+            diamondIcon.leadingAnchor.constraint(equalTo: diamondPill.leadingAnchor, constant: 17),
+            diamondIcon.centerYAnchor.constraint(equalTo: diamondPill.centerYAnchor),
+            diamondIcon.widthAnchor.constraint(equalToConstant: 15.5),
+            diamondIcon.heightAnchor.constraint(equalToConstant: 15.5),
+
+            diamondLabel.leadingAnchor.constraint(equalTo: diamondIcon.trailingAnchor, constant: 8),
+            diamondLabel.trailingAnchor.constraint(equalTo: diamondPill.trailingAnchor, constant: -16),
+            diamondLabel.centerYAnchor.constraint(equalTo: diamondPill.centerYAnchor),
 
             photoPlaceholderView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 28),
             photoPlaceholderView.topAnchor.constraint(equalTo: backButton.bottomAnchor, constant: 24),
@@ -190,15 +219,33 @@ final class FilterGenerationViewController: BaseGenerationWorkflowViewController
         titleLabel.adjustsFontSizeToFitWidth = true
         titleLabel.minimumScaleFactor = 0.75
 
-        saveButton.translatesAutoresizingMaskIntoConstraints = false
-        saveButton.setTitle("Save", for: .normal)
-        saveButton.setTitleColor(UIColor(hex: 0x8D8D95), for: .normal)
-        saveButton.titleLabel?.font = UIFont.systemFont(ofSize: 19, weight: .regular)
-        saveButton.addTarget(self, action: #selector(handleSave), for: .touchUpInside)
+        diamondPill.translatesAutoresizingMaskIntoConstraints = false
+        diamondPill.backgroundColor = HomeDesignColor.accent
+        diamondPill.layer.cornerRadius = 22.5
+        diamondPill.clipsToBounds = true
+        diamondPill.accessibilityTraits = [.button]
+        diamondPill.addTarget(self, action: #selector(handleDiamondTap), for: .touchUpInside)
+
+        diamondIcon.translatesAutoresizingMaskIntoConstraints = false
+        diamondIcon.tintColor = HomeDesignColor.blackText
+        diamondIcon.contentMode = .scaleAspectFit
+        diamondIcon.preferredSymbolConfiguration = UIImage.SymbolConfiguration(pointSize: 13, weight: .bold)
+
+        diamondLabel.translatesAutoresizingMaskIntoConstraints = false
+        diamondLabel.textColor = HomeDesignColor.blackText
+        diamondLabel.font = UIFont.systemFont(ofSize: 17.5, weight: .bold)
+        diamondLabel.adjustsFontSizeToFitWidth = true
+        diamondLabel.minimumScaleFactor = 0.75
+        updateDiamondBalance()
     }
 
     private func configureHero() {
         photoPlaceholderView.translatesAutoresizingMaskIntoConstraints = false
+        photoPlaceholderView.isUserInteractionEnabled = true
+        photoPlaceholderView.accessibilityTraits = [.button, .image]
+        let photoTapGesture = UITapGestureRecognizer(target: self, action: #selector(handleChoosePhoto))
+        photoPlaceholderView.addGestureRecognizer(photoTapGesture)
+
         resultPreviewView.translatesAutoresizingMaskIntoConstraints = false
 
         arrowImageView.translatesAutoresizingMaskIntoConstraints = false
@@ -213,7 +260,7 @@ final class FilterGenerationViewController: BaseGenerationWorkflowViewController
         choosePhotoButton.setTitle("Choose a Photo", for: .normal)
         choosePhotoButton.setTitleColor(UIColor.black, for: .normal)
         choosePhotoButton.titleLabel?.font = UIFont.systemFont(ofSize: 20, weight: .bold)
-        choosePhotoButton.addTarget(self, action: #selector(handleChoosePhoto), for: .touchUpInside)
+        choosePhotoButton.addTarget(self, action: #selector(handlePrimaryAction), for: .touchUpInside)
 
         hintLabel.translatesAutoresizingMaskIntoConstraints = false
         hintLabel.text = "Use a half-body or portrait photo for best\nresults"
@@ -332,9 +379,17 @@ final class FilterGenerationViewController: BaseGenerationWorkflowViewController
     private func updateSelectedTemplate(animated: Bool) {
         titleLabel.text = selectedTemplate.title
         resultPreviewView.configure(template: selectedTemplate)
+        updateDiamondBalance()
+        updatePrimaryActionState()
         templateCollectionView.reloadData()
         pendingTemplateScrollIndexPath = IndexPath(item: selectedTemplateIndex, section: 0)
         scrollPendingItems(animated: animated)
+    }
+
+    private func updateDiamondBalance() {
+        let diamonds = membershipHandler.cachedMembership.diamonds
+        diamondLabel.text = "\(diamonds)"
+        diamondPill.accessibilityLabel = "Diamonds, \(diamonds)"
     }
 
     private func scrollPendingItems(animated: Bool = false) {
@@ -384,8 +439,25 @@ final class FilterGenerationViewController: BaseGenerationWorkflowViewController
         navigationController?.popViewController(animated: true)
     }
 
-    @objc private func handleSave() {
-        showError("No generated result to save yet.")
+    @objc private func handleDiamondTap() {
+        presentDiamondStore()
+    }
+
+    @objc private func handlePrimaryAction() {
+        if hasSelectedPhoto {
+            analytics.record(
+                AnalyticsEvent(
+                    name: "filter_generation_generate_tapped",
+                    properties: [
+                        "template_id": "\(selectedTemplate.id)",
+                        "diamonds": "\(selectedTemplate.diamondCost)"
+                    ]
+                )
+            )
+            beginGenerationWorkflow()
+        } else {
+            handleChoosePhoto()
+        }
     }
 
     @objc private func handleChoosePhoto() {
@@ -400,15 +472,24 @@ final class FilterGenerationViewController: BaseGenerationWorkflowViewController
 
             switch result {
             case let .success(selectedImage):
-                self.selectedLocalPhotoURL = selectedImage.localURL
+                guard let localURL = selectedImage.localURL else {
+                    self.selectedLocalPhotoURL = nil
+                    self.selectedPhotoURLs = []
+                    self.photoPlaceholderView.configure(image: nil)
+                    self.updatePrimaryActionState()
+                    self.showError("The selected image could not be prepared.")
+                    return
+                }
+                self.selectedLocalPhotoURL = localURL
+                self.selectedPhotoURLs = [localURL]
                 self.photoPlaceholderView.configure(image: selectedImage.image)
-                self.choosePhotoButton.setTitle("Choose Another Photo", for: .normal)
+                self.updatePrimaryActionState()
                 self.analytics.record(
                     AnalyticsEvent(
                         name: "filter_generation_photo_selected",
                         properties: [
                             "template_id": "\(self.selectedTemplate.id)",
-                            "has_local_url": selectedImage.localURL == nil ? "false" : "true"
+                            "has_local_url": "true"
                         ]
                     )
                 )
@@ -417,6 +498,19 @@ final class FilterGenerationViewController: BaseGenerationWorkflowViewController
             case let .failure(error):
                 self.showError(error.localizedDescription)
             }
+        }
+    }
+
+    private func updatePrimaryActionState() {
+        if hasSelectedPhoto {
+            let title = selectedTemplate.diamondCost > 0
+                ? "Generate · \(selectedTemplate.diamondCost)"
+                : "Generate"
+            choosePhotoButton.setTitle(title, for: .normal)
+            choosePhotoButton.accessibilityLabel = "Generate"
+        } else {
+            choosePhotoButton.setTitle("Choose a Photo", for: .normal)
+            choosePhotoButton.accessibilityLabel = "Choose a Photo"
         }
     }
 }

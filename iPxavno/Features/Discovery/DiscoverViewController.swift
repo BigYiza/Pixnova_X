@@ -45,6 +45,9 @@ final class DiscoverViewController: BaseViewController {
 
         refreshControl.tintColor = HomeDesignColor.accent
         refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
+        topBarView.onMembershipTap = { [weak self] in
+            self?.presentMembershipPaywall()
+        }
 
         view.addSubview(topBarView)
         view.addSubview(collectionView)
@@ -78,6 +81,13 @@ final class DiscoverViewController: BaseViewController {
 
     @objc private func handleRefresh() {
         viewModel.load()
+    }
+
+    private func presentMembershipPaywall() {
+        let viewController = viewModel.makeMembershipPaywallViewController()
+        let navigationController = UINavigationController(rootViewController: viewController)
+        navigationController.modalPresentationStyle = .fullScreen
+        present(navigationController, animated: true)
     }
 
     private func presentErrorIfNeeded(_ message: String?) {
@@ -226,12 +236,16 @@ extension DiscoverViewController: UICollectionViewDelegate {
 
     private func openTemplate(_ template: CreativeTemplate, sourceSection: ContentSection) {
         viewModel.didSelectTemplate(template)
-        guard template.kind.isFilterGenerationWorkflow else { return }
-        let viewController = viewModel.makeFilterGenerationViewController(
-            for: template,
-            sourceSection: sourceSection
-        )
-        navigationController?.pushViewController(viewController, animated: true)
+        if template.kind.isFilterGenerationWorkflow {
+            let viewController = viewModel.makeFilterGenerationViewController(
+                for: template,
+                sourceSection: sourceSection
+            )
+            navigationController?.pushViewController(viewController, animated: true)
+        } else if template.isTemplateVideoGenerationWorkflow {
+            let viewController = viewModel.makeTemplateVideoGenerationViewController(for: template)
+            navigationController?.pushViewController(viewController, animated: true)
+        }
     }
 }
 
@@ -241,6 +255,17 @@ private extension HomeSectionKind {
             return true
         }
         return false
+    }
+}
+
+private extension CreativeTemplate {
+    var isTemplateVideoGenerationWorkflow: Bool {
+        switch kind {
+        case .imageToVideo, .multiImageToVideo, .video:
+            return true
+        case .textToVideo, .videoEnhance, .filter, .hair, .cutout, .photo, .avatar, .outfit, .baby, .collection, .makeup, .textToImage, .imageToImage, .unknown:
+            return false
+        }
     }
 }
 

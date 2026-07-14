@@ -136,6 +136,23 @@ final class RemoteAccountRepository: AccountRepository {
         }
     }
 
+    @discardableResult
+    func restoreAccount(using transactionIDs: [String]) async throws -> AccountSnapshot {
+        let body = try JSONEncoder().encode(RestoreAccountRequest(transactionIDs: transactionIDs))
+        let endpoint = APIEndpoint<ServiceEnvelope<LoginPayload>>(
+            method: .post,
+            path: "/api/restore_user_id",
+            body: body,
+            requiresAuthentication: false
+        )
+
+        let payload = try await apiClient.send(endpoint).requirePayload()
+        var account = accountStore.currentAccount ?? .empty
+        account.applyLogin(payload)
+        try persist(account)
+        return try await synchronizeAccount()
+    }
+
     private func login() async throws -> AccountSnapshot {
         let endpoint = APIEndpoint<ServiceEnvelope<LoginPayload>>(
             method: .post,
@@ -197,5 +214,13 @@ private struct UserGroupRequest: Encodable {
 
     enum CodingKeys: String, CodingKey {
         case positions = "postion_list"
+    }
+}
+
+private struct RestoreAccountRequest: Encodable {
+    let transactionIDs: [String]
+
+    enum CodingKeys: String, CodingKey {
+        case transactionIDs = "trans_id"
     }
 }

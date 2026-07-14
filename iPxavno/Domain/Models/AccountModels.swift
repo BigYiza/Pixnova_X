@@ -346,12 +346,29 @@ enum JSONValue: Codable, Equatable {
         case let .string(value):
             return value
         case let .number(value):
+            let rounded = value.rounded()
+            if abs(value - rounded) < .ulpOfOne {
+                return "\(Int(rounded))"
+            }
             return String(value)
         case let .bool(value):
             return value ? "true" : "false"
         default:
             return nil
         }
+    }
+
+    var normalizedComparableString: String {
+        (stringValue ?? "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+    }
+
+    var isEmptyObject: Bool {
+        if case let .object(value) = self {
+            return value.isEmpty
+        }
+        return false
     }
 }
 

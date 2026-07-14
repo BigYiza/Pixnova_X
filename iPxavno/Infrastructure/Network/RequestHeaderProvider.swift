@@ -7,31 +7,38 @@ protocol RequestHeaderProviding {
 final class DefaultRequestHeaderProvider: RequestHeaderProviding {
     private let sessionProvider: SessionProviding
     private let deviceIdentifier: DeviceIdentifying
+    private let environment: APIEnvironment
 
-    init(sessionProvider: SessionProviding, deviceIdentifier: DeviceIdentifying) {
+    init(
+        sessionProvider: SessionProviding,
+        deviceIdentifier: DeviceIdentifying,
+        environment: APIEnvironment
+    ) {
         self.sessionProvider = sessionProvider
         self.deviceIdentifier = deviceIdentifier
+        self.environment = environment
     }
 
     func headers(requiresAuthentication: Bool) -> [String: String] {
-        let timezoneMinutes = TimeZone.current.secondsFromGMT() / 60
+        let timezoneMinutes = -(TimeZone.current.secondsFromGMT() / 60)
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
         let language = Locale.preferredLanguages.first ?? "en"
         let userAgent = [
-            "pixnova",
+            environment.gatewayAppName,
             version,
             "iOS",
             UIDevice.current.systemVersion,
             UIDevice.current.model,
-            "Apple Store",
+            environment.distributionChannel,
             "\(timezoneMinutes)",
             language
-        ].joined(separator: ";")
+        ].map(sanitizeUserAgentSegment).joined(separator: ";")
 
         var headers = [
+            "X-Client-Id": environment.gatewayClientID,
             "timezone": "\(timezoneMinutes)",
             "User-Agent": userAgent,
-            "device-id": deviceIdentifier.deviceID,
+            "Device-Id": deviceIdentifier.deviceID,
             "Content-Type": "application/json"
         ]
 
@@ -42,5 +49,14 @@ final class DefaultRequestHeaderProvider: RequestHeaderProviding {
         }
 
         return headers
+    }
+
+    private func sanitizeUserAgentSegment(_ value: String) -> String {
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        let sanitized = trimmed
+            .replacingOccurrences(of: ";", with: "-")
+            .replacingOccurrences(of: "\n", with: " ")
+            .replacingOccurrences(of: "\r", with: " ")
+        return sanitized.isEmpty ? "unknown" : sanitized
     }
 }

@@ -54,6 +54,20 @@ final class APIClient {
         }
     }
 
+    func sendServiceEnvelope<Payload: Decodable>(
+        _ endpoint: APIEndpoint<ServiceEnvelope<Payload>>
+    ) async throws -> ServiceEnvelope<Payload> {
+        let envelope = try await send(endpoint)
+        guard envelope.requiresTokenRefresh else { return envelope }
+
+        guard let tokenRefreshHandler else {
+            throw AppError.tokenExpired
+        }
+
+        try await tokenRefreshHandler()
+        return try await send(endpoint)
+    }
+
     private func makeRequest<Response: Decodable>(_ endpoint: APIEndpoint<Response>) throws -> URLRequest {
         let baseURL: URL
 

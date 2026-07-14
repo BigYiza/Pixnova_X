@@ -175,6 +175,8 @@ struct CreativeTemplate: Codable {
     let prompt: String?
     let usageCount: Int
     let diamondCost: Int
+    let customParameter: GenerationParameterConfiguration?
+    let combineConfigs: JSONValue?
     let tint: String?
     let cardID: Int?
     let maxInputImageCount: Int?
@@ -195,6 +197,8 @@ struct CreativeTemplate: Codable {
         case prompt
         case usageCount = "use_times"
         case diamondCost = "diamonds"
+        case customParameter = "custom_parameter"
+        case combineConfigs = "combine_configs"
         case maxInputImageCount = "max_input_count"
         case tint
         case cardID = "card_id"
@@ -216,6 +220,8 @@ struct CreativeTemplate: Codable {
         prompt: String?,
         usageCount: Int,
         diamondCost: Int,
+        customParameter: GenerationParameterConfiguration? = nil,
+        combineConfigs: JSONValue? = nil,
         tint: String?,
         cardID: Int?,
         maxInputImageCount: Int?
@@ -235,6 +241,8 @@ struct CreativeTemplate: Codable {
         self.prompt = prompt
         self.usageCount = usageCount
         self.diamondCost = diamondCost
+        self.customParameter = customParameter
+        self.combineConfigs = combineConfigs
         self.tint = tint
         self.cardID = cardID
         self.maxInputImageCount = maxInputImageCount
@@ -257,6 +265,8 @@ struct CreativeTemplate: Codable {
         prompt = try container.decodeIfPresent(String.self, forKey: .prompt)
         usageCount = try container.decodeFlexibleInt(forKey: .usageCount) ?? 0
         diamondCost = try container.decodeFlexibleInt(forKey: .diamondCost) ?? 0
+        customParameter = try container.decodeIfPresent(GenerationParameterConfiguration.self, forKey: .customParameter)
+        combineConfigs = try container.decodeIfPresent(JSONValue.self, forKey: .combineConfigs)
         tint = try container.decodeIfPresent(String.self, forKey: .tint)
         cardID = try container.decodeFlexibleInt(forKey: .cardID)
         maxInputImageCount = try container.decodeFlexibleInt(forKey: .maxInputImageCount)
@@ -265,6 +275,13 @@ struct CreativeTemplate: Codable {
     var preferredImageURL: URL? {
         operationCoverURLs.first ?? coverURL ?? alternateCoverURL
     }
+    
+    var preferredVideoURL: URL? {
+        operationCoverURLs.first(where: { url in
+            return url.absoluteString.hasSuffix(".mp4")
+        }) ?? coverURL ?? alternateCoverURL
+    }
+
 
     func withCardID(_ cardID: Int) -> CreativeTemplate {
         CreativeTemplate(
@@ -283,6 +300,8 @@ struct CreativeTemplate: Codable {
             prompt: prompt,
             usageCount: usageCount,
             diamondCost: diamondCost,
+            customParameter: customParameter,
+            combineConfigs: combineConfigs,
             tint: tint,
             cardID: cardID,
             maxInputImageCount: maxInputImageCount
@@ -306,6 +325,8 @@ struct CreativeTemplate: Codable {
         try container.encodeIfPresent(prompt, forKey: .prompt)
         try container.encode(usageCount, forKey: .usageCount)
         try container.encode(diamondCost, forKey: .diamondCost)
+        try container.encodeIfPresent(customParameter, forKey: .customParameter)
+        try container.encodeIfPresent(combineConfigs, forKey: .combineConfigs)
         try container.encodeIfPresent(maxInputImageCount, forKey: .maxInputImageCount)
         try container.encodeIfPresent(tint, forKey: .tint)
         try container.encodeIfPresent(cardID, forKey: .cardID)
@@ -319,6 +340,108 @@ struct TemplateInputRequirement: Codable {
     enum CodingKeys: String, CodingKey {
         case imageCount = "image_count"
         case peopleCount = "people_numbers_one_image"
+    }
+}
+
+struct GenerationParameterConfiguration: Codable, Equatable {
+    var parameters: [GenerationParameter]
+    var restricts: [GenerationParameterRestriction]
+
+    enum CodingKeys: String, CodingKey {
+        case parameters
+        case restricts
+    }
+
+    init(parameters: [GenerationParameter], restricts: [GenerationParameterRestriction]) {
+        self.parameters = parameters
+        self.restricts = restricts
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        parameters = try container.decodeIfPresent([GenerationParameter].self, forKey: .parameters) ?? []
+        restricts = try container.decodeIfPresent([GenerationParameterRestriction].self, forKey: .restricts) ?? []
+    }
+}
+
+struct GenerationParameter: Codable, Equatable, Identifiable {
+    var id: String { key }
+    let icon: String?
+    let key: String
+    let title: String
+    let selected: JSONValue?
+    let values: [GenerationParameterValue]
+
+    enum CodingKeys: String, CodingKey {
+        case icon
+        case key
+        case title
+        case selected
+        case values
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        icon = try container.decodeIfPresent(String.self, forKey: .icon)
+        key = try container.decodeIfPresent(String.self, forKey: .key) ?? ""
+        title = try container.decodeIfPresent(String.self, forKey: .title) ?? key
+        selected = try container.decodeIfPresent(JSONValue.self, forKey: .selected)
+        values = try container.decodeIfPresent([GenerationParameterValue].self, forKey: .values) ?? []
+    }
+}
+
+struct GenerationParameterValue: Codable, Equatable, Identifiable {
+    static let videoBoostCalculationMethod = "current and ugc duration multiplier"
+
+    var id: String { "\(label)|\(value.normalizedComparableString)|\(times)" }
+    let label: String
+    let times: String
+    let value: JSONValue
+    let calculationMethod: String?
+    let durationTimes: String?
+
+    enum CodingKeys: String, CodingKey {
+        case label
+        case times
+        case value
+        case calculationMethod = "calculate_method"
+        case durationTimes = "duration_times"
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        label = try container.decodeIfPresent(String.self, forKey: .label) ?? ""
+        if let stringValue = try? container.decode(String.self, forKey: .times) {
+            times = stringValue
+        } else if let intValue = try? container.decode(Int.self, forKey: .times) {
+            times = "\(intValue)"
+        } else if let doubleValue = try? container.decode(Double.self, forKey: .times) {
+            times = "\(doubleValue)"
+        } else {
+            times = "1"
+        }
+        value = try container.decodeIfPresent(JSONValue.self, forKey: .value) ?? .string(label)
+        calculationMethod = try container.decodeIfPresent(String.self, forKey: .calculationMethod)
+        durationTimes = try container.decodeIfPresent(String.self, forKey: .durationTimes)
+    }
+}
+
+struct GenerationParameterRestriction: Codable, Equatable {
+    let key: String
+    let value: JSONValue
+    let restricts: [[String: [JSONValue]]]
+
+    enum CodingKeys: String, CodingKey {
+        case key
+        case value
+        case restricts = "restrict"
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        key = try container.decodeIfPresent(String.self, forKey: .key) ?? ""
+        value = try container.decodeIfPresent(JSONValue.self, forKey: .value) ?? .null
+        restricts = try container.decodeIfPresent([[String: [JSONValue]]].self, forKey: .restricts) ?? []
     }
 }
 
@@ -374,4 +497,5 @@ private extension KeyedDecodingContainer {
         }
         return []
     }
+
 }

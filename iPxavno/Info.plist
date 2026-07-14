@@ -2,6 +2,19 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>DiamondConsumableProductIDs</key>
+	<array>
+		<string>$(PRODUCT_BUNDLE_IDENTIFIER).diamonds.small</string>
+		<string>$(PRODUCT_BUNDLE_IDENTIFIER).diamonds.medium</string>
+		<string>$(PRODUCT_BUNDLE_IDENTIFIER).diamonds.large</string>
+	</array>
+	<key>MembershipAdditionalProductIDs</key>
+	<array/>
+	<key>MembershipPrimaryProductIDs</key>
+	<array>
+		<string>$(PRODUCT_BUNDLE_IDENTIFIER).pro.weekly</string>
+		<string>$(PRODUCT_BUNDLE_IDENTIFIER).pro.yearly</string>
+	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
