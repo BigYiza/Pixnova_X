@@ -2,6 +2,7 @@ import UIKit
 
 final class HomeTopBarView: UIView {
     var onMembershipTap: (() -> Void)?
+    var onDiamondTap: (() -> Void)?
 
     private let titleLabel = UILabel()
     private let vipPill = HomeStatusPill()
@@ -47,6 +48,8 @@ final class HomeTopBarView: UIView {
         diamondPill.translatesAutoresizingMaskIntoConstraints = false
         vipPill.isUserInteractionEnabled = true
         vipPill.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleMembershipTap)))
+        diamondPill.isUserInteractionEnabled = true
+        diamondPill.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleDiamondTap)))
 
         addSubview(titleLabel)
         addSubview(vipPill)
@@ -72,6 +75,10 @@ final class HomeTopBarView: UIView {
 
     @objc private func handleMembershipTap() {
         onMembershipTap?()
+    }
+
+    @objc private func handleDiamondTap() {
+        onDiamondTap?()
     }
 }
 

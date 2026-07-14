@@ -127,6 +127,7 @@ final class DiscoverViewModel {
     private let contentRepository: ContentRepository
     private let membershipHandler: MembershipHandling
     private let membershipPurchaseHandler: MembershipPurchaseHandling
+    private let diamondPurchaseHandler: DiamondPurchaseHandling
     private let generationRepository: GenerationRepository
     private let generationWorkflowRunner: GenerationWorkflowRunning
     private let analytics: AnalyticsTracking
@@ -137,6 +138,7 @@ final class DiscoverViewModel {
         contentRepository: ContentRepository,
         membershipHandler: MembershipHandling,
         membershipPurchaseHandler: MembershipPurchaseHandling,
+        diamondPurchaseHandler: DiamondPurchaseHandling,
         generationRepository: GenerationRepository,
         generationWorkflowRunner: GenerationWorkflowRunning,
         analytics: AnalyticsTracking
@@ -145,6 +147,7 @@ final class DiscoverViewModel {
         self.contentRepository = contentRepository
         self.membershipHandler = membershipHandler
         self.membershipPurchaseHandler = membershipPurchaseHandler
+        self.diamondPurchaseHandler = diamondPurchaseHandler
         self.generationRepository = generationRepository
         self.generationWorkflowRunner = generationWorkflowRunner
         self.analytics = analytics
@@ -274,6 +277,17 @@ final class DiscoverViewModel {
             viewModel: MembershipPaywallViewModel(
                 membershipHandler: membershipHandler,
                 purchaseHandler: membershipPurchaseHandler,
+                analytics: analytics
+            )
+        )
+    }
+
+    func makeDiamondPurchaseViewController() -> DiamondPurchaseViewController {
+        DiamondPurchaseViewController(
+            viewModel: DiamondPurchaseViewModel(
+                catalog: .configured,
+                membershipHandler: membershipHandler,
+                purchaseHandler: diamondPurchaseHandler,
                 analytics: analytics
             )
         )
