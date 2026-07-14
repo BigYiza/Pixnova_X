@@ -54,17 +54,26 @@ struct ServiceEnvelope<Payload: Decodable>: Decodable {
         case message = "msg"
     }
 
+    var resolvedCode: Int {
+        code ?? -1
+    }
+
+    var resolvedMessage: String {
+        descriptionText ?? desc ?? message ?? "Request failed."
+    }
+
+    var requiresTokenRefresh: Bool {
+        let normalizedText = resolvedMessage.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        return resolvedCode == -100 || (resolvedCode == -1 && normalizedText.contains("illegal request"))
+    }
+
     func requirePayload() throws -> Payload {
         guard code == 0 else {
-            let resolvedCode = code ?? -1
-            let text = descriptionText ?? desc ?? message ?? "Request failed."
-            let normalizedText = text.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-
-            if resolvedCode == -100 || (resolvedCode == -1 && normalizedText.contains("illegal request")) {
+            if requiresTokenRefresh {
                 throw AppError.tokenExpired
             }
 
-            throw AppError.server(message: text, code: resolvedCode)
+            throw AppError.server(message: resolvedMessage, code: resolvedCode)
         }
 
         guard let data else {

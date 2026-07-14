@@ -1,6 +1,8 @@
 import UIKit
 
 final class HomeTopBarView: UIView {
+    var onMembershipTap: (() -> Void)?
+
     private let titleLabel = UILabel()
     private let vipPill = HomeStatusPill()
     private let diamondPill = HomeStatusPill()
@@ -35,7 +37,7 @@ final class HomeTopBarView: UIView {
         backgroundColor = HomeDesignColor.background
 
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.text = "PixnovaAI"
+        titleLabel.text = AppDisplay.name
         titleLabel.textColor = HomeDesignColor.text
         titleLabel.font = UIFont.systemFont(ofSize: 30, weight: .bold)
         titleLabel.adjustsFontSizeToFitWidth = true
@@ -43,6 +45,8 @@ final class HomeTopBarView: UIView {
 
         vipPill.translatesAutoresizingMaskIntoConstraints = false
         diamondPill.translatesAutoresizingMaskIntoConstraints = false
+        vipPill.isUserInteractionEnabled = true
+        vipPill.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleMembershipTap)))
 
         addSubview(titleLabel)
         addSubview(vipPill)
@@ -64,6 +68,10 @@ final class HomeTopBarView: UIView {
             diamondPill.widthAnchor.constraint(equalToConstant: 90),
             diamondPill.heightAnchor.constraint(equalToConstant: 45)
         ])
+    }
+
+    @objc private func handleMembershipTap() {
+        onMembershipTap?()
     }
 }
 

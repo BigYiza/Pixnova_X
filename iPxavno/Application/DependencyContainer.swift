@@ -5,8 +5,12 @@ struct DependencyContainer {
     let deviceIdentifier: DeviceIdentifying
     let accountRepository: AccountRepository
     let membershipHandler: MembershipHandling
+    let membershipPurchaseHandler: MembershipPurchaseHandling
+    let diamondPurchaseHandler: DiamondPurchaseHandling
     let contentRepository: ContentRepository
     let generationRepository: GenerationRepository
+    let generationMediaUploader: GenerationMediaUploading
+    let generationWorkflowRunner: GenerationWorkflowRunning
     let analytics: AnalyticsTracking
     let keyValueStore: KeyValueStore
 
@@ -16,11 +20,13 @@ struct DependencyContainer {
         let deviceIdentifier = DeviceIdentifierProvider(keyValueStore: keyValueStore)
         let accountStore = UserDefaultsAccountStore(keyValueStore: keyValueStore)
         let contentCatalogStore = UserDefaultsContentCatalogStore(keyValueStore: keyValueStore)
+        let environment = APIEnvironment.current
         let headerProvider = DefaultRequestHeaderProvider(
             sessionProvider: sessionVault,
-            deviceIdentifier: deviceIdentifier
+            deviceIdentifier: deviceIdentifier,
+            environment: environment
         )
-        let apiClient = APIClient(environment: .current, headerProvider: headerProvider)
+        let apiClient = APIClient(environment: environment, headerProvider: headerProvider)
         let remoteContent = RemoteContentRepository(
             apiClient: apiClient,
             catalogStore: contentCatalogStore
@@ -31,6 +37,29 @@ struct DependencyContainer {
             accountStore: accountStore
         )
         let membershipHandler = DefaultMembershipHandler(accountRepository: accountRepository)
+        let paymentRepository = RemoteMembershipPaymentRepository(apiClient: apiClient)
+        let generationRepository = RemoteGenerationRepository(apiClient: apiClient)
+        let mediaUploader = OSSGenerationMediaUploader(apiClient: apiClient)
+        let analytics = ConsoleAnalyticsTracker()
+        let purchaseHandler = StoreKitMembershipPurchaseHandler(
+            catalogProvider: { membershipHandler.cachedMembership.productCatalog },
+            paymentRepository: paymentRepository,
+            accountRepository: accountRepository,
+            membershipHandler: membershipHandler,
+            analytics: analytics
+        )
+        let diamondPurchaseHandler = StoreKitDiamondPurchaseHandler(
+            catalogProvider: { .configured },
+            paymentRepository: paymentRepository,
+            membershipHandler: membershipHandler,
+            analytics: analytics
+        )
+        let workflowRunner = DefaultGenerationWorkflowRunner(
+            membershipHandler: membershipHandler,
+            mediaUploader: mediaUploader,
+            generationRepository: generationRepository,
+            analytics: analytics
+        )
         apiClient.tokenRefreshHandler = { [weak accountRepository] in
             guard let accountRepository else {
                 throw AppError.tokenExpired
@@ -43,9 +72,13 @@ struct DependencyContainer {
             deviceIdentifier: deviceIdentifier,
             accountRepository: accountRepository,
             membershipHandler: membershipHandler,
+            membershipPurchaseHandler: purchaseHandler,
+            diamondPurchaseHandler: diamondPurchaseHandler,
             contentRepository: remoteContent,
-            generationRepository: RemoteGenerationRepository(apiClient: apiClient),
-            analytics: ConsoleAnalyticsTracker(),
+            generationRepository: generationRepository,
+            generationMediaUploader: mediaUploader,
+            generationWorkflowRunner: workflowRunner,
+            analytics: analytics,
             keyValueStore: keyValueStore
         )
     }

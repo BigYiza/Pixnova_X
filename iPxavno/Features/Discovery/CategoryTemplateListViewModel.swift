@@ -26,6 +26,7 @@ final class CategoryTemplateListViewModel {
     private let contentRepository: ContentRepository
     private let membershipHandler: MembershipHandling
     private let generationRepository: GenerationRepository
+    private let generationWorkflowRunner: GenerationWorkflowRunning
     private let analytics: AnalyticsTracking
     private var contentObserver: NSObjectProtocol?
 
@@ -34,12 +35,14 @@ final class CategoryTemplateListViewModel {
         contentRepository: ContentRepository,
         membershipHandler: MembershipHandling,
         generationRepository: GenerationRepository,
+        generationWorkflowRunner: GenerationWorkflowRunning,
         analytics: AnalyticsTracking
     ) {
         self.sourceSection = sourceSection
         self.contentRepository = contentRepository
         self.membershipHandler = membershipHandler
         self.generationRepository = generationRepository
+        self.generationWorkflowRunner = generationWorkflowRunner
         self.analytics = analytics
         state = Observable(CategoryTemplateListState.initial(sourceSection: sourceSection))
         observeContentCatalogChanges()
@@ -80,6 +83,17 @@ final class CategoryTemplateListViewModel {
             contentRepository: contentRepository,
             membershipHandler: membershipHandler,
             generationRepository: generationRepository,
+            generationWorkflowRunner: generationWorkflowRunner,
+            analytics: analytics
+        )
+    }
+
+    func makeTemplateVideoGenerationViewController(for template: CreativeTemplate) -> TemplateVideoGenerationViewController {
+        TemplateVideoGenerationViewController(
+            template: template,
+            membershipHandler: membershipHandler,
+            generationRepository: generationRepository,
+            generationWorkflowRunner: generationWorkflowRunner,
             analytics: analytics
         )
     }

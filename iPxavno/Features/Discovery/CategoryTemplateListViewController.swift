@@ -231,9 +231,13 @@ extension CategoryTemplateListViewController: UICollectionViewDelegate {
         }
         let template = cards[selectedIndex].templates[indexPath.item]
         viewModel.didSelectTemplate(template)
-        guard template.kind.isFilterGenerationWorkflow else { return }
-        let viewController = viewModel.makeFilterGenerationViewController(for: template)
-        navigationController?.pushViewController(viewController, animated: true)
+        if template.kind.isFilterGenerationWorkflow {
+            let viewController = viewModel.makeFilterGenerationViewController(for: template)
+            navigationController?.pushViewController(viewController, animated: true)
+        } else if template.isTemplateVideoGenerationWorkflow {
+            let viewController = viewModel.makeTemplateVideoGenerationViewController(for: template)
+            navigationController?.pushViewController(viewController, animated: true)
+        }
     }
 }
 
@@ -248,6 +252,20 @@ extension CategoryTemplateListViewController: UICollectionViewDelegateFlowLayout
         let font = UIFont.systemFont(ofSize: 19.8, weight: indexPath.item == selectedIndex ? .bold : .semibold)
         let width = ceil(title.size(withAttributes: [.font: font]).width) + 26
         return CGSize(width: max(58, width), height: 58)
+    }
+}
+
+private extension CreativeTemplate {
+    var isTemplateVideoGenerationWorkflow: Bool {
+        switch kind {
+        case .imageToVideo, .multiImageToVideo:
+            return true
+        case .video:
+            let imageCount = inputRequirement?.imageCount ?? 0
+            return imageCount == 1 || imageCount == 2
+        case .textToVideo, .videoEnhance, .filter, .hair, .cutout, .photo, .avatar, .outfit, .baby, .collection, .makeup, .textToImage, .imageToImage, .unknown:
+            return false
+        }
     }
 }
 

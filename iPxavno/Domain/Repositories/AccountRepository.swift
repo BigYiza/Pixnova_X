@@ -20,4 +20,7 @@ protocol AccountRepository: AnyObject {
 
     @discardableResult
     func fetchUserGroups(positions: [String]) async throws -> AccountSnapshot
+
+    @discardableResult
+    func restoreAccount(using transactionIDs: [String]) async throws -> AccountSnapshot
 }

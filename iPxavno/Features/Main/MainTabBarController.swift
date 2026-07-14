@@ -42,7 +42,9 @@ final class MainTabBarController: UIViewController {
                 tab: .home,
                 contentRepository: container.contentRepository,
                 membershipHandler: container.membershipHandler,
+                membershipPurchaseHandler: container.membershipPurchaseHandler,
                 generationRepository: container.generationRepository,
+                generationWorkflowRunner: container.generationWorkflowRunner,
                 analytics: container.analytics
             )
         )
@@ -61,7 +63,7 @@ final class MainTabBarController: UIViewController {
         profile.title = "Me"
 
         childControllers = [discover, video, filters, photo, profile].map { viewController in
-            let navigationController = UINavigationController(rootViewController: viewController)
+            let navigationController = SwipeBackNavigationController(rootViewController: viewController)
             navigationController.additionalSafeAreaInsets.bottom = DesignTabBarView.contentHeight
             navigationController.delegate = self
             navigationController.view.backgroundColor = AppTheme.Color.background
@@ -75,7 +77,9 @@ final class MainTabBarController: UIViewController {
                 tab: tab,
                 contentRepository: container.contentRepository,
                 membershipHandler: container.membershipHandler,
+                membershipPurchaseHandler: container.membershipPurchaseHandler,
                 generationRepository: container.generationRepository,
+                generationWorkflowRunner: container.generationWorkflowRunner,
                 analytics: container.analytics
             )
         )
@@ -167,6 +171,26 @@ final class MainTabBarController: UIViewController {
             updates()
             designTabBar.isHidden = shouldHide
         }
+    }
+}
+
+private final class SwipeBackNavigationController: UINavigationController, UIGestureRecognizerDelegate {
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        interactivePopGestureRecognizer?.delegate = self
+        interactivePopGestureRecognizer?.isEnabled = true
+    }
+
+    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        guard gestureRecognizer === interactivePopGestureRecognizer else { return true }
+        return viewControllers.count > 1 && transitionCoordinator == nil
+    }
+
+    func gestureRecognizer(
+        _ gestureRecognizer: UIGestureRecognizer,
+        shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer
+    ) -> Bool {
+        gestureRecognizer === interactivePopGestureRecognizer
     }
 }
 

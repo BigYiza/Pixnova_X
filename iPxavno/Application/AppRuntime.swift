@@ -1,4 +1,5 @@
 import UIKit
+import FirebaseCore
 
 final class AppRuntime {
     static let shared = AppRuntime()
@@ -16,6 +17,8 @@ final class AppRuntime {
                 properties: ["state": application.applicationState.analyticsValue]
             )
         )
+        
+        FirebaseApp.configure()
     }
 }
 

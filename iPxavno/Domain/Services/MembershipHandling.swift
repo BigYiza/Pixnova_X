@@ -38,6 +38,50 @@ struct MembershipProductCatalog: Equatable {
         var seen = Set<String>()
         return (primaryProductIDs + additionalProductIDs).filter { seen.insert($0).inserted }
     }
+
+    static var configured: MembershipProductCatalog {
+        let primary = Bundle.main.stringArray(forInfoDictionaryKey: "MembershipPrimaryProductIDs")
+        let additional = Bundle.main.stringArray(forInfoDictionaryKey: "MembershipAdditionalProductIDs")
+
+        if !primary.isEmpty || !additional.isEmpty {
+            return MembershipProductCatalog(primaryProductIDs: primary, additionalProductIDs: additional)
+        }
+
+        let fallbackPrefix = Bundle.main.bundleIdentifier ?? "app"
+        return MembershipProductCatalog(
+            primaryProductIDs: [
+                "\(fallbackPrefix).pro.weekly",
+                "\(fallbackPrefix).pro.yearly"
+            ],
+            additionalProductIDs: []
+        )
+    }
+}
+
+struct DiamondProductCatalog: Equatable {
+    let consumableProductIDs: [String]
+
+    var allProductIDs: [String] {
+        var seen = Set<String>()
+        return consumableProductIDs.filter { seen.insert($0).inserted }
+    }
+
+    static var configured: DiamondProductCatalog {
+        let productIDs = Bundle.main.stringArray(forInfoDictionaryKey: "DiamondConsumableProductIDs")
+
+        if !productIDs.isEmpty {
+            return DiamondProductCatalog(consumableProductIDs: productIDs)
+        }
+
+        let fallbackPrefix = Bundle.main.bundleIdentifier ?? "app"
+        return DiamondProductCatalog(
+            consumableProductIDs: [
+                "\(fallbackPrefix).diamonds.small",
+                "\(fallbackPrefix).diamonds.medium",
+                "\(fallbackPrefix).diamonds.large"
+            ]
+        )
+    }
 }
 
 struct MembershipSnapshot {
@@ -64,7 +108,7 @@ struct MembershipSnapshot {
         diamonds = account.diamonds
         closeButtonStrategy = MembershipSnapshot.closeButtonStrategy(from: account)
         paywallGroup = account.userGroupMap[AccountUserGroupPosition.membershipPaywall]?.stringValue
-        productCatalog = MembershipSnapshot.productCatalog(for: closeButtonStrategy)
+        productCatalog = .configured
     }
 
     var expirationDate: Date? {
@@ -121,37 +165,11 @@ struct MembershipSnapshot {
         }
     }
 
-    private static func productCatalog(for strategy: MembershipCloseButtonStrategy) -> MembershipProductCatalog {
-        let primaryProductIDs: [String]
+}
 
-        switch strategy {
-        case .normal:
-            primaryProductIDs = [
-                "Pixnova.vip.weekly.online.nofreetrail",
-                "Pixnova.vip.yearly.online.nofreetrail",
-                "Pixnova.vip.yearly.online.3daysfree"
-            ]
-        case .delayed3Seconds:
-            primaryProductIDs = [
-                "Pixnova.vip.yearly.online.3daysfree.abtesting.closebtn.3sshow",
-                "Pixnova.vip.yearly.online.nofreetrail.abtesting.closebtn.3sshow",
-                "Pixnova.vip.weekly.online.nofreetrail.abtesting.closebtn.3sshow"
-            ]
-        case .hidden:
-            primaryProductIDs = [
-                "Pixnova.vip.yearly.online.3daysfree.abtesting.closebtn.none",
-                "Pixnova.vip.yearly.online.nofreetrail.abtesting.closebtn.none",
-                "Pixnova.vip.weekly.online.nofreetrail.abtesting.closebtn.none"
-            ]
-        }
-
-        return MembershipProductCatalog(
-            primaryProductIDs: primaryProductIDs,
-            additionalProductIDs: [
-                "Pixnova.vip.weekly.449.nofreetrail",
-                "Pixnova.vip.yearly.online.nofreetrail.newuserdiscount"
-            ]
-        )
+private extension Bundle {
+    func stringArray(forInfoDictionaryKey key: String) -> [String] {
+        object(forInfoDictionaryKey: key) as? [String] ?? []
     }
 }
 
