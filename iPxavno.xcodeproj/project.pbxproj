@@ -90,8 +90,8 @@
 		5A67D3A82CC3A22730118AFC /* ProfileViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ProfileViewModel.swift; sourceTree = "<group>"; };
 		615CBA10848930C1841FF078 /* RemoteContentRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RemoteContentRepository.swift; sourceTree = "<group>"; };
 		679D56C1EA13336CEE20D59B /* ContentNotifications.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ContentNotifications.swift; sourceTree = "<group>"; };
-		6A09E2B49CC04EB1B59AD401 /* FilterGenerationViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FilterGenerationViewController.swift; sourceTree = "<group>"; };
 		67C2201A59E4A1DE0FC104F0 /* AppDelegate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		6A09E2B49CC04EB1B59AD401 /* FilterGenerationViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FilterGenerationViewController.swift; sourceTree = "<group>"; };
 		6BDD8853D67D096C1B84B9EC /* DeviceIdentifierProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeviceIdentifierProvider.swift; sourceTree = "<group>"; };
 		7108E98F5CB04D1BA60C03BE /* ImageSelectionCoordinator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ImageSelectionCoordinator.swift; sourceTree = "<group>"; };
 		76F3C6F70089698F60CFDF4D /* AppTheme.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
@@ -148,7 +148,6 @@
 			children = (
 				47F584B372891B8DBF9785E0 /* OnboardingViewController.swift */,
 			);
-			name = Onboarding;
 			path = Onboarding;
 			sourceTree = "<group>";
 		};
@@ -159,7 +158,6 @@
 				7F45EF11494B19359A0E706F /* AppRuntime.swift */,
 				01761D8E61095BB3A4E78485 /* DependencyContainer.swift */,
 			);
-			name = Application;
 			path = Application;
 			sourceTree = "<group>";
 		};
@@ -171,7 +169,6 @@
 				4EE8304C102B8ABACC3A6518 /* APIEnvironment.swift */,
 				15C585D72DC5DE85467CB058 /* RequestHeaderProvider.swift */,
 			);
-			name = Network;
 			path = Network;
 			sourceTree = "<group>";
 		};
@@ -182,7 +179,6 @@
 				9A569583A77ABCFD47C6DD41 /* Repositories */,
 				AC593394F8F6D340EB63E811 /* Services */,
 			);
-			name = Infrastructure;
 			path = Infrastructure;
 			sourceTree = "<group>";
 		};
@@ -209,7 +205,6 @@
 				E6580D153EF37146F52FD27C /* ContentModels.swift */,
 				CF908F48255844F18352C2DA /* GenerationModels.swift */,
 			);
-			name = Models;
 			path = Models;
 			sourceTree = "<group>";
 		};
@@ -219,7 +214,6 @@
 				214CE15A933EFA387FB714EC /* AppError.swift */,
 				36D8C2F2FAEE6C46ED498451 /* Observable.swift */,
 			);
-			name = Foundation;
 			path = Foundation;
 			sourceTree = "<group>";
 		};
@@ -230,7 +224,6 @@
 				AA1E14D0303CF51A3395116F /* ContentRepository.swift */,
 				A68199643479BF18EAC94156 /* GenerationRepository.swift */,
 			);
-			name = Repositories;
 			path = Repositories;
 			sourceTree = "<group>";
 		};
@@ -245,7 +238,6 @@
 				77B38369BFF483A927A847C4 /* HomeDesignTokens.swift */,
 				807213956C27F4654F2F3861 /* HomeTopBarView.swift */,
 			);
-			name = Discovery;
 			path = Discovery;
 			sourceTree = "<group>";
 		};
@@ -258,7 +250,6 @@
 				BC87C25ED745CDC6CE7E4CB6 /* PrimaryButton.swift */,
 				A873ED240D656D21A573494F /* RemoteImageView.swift */,
 			);
-			name = UI;
 			path = UI;
 			sourceTree = "<group>";
 		};
@@ -267,7 +258,6 @@
 			children = (
 				B50CE59AC50797769F95AFD8 /* LaunchScreen.storyboard */,
 			);
-			name = Base.lproj;
 			path = Base.lproj;
 			sourceTree = "<group>";
 		};
@@ -276,7 +266,6 @@
 			children = (
 				40E035461EB0290629F77103 /* LaunchViewController.swift */,
 			);
-			name = Launch;
 			path = Launch;
 			sourceTree = "<group>";
 		};
@@ -286,7 +275,6 @@
 				D1B3E9F76C77087D7DCA1A03 /* DesignTabBarView.swift */,
 				20630E0387920415ECE9651F /* MainTabBarController.swift */,
 			);
-			name = Main;
 			path = Main;
 			sourceTree = "<group>";
 		};
@@ -297,7 +285,6 @@
 				5ADC8546DB64BD6BC9ECF41E /* Repositories */,
 				DCF6C83D4088E003FC74537A /* Services */,
 			);
-			name = Domain;
 			path = Domain;
 			sourceTree = "<group>";
 		};
@@ -308,7 +295,6 @@
 				615CBA10848930C1841FF078 /* RemoteContentRepository.swift */,
 				889DDF1915B09D53591C90A9 /* RemoteGenerationRepository.swift */,
 			);
-			name = Repositories;
 			path = Repositories;
 			sourceTree = "<group>";
 		};
@@ -322,7 +308,6 @@
 				6BDD8853D67D096C1B84B9EC /* DeviceIdentifierProvider.swift */,
 				7F193BB79AF0ED9FB75981CE /* SessionVault.swift */,
 			);
-			name = Services;
 			path = Services;
 			sourceTree = "<group>";
 		};
@@ -337,7 +322,6 @@
 				01009C71FF3F06ED92B1A188 /* Onboarding */,
 				C3C1A6FB6E8C22A472569DF9 /* Profile */,
 			);
-			name = Features;
 			path = Features;
 			sourceTree = "<group>";
 		};
@@ -346,7 +330,6 @@
 			children = (
 				DA433CE0D4DB81B559360404 /* KeyValueStore.swift */,
 			);
-			name = Storage;
 			path = Storage;
 			sourceTree = "<group>";
 		};
@@ -356,7 +339,6 @@
 				F3B49DC19CA76E2E41CDD6D4 /* CreationHubViewController.swift */,
 				443267AFFD42629E78D3C6D3 /* CreationHubViewModel.swift */,
 			);
-			name = Creation;
 			path = Creation;
 			sourceTree = "<group>";
 		};
@@ -366,7 +348,6 @@
 				D20A833F4D94D7C5F61A41D3 /* ProfileViewController.swift */,
 				5A67D3A82CC3A22730118AFC /* ProfileViewModel.swift */,
 			);
-			name = Profile;
 			path = Profile;
 			sourceTree = "<group>";
 		};
@@ -376,7 +357,6 @@
 				D8083516F5099E2E31E60877 /* BaseGenerationWorkflowViewController.swift */,
 				6A09E2B49CC04EB1B59AD401 /* FilterGenerationViewController.swift */,
 			);
-			name = Generation;
 			path = Generation;
 			sourceTree = "<group>";
 		};
@@ -390,7 +370,6 @@
 				A9F8B821F395D0C97BA36E44 /* MembershipHandling.swift */,
 				B5DF84507A89836FCA7ECDD9 /* SessionProviding.swift */,
 			);
-			name = Services;
 			path = Services;
 			sourceTree = "<group>";
 		};
@@ -408,7 +387,6 @@
 				9D719FB358B97C9BD2281192 /* Assets.xcassets */,
 				6BCA6A470AB994F17463A8DE /* Base.lproj */,
 			);
-			name = iPxavno;
 			path = iPxavno;
 			sourceTree = "<group>";
 		};
@@ -419,7 +397,6 @@
 				B39BBA69933C6975E1A4689F /* Storage */,
 				5F8BD9C6939F39EC9961E8E4 /* UI */,
 			);
-			name = Core;
 			path = Core;
 			sourceTree = "<group>";
 		};
@@ -568,11 +545,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = P2328CN2XE;
+				DEVELOPMENT_TEAM = RCV2MM8H49;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = iPxavno/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Pixnova needs camera access so you can take a photo for generation.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Pixnova needs photo library access so you can choose a photo for generation.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -583,8 +563,9 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.personaltest.Xavion;
+				PRODUCT_BUNDLE_IDENTIFIER = com.lainc.picvidai;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
@@ -600,11 +581,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = P2328CN2XE;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = RCV2MM8H49;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = iPxavno/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Pixnova needs camera access so you can take a photo for generation.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Pixnova needs photo library access so you can choose a photo for generation.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -615,8 +600,10 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.personaltest.Xavion;
+				PRODUCT_BUNDLE_IDENTIFIER = com.lainc.picvidai;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = picvidai_release;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
