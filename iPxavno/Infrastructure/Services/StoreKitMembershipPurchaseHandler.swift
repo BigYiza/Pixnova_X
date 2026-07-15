@@ -55,90 +55,192 @@ final class StoreKitMembershipPurchaseHandler: MembershipPurchaseHandling {
     }
 
     func purchase(planID: String) async throws {
-        let product = try await product(for: planID)
-        let order = try await paymentRepository.createOrder(
-            name: product.displayName,
-            description: product.description,
-            productID: product.id,
-            purchasePrice: product.displayPrice
-        )
+        #if DEBUG
+        Self.log("purchase begin planID=\(planID)")
+        #endif
 
-        analytics.record(
-            AnalyticsEvent(
-                name: "membership_purchase_started",
-                properties: ["product_id": product.id, "order_id": order.id]
+        do {
+            let product = try await product(for: planID)
+            #if DEBUG
+            Self.logProduct(product, stage: "selected product")
+            #endif
+
+            let order = try await paymentRepository.createOrder(
+                name: product.displayName,
+                description: product.description,
+                productID: product.id,
+                purchasePrice: product.displayPrice
             )
-        )
+            #if DEBUG
+            Self.log("create order success productID=\(product.id) orderID=\(order.id) appAccountToken=\(order.appAccountToken.uuidString)")
+            #endif
 
-        let result = try await product.purchase(options: [.appAccountToken(order.appAccountToken)])
-
-        switch result {
-        case let .success(verificationResult):
-            let transaction = try Self.verifiedTransaction(from: verificationResult)
-            let receipt = try Self.currentReceiptBase64()
-            try await paymentRepository.notifyPurchaseSuccess(
-                orderID: order.id,
-                transactionID: "\(transaction.id)",
-                receiptData: receipt
-            )
-            await transaction.finish()
-            try await waitForCompletedOrder(order.id)
-            _ = try await membershipHandler.refreshStatus()
             analytics.record(
                 AnalyticsEvent(
-                    name: "membership_purchase_finished",
+                    name: "membership_purchase_started",
                     properties: ["product_id": product.id, "order_id": order.id]
                 )
             )
-        case .userCancelled:
-            throw MembershipPurchaseError.purchaseCancelled
-        case .pending:
-            throw MembershipPurchaseError.purchasePending
-        @unknown default:
-            throw MembershipPurchaseError.verificationFailed
+
+            #if DEBUG
+            Self.log("StoreKit purchase prompt begin productID=\(product.id) orderID=\(order.id)")
+            #endif
+            let result = try await product.purchase(options: [.appAccountToken(order.appAccountToken)])
+
+            switch result {
+            case let .success(verificationResult):
+                #if DEBUG
+                Self.log("StoreKit purchase success returned, verifying transaction productID=\(product.id) orderID=\(order.id)")
+                #endif
+
+                let transaction = try Self.verifiedTransaction(from: verificationResult)
+                #if DEBUG
+                Self.logTransaction(transaction, stage: "verified transaction")
+                #endif
+
+                let receipt = try Self.currentReceiptBase64()
+                #if DEBUG
+                Self.log("receipt loaded productID=\(product.id) orderID=\(order.id) receiptBase64Length=\(receipt.count)")
+                #endif
+
+                try await paymentRepository.notifyPurchaseSuccess(
+                    orderID: order.id,
+                    transactionID: "\(transaction.id)",
+                    receiptData: receipt
+                )
+                #if DEBUG
+                Self.log("notify purchase success completed productID=\(product.id) orderID=\(order.id) transactionID=\(transaction.id)")
+                #endif
+
+                await transaction.finish()
+                #if DEBUG
+                Self.log("transaction finish completed productID=\(product.id) orderID=\(order.id) transactionID=\(transaction.id)")
+                #endif
+
+                try await waitForCompletedOrder(order.id)
+                #if DEBUG
+                Self.log("order state completed orderID=\(order.id)")
+                #endif
+
+                _ = try await membershipHandler.refreshStatus()
+                #if DEBUG
+                Self.log("membership refresh completed productID=\(product.id) orderID=\(order.id)")
+                #endif
+
+                analytics.record(
+                    AnalyticsEvent(
+                        name: "membership_purchase_finished",
+                        properties: ["product_id": product.id, "order_id": order.id]
+                    )
+                )
+            case .userCancelled:
+                #if DEBUG
+                Self.log("StoreKit purchase cancelled productID=\(product.id) orderID=\(order.id)")
+                #endif
+                throw MembershipPurchaseError.purchaseCancelled
+            case .pending:
+                #if DEBUG
+                Self.log("StoreKit purchase pending productID=\(product.id) orderID=\(order.id)")
+                #endif
+                throw MembershipPurchaseError.purchasePending
+            @unknown default:
+                #if DEBUG
+                Self.log("StoreKit purchase unknown result productID=\(product.id) orderID=\(order.id)")
+                #endif
+                throw MembershipPurchaseError.verificationFailed
+            }
+        } catch {
+            #if DEBUG
+            Self.logError(error, stage: "purchase failed planID=\(planID)")
+            #endif
+            throw error
         }
     }
 
     func restorePurchases() async throws {
-        try await AppStore.sync()
+        #if DEBUG
+        Self.log("restore begin")
+        #endif
 
-        var restoredTransaction: Transaction?
-        for await result in Transaction.currentEntitlements {
-            guard case let .verified(transaction) = result,
-                  transaction.productType == .autoRenewable else {
-                continue
+        do {
+            try await AppStore.sync()
+            #if DEBUG
+            Self.log("AppStore sync completed")
+            #endif
+
+            var restoredTransaction: Transaction?
+            for await result in Transaction.currentEntitlements {
+                guard case let .verified(transaction) = result,
+                      transaction.productType == .autoRenewable else {
+                    #if DEBUG
+                    Self.log("restore skipped entitlement result=\(result)")
+                    #endif
+                    continue
+                }
+                restoredTransaction = transaction
+                break
             }
-            restoredTransaction = transaction
-            break
-        }
 
-        guard let transaction = restoredTransaction else {
-            throw MembershipPurchaseError.restoreUnavailable
-        }
+            guard let transaction = restoredTransaction else {
+                throw MembershipPurchaseError.restoreUnavailable
+            }
+            #if DEBUG
+            Self.logTransaction(transaction, stage: "restore selected transaction")
+            #endif
 
-        let receipt = (try? Self.currentReceiptBase64()) ?? ""
-        try await paymentRepository.restorePurchase(
-            originalTransactionID: "\(transaction.originalID)",
-            transactionID: "\(transaction.id)",
-            receiptData: receipt
-        )
-        _ = try await accountRepository.restoreAccount(using: ["\(transaction.id)"])
-        _ = try await membershipHandler.refreshStatus()
+            let receipt = (try? Self.currentReceiptBase64()) ?? ""
+            #if DEBUG
+            Self.log("restore receipt loaded receiptBase64Length=\(receipt.count)")
+            #endif
 
-        analytics.record(
-            AnalyticsEvent(
-                name: "membership_restore_finished",
-                properties: ["product_id": transaction.productID]
+            try await paymentRepository.restorePurchase(
+                originalTransactionID: "\(transaction.originalID)",
+                transactionID: "\(transaction.id)",
+                receiptData: receipt
             )
-        )
+            #if DEBUG
+            Self.log("restore payment API completed transactionID=\(transaction.id)")
+            #endif
+
+            _ = try await accountRepository.restoreAccount(using: ["\(transaction.id)"])
+            #if DEBUG
+            Self.log("restore account completed transactionID=\(transaction.id)")
+            #endif
+
+            _ = try await membershipHandler.refreshStatus()
+            #if DEBUG
+            Self.log("restore membership refresh completed transactionID=\(transaction.id)")
+            #endif
+
+            analytics.record(
+                AnalyticsEvent(
+                    name: "membership_restore_finished",
+                    properties: ["product_id": transaction.productID]
+                )
+            )
+        } catch {
+            #if DEBUG
+            Self.logError(error, stage: "restore failed")
+            #endif
+            throw error
+        }
     }
 
     private func product(for productID: String) async throws -> Product {
         if let product = productsByID[productID] {
+            #if DEBUG
+            Self.log("product cache hit productID=\(productID)")
+            #endif
             return product
         }
 
+        #if DEBUG
+        Self.log("product cache miss, loading from StoreKit productID=\(productID)")
+        #endif
         let products = try await Product.products(for: [productID])
+        #if DEBUG
+        Self.log("product lookup returned requested=\(productID) returned=\(products.map(\.id))")
+        #endif
         guard let product = products.first else {
             throw MembershipPurchaseError.productUnavailable
         }
@@ -151,6 +253,9 @@ final class StoreKitMembershipPurchaseHandler: MembershipPurchaseHandling {
         while attempts < 5 {
             attempts += 1
             let state = try await paymentRepository.orderState(orderID: orderID)
+            #if DEBUG
+            Self.log("order state poll orderID=\(orderID) attempt=\(attempts) state=\(state)")
+            #endif
             if state == 1 {
                 return
             }
@@ -164,7 +269,10 @@ final class StoreKitMembershipPurchaseHandler: MembershipPurchaseHandling {
         switch result {
         case let .verified(transaction):
             return transaction
-        case .unverified:
+        case let .unverified(transaction, error):
+            #if DEBUG
+            logError(error, stage: "transaction unverified productID=\(transaction.productID) transactionID=\(transaction.id)")
+            #endif
             throw MembershipPurchaseError.verificationFailed
         }
     }
@@ -200,6 +308,68 @@ final class StoreKitMembershipPurchaseHandler: MembershipPurchaseHandling {
         )
     }
 }
+
+#if DEBUG
+private extension StoreKitMembershipPurchaseHandler {
+    static func log(_ message: String) {
+        print("[StoreKit][Membership][Purchase] \(message)")
+    }
+
+    static func logProduct(_ product: Product, stage: String) {
+        let period = product.subscription?.subscriptionPeriod
+        let periodText = period.map { "\($0.value) \($0.unit)" } ?? "<none>"
+        print(
+            "[StoreKit][Membership][Purchase] \(stage)",
+            "id=\(product.id)",
+            "displayName=\(product.displayName)",
+            "displayPrice=\(product.displayPrice)",
+            "type=\(product.type)",
+            "subscriptionPeriod=\(periodText)",
+            "hasIntroOffer=\(product.subscription?.introductoryOffer != nil)"
+        )
+    }
+
+    static func logTransaction(_ transaction: Transaction, stage: String) {
+        print(
+            "[StoreKit][Membership][Purchase] \(stage)",
+            "id=\(transaction.id)",
+            "originalID=\(transaction.originalID)",
+            "productID=\(transaction.productID)",
+            "productType=\(transaction.productType)",
+            "purchaseDate=\(transaction.purchaseDate)",
+            "expirationDate=\(String(describing: transaction.expirationDate))",
+            "revocationDate=\(String(describing: transaction.revocationDate))"
+        )
+    }
+
+    static func logError(_ error: Error, stage: String) {
+        print("[StoreKit][Membership][Purchase][Error] \(stage) \(errorDiagnostic(error))")
+    }
+
+    static func errorDiagnostic(_ error: Error) -> String {
+        let nsError = error as NSError
+        var parts = [
+            "type=\(type(of: error))",
+            "domain=\(nsError.domain)",
+            "code=\(nsError.code)",
+            "description=\(error.localizedDescription)"
+        ]
+        if let appError = error as? AppError {
+            parts.append("appError=\(appError)")
+        }
+        if let membershipError = error as? MembershipPurchaseError {
+            parts.append("membershipError=\(membershipError)")
+        }
+        if let underlying = nsError.userInfo[NSUnderlyingErrorKey] as? Error {
+            let underlyingError = underlying as NSError
+            parts.append(
+                "underlying={type=\(type(of: underlying)) domain=\(underlyingError.domain) code=\(underlyingError.code) description=\(underlying.localizedDescription)}"
+            )
+        }
+        return parts.joined(separator: " ")
+    }
+}
+#endif
 
 final class StoreKitDiamondPurchaseHandler: DiamondPurchaseHandling {
     private let catalogProvider: () -> DiamondProductCatalog

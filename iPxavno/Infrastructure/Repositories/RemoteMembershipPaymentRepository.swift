@@ -26,11 +26,25 @@ final class RemoteMembershipPaymentRepository: MembershipPaymentRepository {
             path: "/api/v1/order/create",
             body: try encoder.encode(request)
         )
-        let response = try await apiClient.send(endpoint).requirePayload()
-        return MembershipPaymentOrder(
-            id: response.orderID,
-            appAccountToken: UUID(uuidString: response.orderUUID) ?? UUID()
-        )
+        do {
+            let envelope = try await apiClient.send(endpoint)
+            #if DEBUG
+            Self.log("createOrder envelope \(envelope.debugSummary) productID=\(productID) price=\(purchasePrice)")
+            #endif
+            let response = try envelope.requirePayload()
+            #if DEBUG
+            Self.log("createOrder payload orderID=\(response.orderID) orderUUID=\(response.orderUUID) productID=\(productID)")
+            #endif
+            return MembershipPaymentOrder(
+                id: response.orderID,
+                appAccountToken: UUID(uuidString: response.orderUUID) ?? UUID()
+            )
+        } catch {
+            #if DEBUG
+            Self.logError(error, stage: "createOrder failed productID=\(productID) price=\(purchasePrice)")
+            #endif
+            throw error
+        }
     }
 
     func notifyPurchaseSuccess(orderID: String, transactionID: String, receiptData: String) async throws {
@@ -45,7 +59,22 @@ final class RemoteMembershipPaymentRepository: MembershipPaymentRepository {
             path: "/api/v1/pay/apple/success_notify",
             body: try encoder.encode(request)
         )
-        _ = try await apiClient.send(endpoint)
+        do {
+            let envelope = try await apiClient.send(endpoint)
+            #if DEBUG
+            Self.log(
+                "notifyPurchaseSuccess envelope \(envelope.debugSummary) orderID=\(orderID) transactionID=\(transactionID) receiptBase64Length=\(receiptData.count)"
+            )
+            #endif
+        } catch {
+            #if DEBUG
+            Self.logError(
+                error,
+                stage: "notifyPurchaseSuccess failed orderID=\(orderID) transactionID=\(transactionID) receiptBase64Length=\(receiptData.count)"
+            )
+            #endif
+            throw error
+        }
     }
 
     func orderState(orderID: String) async throws -> Int {
@@ -55,7 +84,18 @@ final class RemoteMembershipPaymentRepository: MembershipPaymentRepository {
             path: "/api/v1/order/status",
             queryItems: [URLQueryItem(name: "order_id", value: orderID)]
         )
-        return try await apiClient.send(endpoint).requirePayload().state
+        do {
+            let envelope = try await apiClient.send(endpoint)
+            #if DEBUG
+            Self.log("orderState envelope \(envelope.debugSummary) orderID=\(orderID)")
+            #endif
+            return try envelope.requirePayload().state
+        } catch {
+            #if DEBUG
+            Self.logError(error, stage: "orderState failed orderID=\(orderID)")
+            #endif
+            throw error
+        }
     }
 
     func restorePurchase(originalTransactionID: String, transactionID: String, receiptData: String) async throws {
@@ -70,9 +110,24 @@ final class RemoteMembershipPaymentRepository: MembershipPaymentRepository {
             path: "/api/v1/pay/apple/restore",
             body: try encoder.encode(request)
         )
-        let response = try await apiClient.send(endpoint)
-        guard response.isSuccessful else {
-            throw MembershipPurchaseError.restoreUnavailable
+        do {
+            let response = try await apiClient.send(endpoint)
+            #if DEBUG
+            Self.log(
+                "restorePurchase envelope \(response.debugSummary) originalTransactionID=\(originalTransactionID) transactionID=\(transactionID) receiptBase64Length=\(receiptData.count)"
+            )
+            #endif
+            guard response.isSuccessful else {
+                throw MembershipPurchaseError.restoreUnavailable
+            }
+        } catch {
+            #if DEBUG
+            Self.logError(
+                error,
+                stage: "restorePurchase failed originalTransactionID=\(originalTransactionID) transactionID=\(transactionID) receiptBase64Length=\(receiptData.count)"
+            )
+            #endif
+            throw error
         }
     }
 }
@@ -155,6 +210,12 @@ private struct PaymentEnvelope<Payload: Decodable>: Decodable {
         }
         return data
     }
+
+    #if DEBUG
+    var debugSummary: String {
+        "code=\(String(describing: code)) state=\(String(describing: state)) hasData=\(data != nil) msg=\(message ?? "<nil>") description=\(descriptionText ?? "<nil>")"
+    }
+    #endif
 }
 
 private struct RestorePaymentEnvelope: Decodable {
@@ -164,8 +225,49 @@ private struct RestorePaymentEnvelope: Decodable {
     var isSuccessful: Bool {
         state == 0 || data?.state == 0
     }
+
+    #if DEBUG
+    var debugSummary: String {
+        "state=\(String(describing: state)) dataState=\(String(describing: data?.state)) hasData=\(data != nil)"
+    }
+    #endif
 }
 
 private struct RestorePaymentState: Decodable {
     let state: Int?
 }
+
+#if DEBUG
+private extension RemoteMembershipPaymentRepository {
+    static func log(_ message: String) {
+        print("[PaymentAPI][Membership] \(message)")
+    }
+
+    static func logError(_ error: Error, stage: String) {
+        print("[PaymentAPI][Membership][Error] \(stage) \(errorDiagnostic(error))")
+    }
+
+    static func errorDiagnostic(_ error: Error) -> String {
+        let nsError = error as NSError
+        var parts = [
+            "type=\(type(of: error))",
+            "domain=\(nsError.domain)",
+            "code=\(nsError.code)",
+            "description=\(error.localizedDescription)"
+        ]
+        if let appError = error as? AppError {
+            parts.append("appError=\(appError)")
+        }
+        if let membershipError = error as? MembershipPurchaseError {
+            parts.append("membershipError=\(membershipError)")
+        }
+        if let underlying = nsError.userInfo[NSUnderlyingErrorKey] as? Error {
+            let underlyingError = underlying as NSError
+            parts.append(
+                "underlying={type=\(type(of: underlying)) domain=\(underlyingError.domain) code=\(underlyingError.code) description=\(underlying.localizedDescription)}"
+            )
+        }
+        return parts.joined(separator: " ")
+    }
+}
+#endif
