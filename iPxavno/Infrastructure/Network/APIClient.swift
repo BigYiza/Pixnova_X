@@ -21,23 +21,40 @@ final class APIClient {
 
     func send<Response: Decodable>(_ endpoint: APIEndpoint<Response>) async throws -> Response {
         let request = try makeRequest(endpoint)
+        #if DEBUG
+        let requestID = Self.requestLogID()
+        Self.logRequest(request, requestID: requestID, responseType: Response.self)
+        #endif
         let data: Data
         let response: URLResponse
 
         do {
             (data, response) = try await session.data(for: request)
         } catch {
+            #if DEBUG
+            Self.logNetworkError(error, request: request, requestID: requestID)
+            #endif
             throw AppError.underlying(error)
         }
 
         guard let httpResponse = response as? HTTPURLResponse,
               (200..<300).contains(httpResponse.statusCode) else {
+            #if DEBUG
+            Self.logInvalidResponse(response, data: data, request: request, requestID: requestID)
+            #endif
             throw AppError.invalidResponse
         }
 
         do {
-            return try decoder.decode(Response.self, from: data)
+            let decoded = try decoder.decode(Response.self, from: data)
+            #if DEBUG
+            Self.logSuccess(httpResponse, data: data, request: request, requestID: requestID)
+            #endif
+            return decoded
         } catch {
+            #if DEBUG
+            Self.logDecodingError(error, response: httpResponse, data: data, request: request, requestID: requestID, responseType: Response.self)
+            #endif
             throw AppError.decodingFailed
         }
     }
@@ -106,3 +123,95 @@ final class APIClient {
         return request
     }
 }
+
+#if DEBUG
+private extension APIClient {
+    static func requestLogID() -> String {
+        String(UUID().uuidString.prefix(8))
+    }
+
+    static func logRequest<Response: Decodable>(_ request: URLRequest, requestID: String, responseType: Response.Type) {
+        print(
+            "[API][\(requestID)] ->",
+            request.httpMethod ?? "GET",
+            request.url?.absoluteString ?? "<nil-url>",
+            "responseType=\(responseType)"
+        )
+    }
+
+    static func logSuccess(_ response: HTTPURLResponse, data: Data, request: URLRequest, requestID: String) {
+        print(
+            "[API][\(requestID)] <-",
+            response.statusCode,
+            request.httpMethod ?? "GET",
+            request.url?.absoluteString ?? "<nil-url>",
+            "bytes=\(data.count)"
+        )
+    }
+
+    static func logNetworkError(_ error: Error, request: URLRequest, requestID: String) {
+        print(
+            "[API][\(requestID)][NetworkError]",
+            request.httpMethod ?? "GET",
+            request.url?.absoluteString ?? "<nil-url>",
+            errorDiagnostic(error)
+        )
+    }
+
+    static func logInvalidResponse(_ response: URLResponse, data: Data, request: URLRequest, requestID: String) {
+        let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
+        print(
+            "[API][\(requestID)][InvalidResponse]",
+            request.httpMethod ?? "GET",
+            request.url?.absoluteString ?? "<nil-url>",
+            "status=\(statusCode)",
+            "bytes=\(data.count)",
+            "body=\(responseBodyPreview(data))"
+        )
+    }
+
+    static func logDecodingError<Response: Decodable>(
+        _ error: Error,
+        response: HTTPURLResponse,
+        data: Data,
+        request: URLRequest,
+        requestID: String,
+        responseType: Response.Type
+    ) {
+        print(
+            "[API][\(requestID)][DecodingError]",
+            request.httpMethod ?? "GET",
+            request.url?.absoluteString ?? "<nil-url>",
+            "status=\(response.statusCode)",
+            "responseType=\(responseType)",
+            "bytes=\(data.count)",
+            "error=\(errorDiagnostic(error))",
+            "body=\(responseBodyPreview(data))"
+        )
+    }
+
+    static func responseBodyPreview(_ data: Data, limit: Int = 4_000) -> String {
+        guard !data.isEmpty else { return "<empty>" }
+        let text = String(data: data, encoding: .utf8) ?? "<non-utf8 \(data.count) bytes>"
+        guard text.count > limit else { return text }
+        return "\(text.prefix(limit))...<truncated \(text.count - limit) chars>"
+    }
+
+    static func errorDiagnostic(_ error: Error) -> String {
+        let nsError = error as NSError
+        var parts = [
+            "type=\(type(of: error))",
+            "domain=\(nsError.domain)",
+            "code=\(nsError.code)",
+            "description=\(error.localizedDescription)"
+        ]
+        if let underlying = nsError.userInfo[NSUnderlyingErrorKey] as? Error {
+            let underlyingError = underlying as NSError
+            parts.append(
+                "underlying={type=\(type(of: underlying)) domain=\(underlyingError.domain) code=\(underlyingError.code) description=\(underlying.localizedDescription)}"
+            )
+        }
+        return parts.joined(separator: " ")
+    }
+}
+#endif
