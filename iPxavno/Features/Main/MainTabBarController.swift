@@ -43,6 +43,7 @@ final class MainTabBarController: UIViewController {
                 contentRepository: container.contentRepository,
                 membershipHandler: container.membershipHandler,
                 membershipPurchaseHandler: container.membershipPurchaseHandler,
+                diamondPurchaseHandler: container.diamondPurchaseHandler,
                 generationRepository: container.generationRepository,
                 generationWorkflowRunner: container.generationWorkflowRunner,
                 analytics: container.analytics
@@ -78,6 +79,7 @@ final class MainTabBarController: UIViewController {
                 contentRepository: container.contentRepository,
                 membershipHandler: container.membershipHandler,
                 membershipPurchaseHandler: container.membershipPurchaseHandler,
+                diamondPurchaseHandler: container.diamondPurchaseHandler,
                 generationRepository: container.generationRepository,
                 generationWorkflowRunner: container.generationWorkflowRunner,
                 analytics: container.analytics

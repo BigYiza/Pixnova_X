@@ -161,7 +161,7 @@ final class MembershipPaywallViewController: BaseViewController {
     private func configureFeatures() {
         featuresStack.translatesAutoresizingMaskIntoConstraints = false
         featuresStack.axis = .vertical
-        featuresStack.spacing = 19
+        featuresStack.spacing = 10
         featuresStack.distribution = .fill
 
         [
@@ -178,7 +178,7 @@ final class MembershipPaywallViewController: BaseViewController {
         NSLayoutConstraint.activate([
             featuresStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 28),
             featuresStack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -28),
-            featuresStack.topAnchor.constraint(equalTo: subtitleLabel.bottomAnchor, constant: 42)
+            featuresStack.topAnchor.constraint(equalTo: subtitleLabel.bottomAnchor, constant: 24)
         ])
     }
 
@@ -192,7 +192,7 @@ final class MembershipPaywallViewController: BaseViewController {
         NSLayoutConstraint.activate([
             planStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 28),
             planStack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -28),
-            planStack.topAnchor.constraint(equalTo: featuresStack.bottomAnchor, constant: 35),
+            planStack.topAnchor.constraint(equalTo: featuresStack.bottomAnchor, constant: 24),
             planStack.heightAnchor.constraint(equalToConstant: 141)
         ])
     }
@@ -400,7 +400,7 @@ private final class MembershipFeatureRow: UIView {
 
     private func configureView() {
         translatesAutoresizingMaskIntoConstraints = false
-        heightAnchor.constraint(equalToConstant: 37.5).isActive = true
+        heightAnchor.constraint(equalToConstant: 32).isActive = true
 
         iconContainer.translatesAutoresizingMaskIntoConstraints = false
         iconContainer.backgroundColor = HomeDesignColor.accent.withAlphaComponent(0.18)
@@ -414,7 +414,7 @@ private final class MembershipFeatureRow: UIView {
 
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.textColor = HomeDesignColor.text
-        titleLabel.font = UIFont.systemFont(ofSize: 19, weight: .regular)
+        titleLabel.font = UIFont.systemFont(ofSize: 18, weight: .regular)
         titleLabel.adjustsFontSizeToFitWidth = true
         titleLabel.minimumScaleFactor = 0.8
 
@@ -502,9 +502,11 @@ private final class MembershipPlanCardView: UIControl {
         priceLabel.minimumScaleFactor = 0.72
 
         subtitleLabel.textColor = HomeDesignColor.mutedText
-        subtitleLabel.font = UIFont.systemFont(ofSize: 13.5, weight: .regular)
+        subtitleLabel.font = UIFont.systemFont(ofSize: 12, weight: .regular)
+        subtitleLabel.numberOfLines = 1
+        subtitleLabel.lineBreakMode = .byClipping
         subtitleLabel.adjustsFontSizeToFitWidth = true
-        subtitleLabel.minimumScaleFactor = 0.68
+        subtitleLabel.minimumScaleFactor = 0.5
 
         badgeLabel.backgroundColor = HomeDesignColor.accent
         badgeLabel.text = "BEST VALUE"
@@ -527,9 +529,10 @@ private final class MembershipPlanCardView: UIControl {
             priceLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12),
             priceLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 12),
 
-            subtitleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10),
-            subtitleLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10),
-            subtitleLabel.topAnchor.constraint(equalTo: priceLabel.bottomAnchor, constant: 11)
+            subtitleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 6),
+            subtitleLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -6),
+            subtitleLabel.topAnchor.constraint(equalTo: priceLabel.bottomAnchor, constant: 9),
+            subtitleLabel.bottomAnchor.constraint(lessThanOrEqualTo: bottomAnchor, constant: -12)
         ])
     }
 }

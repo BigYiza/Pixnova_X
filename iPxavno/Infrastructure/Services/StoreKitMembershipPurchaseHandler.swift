@@ -29,6 +29,18 @@ final class StoreKitMembershipPurchaseHandler: MembershipPurchaseHandling {
         guard !productIDs.isEmpty else { throw MembershipPurchaseError.productUnavailable }
 
         let products = try await Product.products(for: productIDs)
+        #if DEBUG
+        let returnedProductIDs = Set(products.map(\.id))
+        let missingProductIDs = productIDs.filter { !returnedProductIDs.contains($0) }
+        print(
+            "[StoreKit][Membership] requested:",
+            productIDs,
+            "returned:",
+            products.map(\.id),
+            "missing:",
+            missingProductIDs
+        )
+        #endif
         productsByID = Dictionary(uniqueKeysWithValues: products.map { ($0.id, $0) })
         let plans = products
             .map(Self.plan(from:))
@@ -180,7 +192,7 @@ final class StoreKitMembershipPurchaseHandler: MembershipPurchaseHandling {
             kind: kind,
             title: isYearly ? "Yearly" : kind == .weekly ? "Weekly" : product.displayName,
             price: product.displayPrice,
-            subtitle: isYearly ? "up to 1840 diamonds / yr" : "+30 diamonds / week",
+            subtitle: isYearly ? "up to 1840 diamonds/year" : "+30 diamonds / week",
             callToAction: hasIntroOffer ? "Start 3-Day Free Trial" : "Continue",
             renewalText: hasIntroOffer ? "then \(product.displayPrice)/year" : "auto-renews",
             hasIntroOffer: hasIntroOffer,
@@ -214,6 +226,18 @@ final class StoreKitDiamondPurchaseHandler: DiamondPurchaseHandling {
         guard !productIDs.isEmpty else { throw DiamondPurchaseError.productUnavailable }
 
         let products = try await Product.products(for: productIDs)
+        #if DEBUG
+        let returnedProductIDs = Set(products.map(\.id))
+        let missingProductIDs = productIDs.filter { !returnedProductIDs.contains($0) }
+        print(
+            "[StoreKit][Diamonds] requested:",
+            productIDs,
+            "returned:",
+            products.map(\.id),
+            "missing:",
+            missingProductIDs
+        )
+        #endif
         productsByID = Dictionary(uniqueKeysWithValues: products.map { ($0.id, $0) })
         let packs = products
             .map(Self.pack(from:))

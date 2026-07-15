@@ -152,7 +152,7 @@ final class MembershipPaywallViewModel {
                 kind: .yearly,
                 title: "Yearly",
                 price: "$39.99",
-                subtitle: "up to 1840 diamonds / yr",
+                subtitle: "up to 1840 diamonds/year",
                 callToAction: "Start 3-Day Free Trial",
                 renewalText: "then $39.99/year",
                 hasIntroOffer: true,

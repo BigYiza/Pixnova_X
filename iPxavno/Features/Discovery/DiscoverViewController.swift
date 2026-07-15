@@ -48,6 +48,9 @@ final class DiscoverViewController: BaseViewController {
         topBarView.onMembershipTap = { [weak self] in
             self?.presentMembershipPaywall()
         }
+        topBarView.onDiamondTap = { [weak self] in
+            self?.presentDiamondStore()
+        }
 
         view.addSubview(topBarView)
         view.addSubview(collectionView)
@@ -85,6 +88,13 @@ final class DiscoverViewController: BaseViewController {
 
     private func presentMembershipPaywall() {
         let viewController = viewModel.makeMembershipPaywallViewController()
+        let navigationController = UINavigationController(rootViewController: viewController)
+        navigationController.modalPresentationStyle = .fullScreen
+        present(navigationController, animated: true)
+    }
+
+    private func presentDiamondStore() {
+        let viewController = viewModel.makeDiamondPurchaseViewController()
         let navigationController = UINavigationController(rootViewController: viewController)
         navigationController.modalPresentationStyle = .fullScreen
         present(navigationController, animated: true)
