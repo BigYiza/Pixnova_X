@@ -21,7 +21,7 @@ struct APIEnvironment {
             serviceBaseURL: URL(string: "https://gateway-636960850285.us-west2.run.app")!,
             paymentBaseURL: URL(string: "https://pay-mhsaciltta-wl.a.run.app")!,
             gatewayClientID: "52d3e39b-294e-4645-893e-dbf1cb692c5f",
-            gatewayAppName: "pixnova-plus",
+            gatewayAppName: "picvidai",
             distributionChannel: "appstore"
         )
         // #endif
