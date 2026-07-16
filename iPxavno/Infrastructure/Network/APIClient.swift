@@ -117,7 +117,11 @@ final class APIClient {
         var request = URLRequest(url: url)
         request.httpMethod = endpoint.method.rawValue
         request.httpBody = endpoint.body
-        headerProvider.headers(requiresAuthentication: endpoint.requiresAuthentication).forEach {
+        headerProvider.headers(
+            forPath: endpoint.path,
+            requiresAuthentication: endpoint.requiresAuthentication,
+            baseURL: baseURL
+        ).forEach {
             request.setValue($0.value, forHTTPHeaderField: $0.key)
         }
         return request
