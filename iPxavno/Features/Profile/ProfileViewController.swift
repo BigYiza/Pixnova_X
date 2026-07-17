@@ -395,7 +395,6 @@ extension ProfileViewController: UICollectionViewDataSource {
             withReuseIdentifier: ProfileHistoryHeaderView.reuseIdentifier,
             for: indexPath
         ) as! ProfileHistoryHeaderView
-        header.configure(showsAll: !state.tasks.isEmpty)
         return header
     }
 }

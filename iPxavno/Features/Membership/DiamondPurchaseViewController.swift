@@ -336,6 +336,7 @@ final class DiamondPurchaseViewController: BaseViewController {
     private var displayedCompletedMessage: String?
     private var displayedCompletedPackID: String?
     private var displayMode = DiamondPurchaseDisplayMode.general
+    private var hasConfiguredInitialDisplayMode = false
     private let activityOfferState = DiamondActivityOfferState()
     private var activityTimer: Timer?
     private var hasAppeared = false
@@ -530,8 +531,9 @@ final class DiamondPurchaseViewController: BaseViewController {
         viewModel.state.bind { [weak self] state in
             guard let self else { return }
             self.setLoading(state.isLoading)
-            if state.isMember {
-                self.displayMode = .subscriber
+            if !self.hasConfiguredInitialDisplayMode, !state.packs.isEmpty {
+                self.displayMode = state.isMember ? .subscriber : .general
+                self.hasConfiguredInitialDisplayMode = true
             }
             self.updateDisplayPresentation()
             self.handleCompletedActivityPurchaseIfNeeded(packID: state.completedPackID)
@@ -752,7 +754,6 @@ final class DiamondPurchaseViewController: BaseViewController {
     }
 
     private func handleGeneralModeTap() {
-        guard !viewModel.state.value.isMember else { return }
         displayMode = .general
         updateDisplayPresentation()
         let dailyPacks = displayedPacks(from: viewModel.state.value.packs)
