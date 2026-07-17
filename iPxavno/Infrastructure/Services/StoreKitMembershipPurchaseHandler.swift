@@ -122,9 +122,9 @@ final class StoreKitMembershipPurchaseHandler: MembershipPurchaseHandling {
                 Self.log("order state completed orderID=\(order.id)")
                 #endif
 
-                _ = try await membershipHandler.refreshStatus()
+                _ = try await membershipHandler.membershipStatus(forceRefresh: true)
                 #if DEBUG
-                Self.log("membership refresh completed productID=\(product.id) orderID=\(order.id)")
+                Self.log("membership full refresh completed productID=\(product.id) orderID=\(order.id)")
                 #endif
 
                 analytics.record(
@@ -207,9 +207,9 @@ final class StoreKitMembershipPurchaseHandler: MembershipPurchaseHandling {
             Self.log("restore account completed transactionID=\(transaction.id)")
             #endif
 
-            _ = try await membershipHandler.refreshStatus()
+            _ = try await membershipHandler.membershipStatus(forceRefresh: true)
             #if DEBUG
-            Self.log("restore membership refresh completed transactionID=\(transaction.id)")
+            Self.log("restore membership full refresh completed transactionID=\(transaction.id)")
             #endif
 
             analytics.record(
@@ -457,7 +457,10 @@ final class StoreKitDiamondPurchaseHandler: DiamondPurchaseHandling {
             )
             await transaction.finish()
             try await waitForCompletedOrder(order.id)
-            _ = try await membershipHandler.refreshStatus()
+            _ = try await membershipHandler.membershipStatus(forceRefresh: true)
+            #if DEBUG
+            print("[StoreKit][Diamonds][Purchase] membership full refresh completed productID=\(product.id) orderID=\(order.id)")
+            #endif
             analytics.record(
                 AnalyticsEvent(
                     name: "diamond_purchase_finished",

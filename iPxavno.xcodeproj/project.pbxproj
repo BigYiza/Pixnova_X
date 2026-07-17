@@ -71,6 +71,11 @@
 		B2E002336FB4EAFF167D3364 /* ConsoleAnalyticsTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 867DB66E94D1F0BC34CD2720 /* ConsoleAnalyticsTracker.swift */; };
 		B3F9E7E99E5B8D9970E0B503 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A951426D2B18B72D8202983 /* SceneDelegate.swift */; };
 		B6F1365F682D8F9120020288 /* ContentCatalogStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B47505387E471C12232CEE3 /* ContentCatalogStore.swift */; };
+		BA1000000000000000000002 /* HistoryTaskModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA1000000000000000000001 /* HistoryTaskModels.swift */; };
+		BA1000000000000000000004 /* HistoryRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA1000000000000000000003 /* HistoryRepository.swift */; };
+		BA1000000000000000000006 /* RemoteHistoryRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA1000000000000000000005 /* RemoteHistoryRepository.swift */; };
+		BA1000000000000000000008 /* ProfileHistoryCells.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA1000000000000000000007 /* ProfileHistoryCells.swift */; };
+		BA1000000000000000000010 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA1000000000000000000009 /* SettingsViewController.swift */; };
 		BA6FA57D017C466A947D4DDC /* RemoteImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A873ED240D656D21A573494F /* RemoteImageView.swift */; };
 		BE6801895D2024D4AE9CB8E2 /* LaunchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E035461EB0290629F77103 /* LaunchViewController.swift */; };
 		BF8D05CA9BB9A1A4330B2FC1 /* KeyValueStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA433CE0D4DB81B559360404 /* KeyValueStore.swift */; };
@@ -148,6 +153,11 @@
 		AA1E14D0303CF51A3395116F /* ContentRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ContentRepository.swift; sourceTree = "<group>"; };
 		B50CE59AC50797769F95AFD8 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		B5DF84507A89836FCA7ECDD9 /* SessionProviding.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SessionProviding.swift; sourceTree = "<group>"; };
+		BA1000000000000000000001 /* HistoryTaskModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HistoryTaskModels.swift; sourceTree = "<group>"; };
+		BA1000000000000000000003 /* HistoryRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HistoryRepository.swift; sourceTree = "<group>"; };
+		BA1000000000000000000005 /* RemoteHistoryRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RemoteHistoryRepository.swift; sourceTree = "<group>"; };
+		BA1000000000000000000007 /* ProfileHistoryCells.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ProfileHistoryCells.swift; sourceTree = "<group>"; };
+		BA1000000000000000000009 /* SettingsViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		BBAA1C4EA2B7CF842C86BFA9 /* RemoteAccountRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RemoteAccountRepository.swift; sourceTree = "<group>"; };
 		BC87C25ED745CDC6CE7E4CB6 /* PrimaryButton.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PrimaryButton.swift; sourceTree = "<group>"; };
 		CBF0F075411716A76D5A6D92 /* HomeContentCells.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeContentCells.swift; sourceTree = "<group>"; };
@@ -244,6 +254,7 @@
 			children = (
 				F7099CA3ADBCA8058E7BECC9 /* AccountModels.swift */,
 				E6580D153EF37146F52FD27C /* ContentModels.swift */,
+				BA1000000000000000000001 /* HistoryTaskModels.swift */,
 				CF908F48255844F18352C2DA /* GenerationModels.swift */,
 			);
 			path = Models;
@@ -264,6 +275,7 @@
 			children = (
 				4BE2514751E41CB0222B7E2C /* AccountRepository.swift */,
 				AA1E14D0303CF51A3395116F /* ContentRepository.swift */,
+				BA1000000000000000000003 /* HistoryRepository.swift */,
 				A68199643479BF18EAC94156 /* GenerationRepository.swift */,
 			);
 			path = Repositories;
@@ -335,6 +347,7 @@
 			children = (
 				BBAA1C4EA2B7CF842C86BFA9 /* RemoteAccountRepository.swift */,
 				615CBA10848930C1841FF078 /* RemoteContentRepository.swift */,
+				BA1000000000000000000005 /* RemoteHistoryRepository.swift */,
 				889DDF1915B09D53591C90A9 /* RemoteGenerationRepository.swift */,
 				93332A05339F4DCC96A64201 /* RemoteMembershipPaymentRepository.swift */,
 			);
@@ -392,6 +405,8 @@
 			isa = PBXGroup;
 			children = (
 				D20A833F4D94D7C5F61A41D3 /* ProfileViewController.swift */,
+				BA1000000000000000000007 /* ProfileHistoryCells.swift */,
+				BA1000000000000000000009 /* SettingsViewController.swift */,
 				5A67D3A82CC3A22730118AFC /* ProfileViewModel.swift */,
 			);
 			path = Profile;
@@ -564,9 +579,11 @@
 				BA6FA57D017C466A947D4DDC /* RemoteImageView.swift in Sources */,
 				C601C56A0B2FE5E9B842D7B9 /* AccountModels.swift in Sources */,
 				A2D50E3D50EA3D230DFF615D /* ContentModels.swift in Sources */,
+				BA1000000000000000000002 /* HistoryTaskModels.swift in Sources */,
 				CD17EC7B999073D88ED69569 /* GenerationModels.swift in Sources */,
 				75BE3FAFEA7006C04FFF294B /* AccountRepository.swift in Sources */,
 				2744C40F206F6340B35018B0 /* ContentRepository.swift in Sources */,
+				BA1000000000000000000004 /* HistoryRepository.swift in Sources */,
 				90025A7F3044ECA6374963B0 /* GenerationRepository.swift in Sources */,
 				101E79FF3958D329F544FD7F /* AccountNotifications.swift in Sources */,
 				E66DE3DB1A043ED1541B2AB3 /* AnalyticsTracking.swift in Sources */,
@@ -599,6 +616,8 @@
 				179A9580F1B047CE91D77901 /* MembershipPaywallViewModel.swift in Sources */,
 				1972924B42A33950605905B3 /* OnboardingViewController.swift in Sources */,
 				99AFBE36F737DF5F665AB9C0 /* ProfileViewController.swift in Sources */,
+				BA1000000000000000000008 /* ProfileHistoryCells.swift in Sources */,
+				BA1000000000000000000010 /* SettingsViewController.swift in Sources */,
 				46C1A221DAFD9165C2A66BE5 /* ProfileViewModel.swift in Sources */,
 				74E91FC9E0EC3676FB9D68C3 /* APIClient.swift in Sources */,
 				E585039253903467F4886F6D /* APIEndpoint.swift in Sources */,
@@ -606,6 +625,7 @@
 				6340DFD977FFCFA5EB627B9E /* RequestHeaderProvider.swift in Sources */,
 				F23196E3D39A18844ADCD345 /* RemoteAccountRepository.swift in Sources */,
 				05D86FD3DC3C20BCA40A5CB0 /* RemoteContentRepository.swift in Sources */,
+				BA1000000000000000000006 /* RemoteHistoryRepository.swift in Sources */,
 				F35CC69394441728AA9E30BE /* RemoteGenerationRepository.swift in Sources */,
 				93332A06339F4DCC96A64201 /* RemoteMembershipPaymentRepository.swift in Sources */,
 				F3BC39040BE2FE364692FBBC /* AccountStore.swift in Sources */,
@@ -633,6 +653,7 @@
 				DEVELOPMENT_TEAM = P2328CN2XE;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = iPxavno/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Pixnova;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Camera access is needed so you can take a photo for generation.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Allow Pixnova to save generated images and videos to your photo library.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Photo library access is needed so you can choose a photo for generation.";
@@ -668,6 +689,7 @@
 				DEVELOPMENT_TEAM = P2328CN2XE;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = iPxavno/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Pixnova;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Camera access is needed so you can take a photo for generation.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Allow Pixnova to save generated images and videos to your photo library.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Photo library access is needed so you can choose a photo for generation.";

@@ -842,7 +842,7 @@ final class GenerationProgressViewController: BaseViewController {
         }
 
         if isMember {
-            cancelGenerationAndLeave()
+            onSkipWait?()
         } else {
             showCancelConfirmation()
         }

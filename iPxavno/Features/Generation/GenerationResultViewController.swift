@@ -22,10 +22,10 @@ final class GenerationResultViewController: BaseViewController {
 
     private var saveTask: Task<Void, Never>?
 
-    init(template: CreativeTemplate, resultURL: URL) {
+    init(template: CreativeTemplate, resultURL: URL, contentType: String? = nil) {
         self.template = template
         self.resultURL = resultURL
-        self.mediaKind = GenerationResultMediaKind(url: resultURL)
+        self.mediaKind = GenerationResultMediaKind(url: resultURL, mimeType: contentType)
         super.init(nibName: nil, bundle: nil)
         hidesBottomBarWhenPushed = true
     }
@@ -264,7 +264,19 @@ final class GenerationResultViewController: BaseViewController {
         setLoading(isSaving)
     }
 
-    private func showSavedToast() {
+    func setTemplateActionLoading(_ isLoading: Bool) {
+        templateButton.isEnabled = !isLoading
+        templateButton.alpha = isLoading ? 0.65 : 1
+    }
+
+    func showToast(
+        _ message: String,
+        iconName: String = "checkmark.circle.fill",
+        iconColor: UIColor = HomeDesignColor.accent
+    ) {
+        toastLabel.text = message
+        toastIconView.image = UIImage(systemName: iconName)
+        toastIconView.tintColor = iconColor
         view.bringSubviewToFront(toastView)
         UIView.animate(withDuration: 0.22) {
             self.toastView.alpha = 1
@@ -274,6 +286,10 @@ final class GenerationResultViewController: BaseViewController {
                 self.toastView.alpha = 0
             }
         }
+    }
+
+    private func showSavedToast() {
+        showToast("Saved to Photos - no watermark")
     }
 
     @objc private func handleBack() {

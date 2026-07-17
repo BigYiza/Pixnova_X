@@ -13,7 +13,7 @@ struct APIEnvironment {
         //     serviceBaseURL: URL(string: "https://gateway-test-836083013935.asia-southeast1.run.app")!,
         //     paymentBaseURL: URL(string: "https://pay-vmddzvrudq-df.a.run.app")!,
         //     gatewayClientID: "52d3e39b-294e-4645-893e-dbf1cb692c5f",
-        //     gatewayAppName: "pixnova-plus",
+        //     gatewayAppName: "picvidai",
         //     distributionChannel: "appstore"
         // )
         // #else

@@ -26,7 +26,8 @@ final class HomeTopBarView: UIView {
             borderColor: UIColor.white.withAlphaComponent(0.09)
         )
         diamondPill.configure(
-            iconName: "suit.diamond.fill",
+            iconName: nil,
+            iconText: "💎",
             text: "\(membership.diamonds)",
             foregroundColor: HomeDesignColor.blackText,
             backgroundColor: HomeDesignColor.accent,
@@ -84,7 +85,10 @@ final class HomeTopBarView: UIView {
 
 private final class HomeStatusPill: UIView {
     private let iconView = UIImageView()
+    private let iconLabel = UILabel()
     private let valueLabel = UILabel()
+    private var valueLeadingFromImageConstraint: NSLayoutConstraint!
+    private var valueLeadingFromEmojiConstraint: NSLayoutConstraint!
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -95,11 +99,23 @@ private final class HomeStatusPill: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func configure(iconName: String, text: String, foregroundColor: UIColor, backgroundColor: UIColor, borderColor: UIColor) {
+    func configure(
+        iconName: String?,
+        iconText: String? = nil,
+        text: String,
+        foregroundColor: UIColor,
+        backgroundColor: UIColor,
+        borderColor: UIColor
+    ) {
         self.backgroundColor = backgroundColor
         layer.borderColor = borderColor.cgColor
-        iconView.image = UIImage(systemName: iconName)?.withRenderingMode(.alwaysTemplate)
+        iconView.image = iconName.flatMap { UIImage(systemName: $0)?.withRenderingMode(.alwaysTemplate) }
         iconView.tintColor = foregroundColor
+        iconView.isHidden = iconText != nil
+        iconLabel.text = iconText
+        iconLabel.isHidden = iconText == nil
+        valueLeadingFromImageConstraint.isActive = iconText == nil
+        valueLeadingFromEmojiConstraint.isActive = iconText != nil
         valueLabel.text = text
         valueLabel.textColor = foregroundColor
     }
@@ -113,13 +129,22 @@ private final class HomeStatusPill: UIView {
         iconView.contentMode = .scaleAspectFit
         iconView.preferredSymbolConfiguration = UIImage.SymbolConfiguration(pointSize: 14, weight: .bold)
 
+        iconLabel.translatesAutoresizingMaskIntoConstraints = false
+        iconLabel.font = UIFont.systemFont(ofSize: 15)
+        iconLabel.textAlignment = .center
+        iconLabel.isHidden = true
+
         valueLabel.translatesAutoresizingMaskIntoConstraints = false
         valueLabel.font = UIFont.systemFont(ofSize: 16.5, weight: .bold)
         valueLabel.adjustsFontSizeToFitWidth = true
         valueLabel.minimumScaleFactor = 0.75
 
         addSubview(iconView)
+        addSubview(iconLabel)
         addSubview(valueLabel)
+
+        valueLeadingFromImageConstraint = valueLabel.leadingAnchor.constraint(equalTo: iconView.trailingAnchor, constant: 7)
+        valueLeadingFromEmojiConstraint = valueLabel.leadingAnchor.constraint(equalTo: iconLabel.trailingAnchor, constant: 5)
 
         NSLayoutConstraint.activate([
             iconView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
@@ -127,7 +152,12 @@ private final class HomeStatusPill: UIView {
             iconView.widthAnchor.constraint(equalToConstant: 16),
             iconView.heightAnchor.constraint(equalToConstant: 16),
 
-            valueLabel.leadingAnchor.constraint(equalTo: iconView.trailingAnchor, constant: 7),
+            iconLabel.centerXAnchor.constraint(equalTo: iconView.centerXAnchor),
+            iconLabel.centerYAnchor.constraint(equalTo: iconView.centerYAnchor),
+            iconLabel.widthAnchor.constraint(equalToConstant: 22),
+            iconLabel.heightAnchor.constraint(equalToConstant: 22),
+
+            valueLeadingFromImageConstraint,
             valueLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12),
             valueLabel.centerYAnchor.constraint(equalTo: centerYAnchor)
         ])

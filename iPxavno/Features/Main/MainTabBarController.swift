@@ -58,6 +58,7 @@ final class MainTabBarController: UIViewController {
         let profile = ProfileViewController(
             viewModel: ProfileViewModel(
                 membershipHandler: container.membershipHandler,
+                historyRepository: container.historyRepository,
                 analytics: container.analytics
             )
         )

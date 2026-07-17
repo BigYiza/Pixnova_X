@@ -21,7 +21,7 @@ final class FilterGenerationViewController: BaseGenerationWorkflowViewController
     private let backButton = UIButton(type: .system)
     private let titleLabel = UILabel()
     private let diamondPill = UIControl()
-    private let diamondIcon = UIImageView(image: UIImage(systemName: "suit.diamond.fill"))
+    private let diamondIcon = UILabel()
     private let diamondLabel = UILabel()
     private let photoPlaceholderView = FilterPhotoPlaceholderView()
     private let resultPreviewView = FilterResultPreviewView()
@@ -153,10 +153,10 @@ final class FilterGenerationViewController: BaseGenerationWorkflowViewController
 
             diamondIcon.leadingAnchor.constraint(equalTo: diamondPill.leadingAnchor, constant: 17),
             diamondIcon.centerYAnchor.constraint(equalTo: diamondPill.centerYAnchor),
-            diamondIcon.widthAnchor.constraint(equalToConstant: 15.5),
-            diamondIcon.heightAnchor.constraint(equalToConstant: 15.5),
+            diamondIcon.widthAnchor.constraint(equalToConstant: 22),
+            diamondIcon.heightAnchor.constraint(equalToConstant: 22),
 
-            diamondLabel.leadingAnchor.constraint(equalTo: diamondIcon.trailingAnchor, constant: 8),
+            diamondLabel.leadingAnchor.constraint(equalTo: diamondIcon.trailingAnchor, constant: 5),
             diamondLabel.trailingAnchor.constraint(equalTo: diamondPill.trailingAnchor, constant: -16),
             diamondLabel.centerYAnchor.constraint(equalTo: diamondPill.centerYAnchor),
 
@@ -227,9 +227,9 @@ final class FilterGenerationViewController: BaseGenerationWorkflowViewController
         diamondPill.addTarget(self, action: #selector(handleDiamondTap), for: .touchUpInside)
 
         diamondIcon.translatesAutoresizingMaskIntoConstraints = false
-        diamondIcon.tintColor = HomeDesignColor.blackText
-        diamondIcon.contentMode = .scaleAspectFit
-        diamondIcon.preferredSymbolConfiguration = UIImage.SymbolConfiguration(pointSize: 13, weight: .bold)
+        diamondIcon.text = "💎"
+        diamondIcon.font = UIFont.systemFont(ofSize: 15)
+        diamondIcon.textAlignment = .center
 
         diamondLabel.translatesAutoresizingMaskIntoConstraints = false
         diamondLabel.textColor = HomeDesignColor.blackText
@@ -504,7 +504,7 @@ final class FilterGenerationViewController: BaseGenerationWorkflowViewController
     private func updatePrimaryActionState() {
         if hasSelectedPhoto {
             let title = selectedTemplate.diamondCost > 0
-                ? "Generate · \(selectedTemplate.diamondCost)"
+                ? "Generate · 💎 \(selectedTemplate.diamondCost)"
                 : "Generate"
             choosePhotoButton.setTitle(title, for: .normal)
             choosePhotoButton.accessibilityLabel = "Generate"

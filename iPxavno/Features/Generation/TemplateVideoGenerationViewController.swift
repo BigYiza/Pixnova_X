@@ -17,7 +17,7 @@ final class TemplateVideoGenerationViewController: BaseGenerationWorkflowViewCon
     private let backButton = UIButton(type: .system)
     private let titleLabel = UILabel()
     private let diamondPill = UIControl()
-    private let diamondIcon = UIImageView(image: UIImage(systemName: "suit.diamond.fill"))
+    private let diamondIcon = UILabel()
     private let diamondLabel = UILabel()
     private let previewView = VideoTemplatePreviewView()
     private let photoArea = UIStackView()
@@ -171,9 +171,9 @@ final class TemplateVideoGenerationViewController: BaseGenerationWorkflowViewCon
         diamondPill.addTarget(self, action: #selector(handleDiamondTap), for: .touchUpInside)
 
         diamondIcon.translatesAutoresizingMaskIntoConstraints = false
-        diamondIcon.tintColor = HomeDesignColor.blackText
-        diamondIcon.contentMode = .scaleAspectFit
-        diamondIcon.preferredSymbolConfiguration = UIImage.SymbolConfiguration(pointSize: 13, weight: .bold)
+        diamondIcon.text = "💎"
+        diamondIcon.font = UIFont.systemFont(ofSize: 15)
+        diamondIcon.textAlignment = .center
 
         diamondLabel.translatesAutoresizingMaskIntoConstraints = false
         diamondLabel.textColor = HomeDesignColor.blackText
@@ -200,10 +200,10 @@ final class TemplateVideoGenerationViewController: BaseGenerationWorkflowViewCon
 
             diamondIcon.leadingAnchor.constraint(equalTo: diamondPill.leadingAnchor, constant: 17),
             diamondIcon.centerYAnchor.constraint(equalTo: diamondPill.centerYAnchor),
-            diamondIcon.widthAnchor.constraint(equalToConstant: 15.5),
-            diamondIcon.heightAnchor.constraint(equalToConstant: 15.5),
+            diamondIcon.widthAnchor.constraint(equalToConstant: 22),
+            diamondIcon.heightAnchor.constraint(equalToConstant: 22),
 
-            diamondLabel.leadingAnchor.constraint(equalTo: diamondIcon.trailingAnchor, constant: 8),
+            diamondLabel.leadingAnchor.constraint(equalTo: diamondIcon.trailingAnchor, constant: 5),
             diamondLabel.trailingAnchor.constraint(equalTo: diamondPill.trailingAnchor, constant: -16),
             diamondLabel.centerYAnchor.constraint(equalTo: diamondPill.centerYAnchor),
 
@@ -402,22 +402,12 @@ final class TemplateVideoGenerationViewController: BaseGenerationWorkflowViewCon
     }
 
     private func updateGenerateButtonTitle() {
-        let iconAttachment = NSTextAttachment()
-        iconAttachment.image = UIImage(systemName: "suit.diamond.fill")?.withTintColor(
-            HomeDesignColor.blackText,
-            renderingMode: .alwaysOriginal
-        )
-        iconAttachment.bounds = CGRect(x: 0, y: -1.5, width: 14, height: 14)
-
-        let title = NSMutableAttributedString(attachment: iconAttachment)
-        title.append(
-            NSAttributedString(
-                string: "  Generate · \(pricing.expense)",
-                attributes: [
-                    .font: UIFont.systemFont(ofSize: 20.5, weight: .bold),
-                    .foregroundColor: HomeDesignColor.blackText
-                ]
-            )
+        let title = NSAttributedString(
+            string: "💎 Generate · \(pricing.expense)",
+            attributes: [
+                .font: UIFont.systemFont(ofSize: 20.5, weight: .bold),
+                .foregroundColor: HomeDesignColor.blackText
+            ]
         )
         generateButton.setAttributedTitle(title, for: .normal)
     }
@@ -964,7 +954,7 @@ private final class VideoParameterPopupView: UIVisualEffectView {
 
 private final class VideoParameterPopupRow: UIControl {
     private let label = UILabel()
-    private let diamondIcon = UIImageView(image: UIImage(systemName: "suit.diamond.fill"))
+    private let diamondIcon = UILabel()
     private let timesLabel = UILabel()
 
     override init(frame: CGRect) {
@@ -980,7 +970,6 @@ private final class VideoParameterPopupRow: UIControl {
         let color = isSelected ? HomeDesignColor.accent : HomeDesignColor.text
         label.text = value.label
         label.textColor = color
-        diamondIcon.tintColor = isSelected ? HomeDesignColor.accent : UIColor(hex: 0x9A9AA2)
         timesLabel.text = "×\(value.times)"
         timesLabel.textColor = isSelected ? HomeDesignColor.accent : UIColor(hex: 0x9A9AA2)
     }
@@ -990,8 +979,9 @@ private final class VideoParameterPopupRow: UIControl {
         label.font = UIFont.systemFont(ofSize: 19.5, weight: .semibold)
 
         diamondIcon.translatesAutoresizingMaskIntoConstraints = false
-        diamondIcon.contentMode = .scaleAspectFit
-        diamondIcon.preferredSymbolConfiguration = UIImage.SymbolConfiguration(pointSize: 13, weight: .bold)
+        diamondIcon.text = "💎"
+        diamondIcon.font = UIFont.systemFont(ofSize: 14)
+        diamondIcon.textAlignment = .center
 
         timesLabel.translatesAutoresizingMaskIntoConstraints = false
         timesLabel.font = UIFont.systemFont(ofSize: 19.5, weight: .semibold)
@@ -1011,8 +1001,8 @@ private final class VideoParameterPopupRow: UIControl {
 
             diamondIcon.trailingAnchor.constraint(equalTo: timesLabel.leadingAnchor, constant: -8),
             diamondIcon.centerYAnchor.constraint(equalTo: centerYAnchor),
-            diamondIcon.widthAnchor.constraint(equalToConstant: 16),
-            diamondIcon.heightAnchor.constraint(equalToConstant: 16)
+            diamondIcon.widthAnchor.constraint(equalToConstant: 22),
+            diamondIcon.heightAnchor.constraint(equalToConstant: 22)
         ])
     }
 }

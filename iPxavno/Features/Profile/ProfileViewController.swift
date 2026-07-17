@@ -2,14 +2,18 @@ import UIKit
 
 final class ProfileViewController: BaseViewController {
     private let viewModel: ProfileViewModel
-    private let nameLabel = UILabel()
-    private let subtitleLabel = UILabel()
-    private let userIDValueLabel = UILabel()
-    private let creditValueLabel = UILabel()
-    private let videoValueLabel = UILabel()
-    private let membershipLabel = UILabel()
-    private let invitationLabel = UILabel()
-    private let stackView = UIStackView()
+    private let titleLabel = UILabel()
+    private let settingsButton = UIButton(type: .system)
+    private let diamondButton = UIControl()
+    private let diamondIcon = UILabel()
+    private let diamondLabel = UILabel()
+    private let refreshControl = UIRefreshControl()
+    private var displayedErrorMessage: String?
+    private var state = ProfileViewState.initial
+    private lazy var collectionView = UICollectionView(
+        frame: .zero,
+        collectionViewLayout: UICollectionViewFlowLayout()
+    )
 
     init(viewModel: ProfileViewModel) {
         self.viewModel = viewModel
@@ -22,126 +26,447 @@ final class ProfileViewController: BaseViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Me"
+        title = nil
+        navigationController?.setNavigationBarHidden(true, animated: false)
         configureView()
         bindViewModel()
         viewModel.load()
     }
 
     private func configureView() {
-        nameLabel.translatesAutoresizingMaskIntoConstraints = false
-        nameLabel.font = AppTheme.Font.title
-        nameLabel.textColor = AppTheme.Color.ink
+        view.backgroundColor = HomeDesignColor.background
+        configureHeader()
+        configureCollectionView()
 
-        subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
-        subtitleLabel.font = AppTheme.Font.body
-        subtitleLabel.textColor = AppTheme.Color.secondaryInk
-
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        stackView.axis = .vertical
-        stackView.spacing = 12
-
-        view.addSubview(nameLabel)
-        view.addSubview(subtitleLabel)
-        view.addSubview(stackView)
-
-        stackView.addArrangedSubview(makeMetricRow(title: "User ID", valueLabel: userIDValueLabel))
-        stackView.addArrangedSubview(makeMetricRow(title: "Credits", valueLabel: creditValueLabel))
-        stackView.addArrangedSubview(makeMetricRow(title: "Video Credits", valueLabel: videoValueLabel))
-        stackView.addArrangedSubview(makeMetricRow(title: "Membership", valueLabel: membershipLabel))
-        stackView.addArrangedSubview(makeMetricRow(title: "Invite Code", valueLabel: invitationLabel))
-        stackView.addArrangedSubview(makeNavigationRow(title: "Creation History"))
-        stackView.addArrangedSubview(makeNavigationRow(title: "Rewards"))
-        stackView.addArrangedSubview(makeNavigationRow(title: "Restore Purchases"))
+        view.addSubview(titleLabel)
+        view.addSubview(settingsButton)
+        view.addSubview(diamondButton)
+        diamondButton.addSubview(diamondIcon)
+        diamondButton.addSubview(diamondLabel)
+        view.addSubview(collectionView)
 
         NSLayoutConstraint.activate([
-            nameLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: AppTheme.Metric.screenInset),
-            nameLabel.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -AppTheme.Metric.screenInset),
-            nameLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 28),
+            titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 28),
+            titleLabel.centerYAnchor.constraint(equalTo: settingsButton.centerYAnchor),
 
-            subtitleLabel.leadingAnchor.constraint(equalTo: nameLabel.leadingAnchor),
-            subtitleLabel.trailingAnchor.constraint(equalTo: nameLabel.trailingAnchor),
-            subtitleLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 6),
+            settingsButton.trailingAnchor.constraint(equalTo: diamondButton.leadingAnchor, constant: -11),
+            settingsButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 14),
+            settingsButton.widthAnchor.constraint(equalToConstant: 42),
+            settingsButton.heightAnchor.constraint(equalToConstant: 42),
 
-            stackView.leadingAnchor.constraint(equalTo: nameLabel.leadingAnchor),
-            stackView.trailingAnchor.constraint(equalTo: nameLabel.trailingAnchor),
-            stackView.topAnchor.constraint(equalTo: subtitleLabel.bottomAnchor, constant: 28)
+            diamondButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -28),
+            diamondButton.centerYAnchor.constraint(equalTo: settingsButton.centerYAnchor),
+            diamondButton.widthAnchor.constraint(equalToConstant: 91),
+            diamondButton.heightAnchor.constraint(equalToConstant: 45),
+
+            diamondIcon.leadingAnchor.constraint(equalTo: diamondButton.leadingAnchor, constant: 14),
+            diamondIcon.centerYAnchor.constraint(equalTo: diamondButton.centerYAnchor),
+            diamondIcon.widthAnchor.constraint(equalToConstant: 22),
+            diamondIcon.heightAnchor.constraint(equalToConstant: 22),
+
+            diamondLabel.leadingAnchor.constraint(equalTo: diamondIcon.trailingAnchor, constant: 3),
+            diamondLabel.trailingAnchor.constraint(equalTo: diamondButton.trailingAnchor, constant: -11),
+            diamondLabel.centerYAnchor.constraint(equalTo: diamondButton.centerYAnchor),
+
+            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            collectionView.topAnchor.constraint(equalTo: settingsButton.bottomAnchor, constant: 19),
+            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
+    }
+
+    private func configureHeader() {
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        titleLabel.text = "Me"
+        titleLabel.textColor = HomeDesignColor.text
+        titleLabel.font = UIFont.systemFont(ofSize: 30, weight: .bold)
+
+        settingsButton.translatesAutoresizingMaskIntoConstraints = false
+        settingsButton.tintColor = UIColor(hex: 0x9A9AA2)
+        settingsButton.backgroundColor = UIColor.white.withAlphaComponent(0.07)
+        settingsButton.layer.cornerRadius = 21
+        settingsButton.layer.borderWidth = 1
+        settingsButton.layer.borderColor = UIColor.white.withAlphaComponent(0.09).cgColor
+        settingsButton.setImage(UIImage(systemName: "gearshape"), for: .normal)
+        settingsButton.setPreferredSymbolConfiguration(
+            UIImage.SymbolConfiguration(pointSize: 17, weight: .medium),
+            forImageIn: .normal
+        )
+        settingsButton.addTarget(self, action: #selector(handleSettingsTap), for: .touchUpInside)
+
+        diamondButton.translatesAutoresizingMaskIntoConstraints = false
+        diamondButton.backgroundColor = HomeDesignColor.accent
+        diamondButton.layer.cornerRadius = 22.5
+        diamondButton.clipsToBounds = true
+        diamondButton.accessibilityTraits = [.button]
+        diamondButton.addTarget(self, action: #selector(handleDiamondTap), for: .touchUpInside)
+
+        diamondIcon.translatesAutoresizingMaskIntoConstraints = false
+        diamondIcon.text = "💎"
+        diamondIcon.font = UIFont.systemFont(ofSize: 15)
+        diamondIcon.textAlignment = .center
+
+        diamondLabel.translatesAutoresizingMaskIntoConstraints = false
+        diamondLabel.textColor = HomeDesignColor.blackText
+        diamondLabel.font = UIFont.systemFont(ofSize: 17.5, weight: .bold)
+        diamondLabel.adjustsFontSizeToFitWidth = true
+        diamondLabel.minimumScaleFactor = 0.75
+    }
+
+    private func configureCollectionView() {
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.backgroundColor = HomeDesignColor.background
+        collectionView.alwaysBounceVertical = true
+        collectionView.showsVerticalScrollIndicator = false
+        collectionView.contentInset.bottom = 18
+        collectionView.dataSource = self
+        collectionView.delegate = self
+        collectionView.refreshControl = refreshControl
+        collectionView.register(
+            ProfileMembershipCardCell.self,
+            forCellWithReuseIdentifier: ProfileMembershipCardCell.reuseIdentifier
+        )
+        collectionView.register(
+            ProfileHistoryTaskCell.self,
+            forCellWithReuseIdentifier: ProfileHistoryTaskCell.reuseIdentifier
+        )
+        collectionView.register(
+            ProfileHistoryEmptyCell.self,
+            forCellWithReuseIdentifier: ProfileHistoryEmptyCell.reuseIdentifier
+        )
+        collectionView.register(
+            ProfileHistoryHeaderView.self,
+            forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+            withReuseIdentifier: ProfileHistoryHeaderView.reuseIdentifier
+        )
+
+        refreshControl.tintColor = HomeDesignColor.accent
+        refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
     }
 
     private func bindViewModel() {
         viewModel.state.bind { [weak self] state in
-            self?.setLoading(state.isLoading)
-            self?.nameLabel.text = state.displayName
-            self?.subtitleLabel.text = state.subtitle
-            self?.userIDValueLabel.text = state.userID
-            self?.creditValueLabel.text = state.diamonds
-            self?.videoValueLabel.text = state.videoCredits
-            self?.membershipLabel.text = state.membership
-            self?.invitationLabel.text = state.inviteState
+            guard let self else { return }
+            self.state = state
+            self.diamondLabel.text = "\(state.membership.diamonds)"
+            self.diamondButton.accessibilityLabel = "Diamonds, \(state.membership.diamonds)"
+            self.setLoading(state.isInitialLoading && state.tasks.isEmpty)
+            if !state.isRefreshing {
+                self.refreshControl.endRefreshing()
+            }
+            self.collectionView.reloadData()
+            self.presentErrorIfNeeded(state.errorMessage)
         }
     }
 
-    private func makeMetricRow(title: String, valueLabel: UILabel) -> UIView {
-        let row = makeRowContainer()
-        let titleLabel = makeRowTitle(title)
-        valueLabel.translatesAutoresizingMaskIntoConstraints = false
-        valueLabel.font = AppTheme.Font.headline
-        valueLabel.textColor = AppTheme.Color.accentDark
-        valueLabel.textAlignment = .right
-
-        row.addSubview(titleLabel)
-        row.addSubview(valueLabel)
-
-        NSLayoutConstraint.activate([
-            titleLabel.leadingAnchor.constraint(equalTo: row.leadingAnchor, constant: 16),
-            titleLabel.centerYAnchor.constraint(equalTo: row.centerYAnchor),
-
-            valueLabel.leadingAnchor.constraint(greaterThanOrEqualTo: titleLabel.trailingAnchor, constant: 12),
-            valueLabel.trailingAnchor.constraint(equalTo: row.trailingAnchor, constant: -16),
-            valueLabel.centerYAnchor.constraint(equalTo: row.centerYAnchor)
-        ])
-
-        return row
+    private func presentErrorIfNeeded(_ message: String?) {
+        guard let message, !message.isEmpty, displayedErrorMessage != message else { return }
+        displayedErrorMessage = message
+        showError(message)
     }
 
-    private func makeNavigationRow(title: String) -> UIView {
-        let row = makeRowContainer()
-        let titleLabel = makeRowTitle(title)
-        let icon = UIImageView(image: UIImage(systemName: "chevron.right"))
-        icon.translatesAutoresizingMaskIntoConstraints = false
-        icon.tintColor = AppTheme.Color.secondaryInk
-
-        row.addSubview(titleLabel)
-        row.addSubview(icon)
-
-        NSLayoutConstraint.activate([
-            titleLabel.leadingAnchor.constraint(equalTo: row.leadingAnchor, constant: 16),
-            titleLabel.centerYAnchor.constraint(equalTo: row.centerYAnchor),
-
-            icon.trailingAnchor.constraint(equalTo: row.trailingAnchor, constant: -16),
-            icon.centerYAnchor.constraint(equalTo: row.centerYAnchor)
-        ])
-
-        return row
+    @objc private func handleRefresh() {
+        viewModel.refresh()
     }
 
-    private func makeRowContainer() -> UIView {
-        let row = UIView()
-        row.backgroundColor = AppTheme.Color.surface
-        row.layer.cornerRadius = AppTheme.Metric.cornerRadius
-        row.layer.borderColor = AppTheme.Color.line.cgColor
-        row.layer.borderWidth = 1
-        row.heightAnchor.constraint(equalToConstant: 58).isActive = true
-        return row
+    @objc private func handleDiamondTap() {
+        let container = AppRuntime.shared.container
+        let controller = DiamondPurchaseViewController(
+            viewModel: DiamondPurchaseViewModel(
+                catalog: .configured,
+                membershipHandler: container.membershipHandler,
+                purchaseHandler: container.diamondPurchaseHandler,
+                analytics: container.analytics
+            )
+        )
+        let navigationController = UINavigationController(rootViewController: controller)
+        navigationController.modalPresentationStyle = .fullScreen
+        present(navigationController, animated: true)
     }
 
-    private func makeRowTitle(_ text: String) -> UILabel {
-        let label = UILabel()
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = AppTheme.Font.body
-        label.textColor = AppTheme.Color.ink
-        label.text = text
-        return label
+    @objc private func handleSettingsTap() {
+        let controller = SettingsViewController(
+            purchaseHandler: AppRuntime.shared.container.membershipPurchaseHandler
+        )
+        navigationController?.pushViewController(controller, animated: true)
+    }
+
+    private func presentMembershipPaywall() {
+        let container = AppRuntime.shared.container
+        let controller = MembershipPaywallViewController(
+            viewModel: MembershipPaywallViewModel(
+                membershipHandler: container.membershipHandler,
+                purchaseHandler: container.membershipPurchaseHandler,
+                analytics: container.analytics
+            )
+        )
+        let navigationController = UINavigationController(rootViewController: controller)
+        navigationController.modalPresentationStyle = .fullScreen
+        present(navigationController, animated: true)
+    }
+
+    private func presentResult(for task: HistoryTask) {
+        guard let resultURL = task.resultURL else { return }
+        let controller = GenerationResultViewController(
+            template: task.template ?? Self.fallbackTemplate,
+            resultURL: resultURL,
+            contentType: task.result?.contentType
+        )
+        controller.onUseTemplateAgain = { [weak self, weak controller] in
+            guard let self, let controller else { return }
+            self.openTemplateAgain(filterID: task.template?.id ?? 0, from: controller)
+        }
+        navigationController?.pushViewController(controller, animated: true)
+    }
+
+    private func openTemplateAgain(filterID: Int, from resultController: GenerationResultViewController) {
+        guard filterID > 0 else {
+            resultController.showToast(
+                "This template is no longer available.",
+                iconName: "exclamationmark.circle.fill",
+                iconColor: UIColor(hex: 0xFF5A5F)
+            )
+            return
+        }
+
+        resultController.setTemplateActionLoading(true)
+        Task { [weak self, weak resultController] in
+            guard let self else { return }
+            do {
+                let cards = try await AppRuntime.shared.container.contentRepository.refreshAllCards()
+                await MainActor.run {
+                    guard let resultController else { return }
+                    resultController.setTemplateActionLoading(false)
+                    self.openCurrentTemplate(filterID: filterID, in: cards, from: resultController)
+                }
+            } catch {
+                await MainActor.run {
+                    resultController?.setTemplateActionLoading(false)
+                    resultController?.showToast(
+                        "Unable to check template availability. Please try again.",
+                        iconName: "exclamationmark.circle.fill",
+                        iconColor: UIColor(hex: 0xFF5A5F)
+                    )
+                }
+            }
+        }
+    }
+
+    private func openCurrentTemplate(
+        filterID: Int,
+        in cards: [ContentSection],
+        from resultController: GenerationResultViewController
+    ) {
+        guard navigationController?.topViewController === resultController,
+              let matched = cards.lazy.compactMap({ section -> (ContentSection, CreativeTemplate)? in
+                  guard let template = section.templates.first(where: { $0.id == filterID }) else { return nil }
+                  return (section, template)
+              }).first else {
+            resultController.showToast(
+                "This template is no longer available.",
+                iconName: "exclamationmark.circle.fill",
+                iconColor: UIColor(hex: 0xFF5A5F)
+            )
+            return
+        }
+
+        let container = AppRuntime.shared.container
+        let template = matched.1
+        if template.kind.isFilterGenerationWorkflow {
+            let controller = FilterGenerationViewController(
+                initialTemplate: template,
+                sourceSection: matched.0,
+                contentRepository: container.contentRepository,
+                membershipHandler: container.membershipHandler,
+                generationRepository: container.generationRepository,
+                generationWorkflowRunner: container.generationWorkflowRunner,
+                analytics: container.analytics
+            )
+            navigationController?.pushViewController(controller, animated: true)
+        } else if template.isTemplateVideoGenerationWorkflow {
+            let controller = TemplateVideoGenerationViewController(
+                template: template,
+                membershipHandler: container.membershipHandler,
+                generationRepository: container.generationRepository,
+                generationWorkflowRunner: container.generationWorkflowRunner,
+                analytics: container.analytics
+            )
+            navigationController?.pushViewController(controller, animated: true)
+        } else {
+            resultController.showToast(
+                "This template is no longer available.",
+                iconName: "exclamationmark.circle.fill",
+                iconColor: UIColor(hex: 0xFF5A5F)
+            )
+        }
+    }
+
+    private static let fallbackTemplate = CreativeTemplate(
+        id: 0,
+        kind: .unknown,
+        title: "Creation",
+        summary: nil,
+        coverURL: nil,
+        alternateCoverURL: nil,
+        operationCoverURLs: [],
+        requiresMembership: false,
+        storageChannel: nil,
+        inputRequirement: nil,
+        waitSeconds: 20,
+        processingMessages: [],
+        prompt: nil,
+        usageCount: 0,
+        diamondCost: 0,
+        tint: nil,
+        cardID: nil,
+        maxInputImageCount: nil
+    )
+}
+
+private extension CreativeTemplate {
+    var isTemplateVideoGenerationWorkflow: Bool {
+        switch kind {
+        case .imageToVideo, .multiImageToVideo, .video:
+            return true
+        case .textToVideo, .videoEnhance, .filter, .hair, .cutout, .photo, .avatar, .outfit, .baby, .collection, .makeup, .textToImage, .imageToImage, .unknown:
+            return false
+        }
+    }
+}
+
+private extension CreativeKind {
+    var isFilterGenerationWorkflow: Bool {
+        switch self {
+        case .filter, .hair, .cutout, .photo, .outfit, .baby, .makeup, .avatar, .textToImage, .imageToImage:
+            return true
+        case .video, .textToVideo, .imageToVideo, .multiImageToVideo, .videoEnhance, .collection, .unknown:
+            return false
+        }
+    }
+}
+
+extension ProfileViewController: UICollectionViewDataSource {
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        2
+    }
+
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        if section == 0 {
+            return 1
+        }
+        return max(state.tasks.count, 1)
+    }
+
+    func collectionView(
+        _ collectionView: UICollectionView,
+        cellForItemAt indexPath: IndexPath
+    ) -> UICollectionViewCell {
+        if indexPath.section == 0 {
+            let cell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: ProfileMembershipCardCell.reuseIdentifier,
+                for: indexPath
+            ) as! ProfileMembershipCardCell
+            cell.configure(membership: state.membership)
+            return cell
+        }
+
+        guard state.tasks.indices.contains(indexPath.item) else {
+            return collectionView.dequeueReusableCell(
+                withReuseIdentifier: ProfileHistoryEmptyCell.reuseIdentifier,
+                for: indexPath
+            )
+        }
+
+        let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: ProfileHistoryTaskCell.reuseIdentifier,
+            for: indexPath
+        ) as! ProfileHistoryTaskCell
+        cell.configure(task: state.tasks[indexPath.item])
+        return cell
+    }
+
+    func collectionView(
+        _ collectionView: UICollectionView,
+        viewForSupplementaryElementOfKind kind: String,
+        at indexPath: IndexPath
+    ) -> UICollectionReusableView {
+        let header = collectionView.dequeueReusableSupplementaryView(
+            ofKind: kind,
+            withReuseIdentifier: ProfileHistoryHeaderView.reuseIdentifier,
+            for: indexPath
+        ) as! ProfileHistoryHeaderView
+        header.configure(showsAll: !state.tasks.isEmpty)
+        return header
+    }
+}
+
+extension ProfileViewController: UICollectionViewDelegateFlowLayout {
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        sizeForItemAt indexPath: IndexPath
+    ) -> CGSize {
+        let width = collectionView.bounds.width
+        let horizontalInset: CGFloat = 28
+        let itemSpacing: CGFloat = 16
+        if indexPath.section == 0 {
+            return CGSize(width: width - horizontalInset * 2, height: state.membership.isVIP ? 101 : 125)
+        }
+        if state.tasks.isEmpty {
+            return CGSize(width: width - horizontalInset * 2, height: 390)
+        }
+        let itemWidth = floor((width - horizontalInset * 2 - itemSpacing) / 2)
+        return CGSize(width: itemWidth, height: floor(itemWidth * (211 / 158)))
+    }
+
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        insetForSectionAt section: Int
+    ) -> UIEdgeInsets {
+        UIEdgeInsets(top: 0, left: 28, bottom: section == 0 ? 0 : 28, right: 28)
+    }
+
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        minimumLineSpacingForSectionAt section: Int
+    ) -> CGFloat {
+        section == 0 ? 0 : 17
+    }
+
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        minimumInteritemSpacingForSectionAt section: Int
+    ) -> CGFloat {
+        16
+    }
+
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        referenceSizeForHeaderInSection section: Int
+    ) -> CGSize {
+        section == 1 ? CGSize(width: collectionView.bounds.width - 56, height: 58) : .zero
+    }
+
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if indexPath.section == 0 {
+            if !state.membership.isVIP {
+                presentMembershipPaywall()
+            }
+            return
+        }
+
+        guard state.tasks.indices.contains(indexPath.item) else { return }
+        presentResult(for: state.tasks[indexPath.item])
+    }
+
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let remainingHeight = scrollView.contentSize.height - scrollView.contentOffset.y - scrollView.bounds.height
+        if remainingHeight < 180 {
+            viewModel.loadMore()
+        }
     }
 }
