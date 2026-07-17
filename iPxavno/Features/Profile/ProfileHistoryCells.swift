@@ -115,8 +115,6 @@ final class ProfileHistoryHeaderView: UICollectionReusableView {
     static let reuseIdentifier = "ProfileHistoryHeaderView"
 
     private let titleLabel = UILabel()
-    private let allLabel = UILabel()
-    private let chevronView = UIImageView(image: UIImage(systemName: "chevron.right"))
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -127,41 +125,18 @@ final class ProfileHistoryHeaderView: UICollectionReusableView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func configure(showsAll: Bool) {
-        allLabel.isHidden = !showsAll
-        chevronView.isHidden = !showsAll
-    }
-
     private func configureView() {
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.text = "MY ART"
         titleLabel.textColor = HomeDesignColor.text
         titleLabel.font = UIFont.systemFont(ofSize: 19, weight: .bold)
 
-        allLabel.translatesAutoresizingMaskIntoConstraints = false
-        allLabel.text = "All"
-        allLabel.textColor = HomeDesignColor.accent
-        allLabel.font = UIFont.systemFont(ofSize: 16.3, weight: .semibold)
-
-        chevronView.translatesAutoresizingMaskIntoConstraints = false
-        chevronView.tintColor = HomeDesignColor.accent
-        chevronView.preferredSymbolConfiguration = UIImage.SymbolConfiguration(pointSize: 12, weight: .bold)
-
         addSubview(titleLabel)
-        addSubview(allLabel)
-        addSubview(chevronView)
 
         NSLayoutConstraint.activate([
             titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 28),
-            titleLabel.centerYAnchor.constraint(equalTo: centerYAnchor, constant: 5),
-
-            chevronView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -28),
-            chevronView.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor),
-            chevronView.widthAnchor.constraint(equalToConstant: 12),
-            chevronView.heightAnchor.constraint(equalToConstant: 16),
-
-            allLabel.trailingAnchor.constraint(equalTo: chevronView.leadingAnchor, constant: -6),
-            allLabel.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor)
+            titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -28),
+            titleLabel.centerYAnchor.constraint(equalTo: centerYAnchor, constant: 5)
         ])
     }
 }
