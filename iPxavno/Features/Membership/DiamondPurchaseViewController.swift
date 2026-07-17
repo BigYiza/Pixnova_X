@@ -1288,6 +1288,7 @@ private final class DiamondPackCardView: UIControl {
     private let priceLabel = UILabel()
     private let originalPriceLabel = UILabel()
     private let discountBadge = UILabel()
+    private let discountStack = UIStackView()
     private let diamondIcon = UILabel()
     private let amountLabel = UILabel()
     private let bonusLabel = UILabel()
@@ -1355,6 +1356,14 @@ private final class DiamondPackCardView: UIControl {
         discountBadge.layer.cornerRadius = 7
         discountBadge.clipsToBounds = true
 
+        discountStack.translatesAutoresizingMaskIntoConstraints = false
+        discountStack.axis = .vertical
+        discountStack.alignment = .leading
+        discountStack.distribution = .fill
+        discountStack.spacing = 4
+        discountStack.addArrangedSubview(originalPriceLabel)
+        discountStack.addArrangedSubview(discountBadge)
+
         diamondIcon.translatesAutoresizingMaskIntoConstraints = false
         diamondIcon.text = "💎"
         diamondIcon.font = UIFont.systemFont(ofSize: 18)
@@ -1371,8 +1380,7 @@ private final class DiamondPackCardView: UIControl {
         bonusLabel.textAlignment = .right
 
         addSubview(priceLabel)
-        addSubview(originalPriceLabel)
-        addSubview(discountBadge)
+        addSubview(discountStack)
         addSubview(diamondIcon)
         addSubview(amountLabel)
         addSubview(bonusLabel)
@@ -1385,11 +1393,10 @@ private final class DiamondPackCardView: UIControl {
             priceLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
             priceLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 60),
 
-            originalPriceLabel.leadingAnchor.constraint(equalTo: priceLabel.trailingAnchor, constant: 10),
-            originalPriceLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
+            discountStack.leadingAnchor.constraint(equalTo: priceLabel.trailingAnchor, constant: 10),
+            discountStack.centerYAnchor.constraint(equalTo: centerYAnchor),
+            discountStack.trailingAnchor.constraint(lessThanOrEqualTo: diamondIcon.leadingAnchor, constant: -10),
 
-            discountBadge.leadingAnchor.constraint(equalTo: originalPriceLabel.trailingAnchor, constant: 10),
-            discountBadge.centerYAnchor.constraint(equalTo: centerYAnchor),
             discountBadge.widthAnchor.constraint(equalToConstant: 70),
             discountBadge.heightAnchor.constraint(equalToConstant: 24),
 
