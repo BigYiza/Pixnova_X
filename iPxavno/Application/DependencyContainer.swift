@@ -9,6 +9,7 @@ struct DependencyContainer {
     let diamondPurchaseHandler: DiamondPurchaseHandling
     let contentRepository: ContentRepository
     let generationRepository: GenerationRepository
+    let historyRepository: HistoryRepository
     let generationMediaUploader: GenerationMediaUploading
     let generationWorkflowRunner: GenerationWorkflowRunning
     let analytics: AnalyticsTracking
@@ -39,6 +40,7 @@ struct DependencyContainer {
         let membershipHandler = DefaultMembershipHandler(accountRepository: accountRepository)
         let paymentRepository = RemoteMembershipPaymentRepository(apiClient: apiClient)
         let generationRepository = RemoteGenerationRepository(apiClient: apiClient)
+        let historyRepository = RemoteHistoryRepository(apiClient: apiClient)
         let mediaUploader = OSSGenerationMediaUploader(apiClient: apiClient)
         let analytics = ConsoleAnalyticsTracker()
         let purchaseHandler = StoreKitMembershipPurchaseHandler(
@@ -76,6 +78,7 @@ struct DependencyContainer {
             diamondPurchaseHandler: diamondPurchaseHandler,
             contentRepository: remoteContent,
             generationRepository: generationRepository,
+            historyRepository: historyRepository,
             generationMediaUploader: mediaUploader,
             generationWorkflowRunner: workflowRunner,
             analytics: analytics,

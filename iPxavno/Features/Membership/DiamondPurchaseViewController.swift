@@ -1119,7 +1119,7 @@ private final class DiamondLimitedOfferCardView: UIControl {
     private let headerView = UIView()
     private let headerLabel = UILabel()
     private let timerLabel = UILabel()
-    private let diamondIcon = UIImageView(image: UIImage(systemName: "suit.diamond.fill"))
+    private let diamondIcon = UILabel()
     private let amountLabel = UILabel()
     private let bonusLabel = UILabel()
     private let priceLabel = UILabel()
@@ -1185,9 +1185,9 @@ private final class DiamondLimitedOfferCardView: UIControl {
         timerLabel.textAlignment = .right
 
         diamondIcon.translatesAutoresizingMaskIntoConstraints = false
-        diamondIcon.tintColor = HomeDesignColor.accent
-        diamondIcon.contentMode = .scaleAspectFit
-        diamondIcon.preferredSymbolConfiguration = UIImage.SymbolConfiguration(pointSize: 17, weight: .bold)
+        diamondIcon.text = "💎"
+        diamondIcon.font = UIFont.systemFont(ofSize: 22)
+        diamondIcon.textAlignment = .center
 
         amountLabel.translatesAutoresizingMaskIntoConstraints = false
         amountLabel.textColor = HomeDesignColor.text
@@ -1247,8 +1247,8 @@ private final class DiamondLimitedOfferCardView: UIControl {
 
             diamondIcon.centerYAnchor.constraint(equalTo: amountLabel.centerYAnchor, constant: 1),
             diamondIcon.trailingAnchor.constraint(equalTo: amountLabel.leadingAnchor, constant: -8),
-            diamondIcon.widthAnchor.constraint(equalToConstant: 22.6),
-            diamondIcon.heightAnchor.constraint(equalToConstant: 22.6),
+            diamondIcon.widthAnchor.constraint(equalToConstant: 28),
+            diamondIcon.heightAnchor.constraint(equalToConstant: 28),
 
             amountLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
             amountLabel.topAnchor.constraint(equalTo: topAnchor, constant: 79),
@@ -1288,7 +1288,7 @@ private final class DiamondPackCardView: UIControl {
     private let priceLabel = UILabel()
     private let originalPriceLabel = UILabel()
     private let discountBadge = UILabel()
-    private let diamondIcon = UIImageView(image: UIImage(systemName: "suit.diamond.fill"))
+    private let diamondIcon = UILabel()
     private let amountLabel = UILabel()
     private let bonusLabel = UILabel()
     private var amountCenterYConstraint: NSLayoutConstraint?
@@ -1328,7 +1328,6 @@ private final class DiamondPackCardView: UIControl {
         layer.borderColor = (isSelected ? HomeDesignColor.accent : HomeDesignColor.border).cgColor
         priceLabel.textColor = isSelected ? HomeDesignColor.text : HomeDesignColor.text.withAlphaComponent(0.92)
         amountLabel.textColor = HomeDesignColor.accent
-        diamondIcon.tintColor = HomeDesignColor.accent
     }
 
     private func configureView() {
@@ -1357,9 +1356,9 @@ private final class DiamondPackCardView: UIControl {
         discountBadge.clipsToBounds = true
 
         diamondIcon.translatesAutoresizingMaskIntoConstraints = false
-        diamondIcon.tintColor = HomeDesignColor.accent
-        diamondIcon.contentMode = .scaleAspectFit
-        diamondIcon.preferredSymbolConfiguration = UIImage.SymbolConfiguration(pointSize: 15, weight: .bold)
+        diamondIcon.text = "💎"
+        diamondIcon.font = UIFont.systemFont(ofSize: 18)
+        diamondIcon.textAlignment = .center
 
         amountLabel.translatesAutoresizingMaskIntoConstraints = false
         amountLabel.textColor = HomeDesignColor.accent
@@ -1399,8 +1398,8 @@ private final class DiamondPackCardView: UIControl {
 
             diamondIcon.trailingAnchor.constraint(equalTo: amountLabel.leadingAnchor, constant: -8),
             diamondIcon.centerYAnchor.constraint(equalTo: amountLabel.centerYAnchor),
-            diamondIcon.widthAnchor.constraint(equalToConstant: 18.4),
-            diamondIcon.heightAnchor.constraint(equalToConstant: 18.4),
+            diamondIcon.widthAnchor.constraint(equalToConstant: 24),
+            diamondIcon.heightAnchor.constraint(equalToConstant: 24),
 
             bonusLabel.trailingAnchor.constraint(equalTo: amountLabel.trailingAnchor),
             bonusLabel.topAnchor.constraint(equalTo: amountLabel.bottomAnchor, constant: 2)

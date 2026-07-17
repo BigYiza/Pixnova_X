@@ -68,7 +68,7 @@ final class DefaultRequestHeaderProvider: RequestHeaderProviding {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
         let languageCode = shortLanguageCode()
         let userAgent = [
-            "pixnova",
+            environment.gatewayAppName,
             version,
             "iOS",
             UIDevice.current.systemVersion,
