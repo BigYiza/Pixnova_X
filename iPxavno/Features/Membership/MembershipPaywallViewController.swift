@@ -286,7 +286,7 @@ final class MembershipPaywallViewController: BaseViewController {
     private func updateCTA() {
         let plan = viewModel.selectedPlan
         let title = plan?.callToAction ?? "Continue"
-        let subtitle = plan?.renewalText ?? "auto-renews"
+        let subtitle = plan.map(Self.purchasePriceText(for:)) ?? "Select a plan"
         let attributed = NSMutableAttributedString(
             string: title,
             attributes: [
@@ -305,6 +305,22 @@ final class MembershipPaywallViewController: BaseViewController {
         renewalLabel.text = plan?.kind == .yearly
             ? "Cancel anytime · auto-renews yearly"
             : "Cancel anytime · auto-renews"
+    }
+
+    private static func purchasePriceText(for plan: MembershipPurchasePlan) -> String {
+        let priceWithPeriod: String
+        switch plan.kind {
+        case .weekly:
+            priceWithPeriod = "\(plan.price)/week"
+        case .yearly:
+            priceWithPeriod = "\(plan.price)/year"
+        case .other:
+            priceWithPeriod = plan.price
+        }
+
+        return plan.hasIntroOffer
+            ? "then \(priceWithPeriod)"
+            : "\(priceWithPeriod) · auto-renews"
     }
 
     private func makeLegalButton(title: String, action: Selector) -> UIButton {
