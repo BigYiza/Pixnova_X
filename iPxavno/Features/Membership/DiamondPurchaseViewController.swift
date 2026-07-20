@@ -61,24 +61,31 @@ private final class DiamondActivityOfferState {
         self.defaults = defaults
     }
 
-    func ensureStarted(now: Date = Date()) {
-        guard defaults.object(forKey: Key.firstShownAt) == nil else { return }
-        defaults.set(now.timeIntervalSince1970, forKey: Key.firstShownAt)
+    func ensureStarted(for offerID: String, now: Date = Date()) {
+        let key = scopedKey(Key.firstShownAt, offerID: offerID)
+        guard defaults.object(forKey: key) == nil else { return }
+        defaults.set(now.timeIntervalSince1970, forKey: key)
     }
 
-    func markPurchased() {
-        defaults.set(true, forKey: Key.purchased)
+    func markPurchased(offerID: String) {
+        defaults.set(true, forKey: scopedKey(Key.purchased, offerID: offerID))
     }
 
-    func isActive(now: Date = Date()) -> Bool {
-        !defaults.bool(forKey: Key.purchased) && remainingTime(now: now) > 0
+    func isActive(offerID: String, now: Date = Date()) -> Bool {
+        !defaults.bool(forKey: scopedKey(Key.purchased, offerID: offerID))
+            && remainingTime(offerID: offerID, now: now) > 0
     }
 
-    func remainingTime(now: Date = Date()) -> TimeInterval {
-        guard defaults.object(forKey: Key.firstShownAt) != nil else { return duration }
-        let startedAt = defaults.double(forKey: Key.firstShownAt)
+    func remainingTime(offerID: String, now: Date = Date()) -> TimeInterval {
+        let key = scopedKey(Key.firstShownAt, offerID: offerID)
+        guard defaults.object(forKey: key) != nil else { return duration }
+        let startedAt = defaults.double(forKey: key)
         let elapsed = now.timeIntervalSince1970 - startedAt
         return max(0, duration - elapsed)
+    }
+
+    private func scopedKey(_ key: String, offerID: String) -> String {
+        "\(key).\(offerID)"
     }
 }
 
@@ -357,7 +364,6 @@ final class DiamondPurchaseViewController: BaseViewController {
         navigationController?.setNavigationBarHidden(true, animated: false)
         configureView()
         bindViewModel()
-        activityOfferState.ensureStarted()
         viewModel.load()
     }
 
@@ -574,11 +580,16 @@ final class DiamondPurchaseViewController: BaseViewController {
     }
 
     private func activityOffer(from packs: [DiamondPackOption]) -> DiamondPackOption? {
-        guard activityOfferState.isActive() else { return nil }
-        let offerID = displayMode == .subscriber
+        let offerID = activityOfferProductID
+        guard let offer = packs.first(where: { $0.id == offerID }) else { return nil }
+        activityOfferState.ensureStarted(for: offerID)
+        return activityOfferState.isActive(offerID: offerID) ? offer : nil
+    }
+
+    private var activityOfferProductID: String {
+        displayMode == .subscriber
             ? DiamondProductID.member1200Activity
             : DiamondProductID.standard1000Activity
-        return packs.first { $0.id == offerID }
     }
 
     private func syncSelectionIfNeeded(
@@ -650,7 +661,7 @@ final class DiamondPurchaseViewController: BaseViewController {
             return
         }
 
-        let remainingTime = activityOfferState.remainingTime()
+        let remainingTime = activityOfferState.remainingTime(offerID: offer.id)
         limitedOfferCard.configure(
             option: offer,
             isMember: viewModel.state.value.isMember,
@@ -662,7 +673,8 @@ final class DiamondPurchaseViewController: BaseViewController {
     }
 
     private func updateActivityTimerState() {
-        guard activityOfferState.isActive(), !limitedOfferCard.isHidden else {
+        let offerID = activityOfferProductID
+        guard activityOfferState.isActive(offerID: offerID), !limitedOfferCard.isHidden else {
             stopActivityTimer()
             return
         }
@@ -680,7 +692,8 @@ final class DiamondPurchaseViewController: BaseViewController {
     }
 
     private func handleActivityTimerTick() {
-        guard activityOfferState.isActive() else {
+        let offerID = activityOfferProductID
+        guard activityOfferState.isActive(offerID: offerID) else {
             stopActivityTimer()
             rebuildPacks(
                 displayedPacks(from: viewModel.state.value.packs),
@@ -690,7 +703,7 @@ final class DiamondPurchaseViewController: BaseViewController {
             return
         }
 
-        limitedOfferCard.updateRemainingTime(activityOfferState.remainingTime())
+        limitedOfferCard.updateRemainingTime(activityOfferState.remainingTime(offerID: offerID))
     }
 
     private func handleCompletedActivityPurchaseIfNeeded(packID: String?) {
@@ -700,7 +713,7 @@ final class DiamondPurchaseViewController: BaseViewController {
             return
         }
         displayedCompletedPackID = packID
-        activityOfferState.markPurchased()
+        activityOfferState.markPurchased(offerID: packID)
         stopActivityTimer()
     }
 
