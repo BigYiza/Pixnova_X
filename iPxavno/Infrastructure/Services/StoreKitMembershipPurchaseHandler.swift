@@ -395,7 +395,7 @@ final class StoreKitDiamondPurchaseHandler: DiamondPurchaseHandling {
         let productIDs = catalog.allProductIDs
         guard !productIDs.isEmpty else { throw DiamondPurchaseError.productUnavailable }
 
-        let products = try await Product.products(for: productIDs)
+        let products = try await loadProducts(productIDs: productIDs)
         #if DEBUG
         let returnedProductIDs = Set(products.map(\.id))
         let missingProductIDs = productIDs.filter { !returnedProductIDs.contains($0) }
@@ -426,6 +426,32 @@ final class StoreKitDiamondPurchaseHandler: DiamondPurchaseHandling {
 
         guard !packs.isEmpty else { throw DiamondPurchaseError.productUnavailable }
         return packs
+    }
+
+    private func loadProducts(productIDs: [String]) async throws -> [Product] {
+        let activityIDs = productIDs.filter { $0.lowercased().hasSuffix(".activity") }
+        let regularIDs = productIDs.filter { !activityIDs.contains($0) }
+        var products: [Product] = []
+
+        // Activity products are requested separately so a partial catalog response
+        // cannot silently remove the limited offer from one of the two tabs.
+        if !regularIDs.isEmpty {
+            products.append(contentsOf: try await Product.products(for: regularIDs))
+        }
+        if !activityIDs.isEmpty {
+            products.append(contentsOf: try await Product.products(for: activityIDs))
+        }
+
+        var productsByID = Dictionary(uniqueKeysWithValues: products.map { ($0.id, $0) })
+        let missingIDs = productIDs.filter { productsByID[$0] == nil }
+        for productID in missingIDs {
+            let retryProducts = try await Product.products(for: [productID])
+            for product in retryProducts {
+                productsByID[product.id] = product
+            }
+        }
+
+        return productIDs.compactMap { productsByID[$0] }
     }
 
     func purchase(packID: String) async throws {
