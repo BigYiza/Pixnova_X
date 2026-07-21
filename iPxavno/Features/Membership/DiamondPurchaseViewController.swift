@@ -34,8 +34,7 @@ private enum DiamondProductID {
         member15,
         member60,
         member240,
-        member600,
-        member1200Normal
+        member600
     ]
     static let activityIDs: Set<String> = [
         standard1000Activity,
@@ -292,7 +291,7 @@ final class DiamondPurchaseViewModel {
 
     private func visibleOptions(from packs: [DiamondPurchasePack], isMember: Bool) -> [DiamondPackOption] {
         let visibleAmounts = Self.standardDiamondAmounts.union(Self.memberDiamondAmounts)
-        return packs.filter { pack in
+        var options = packs.filter { pack in
             guard let amount = pack.diamondAmount else { return false }
             return visibleAmounts.contains(amount)
         }.map { pack in
@@ -301,6 +300,26 @@ final class DiamondPurchaseViewModel {
                 requiresMembership: !isMember && Self.memberDiamondAmounts.contains(pack.diamondAmount ?? 0)
             )
         }
+
+        if catalog.allProductIDs.contains(DiamondProductID.member1200Activity),
+           !options.contains(where: { $0.id == DiamondProductID.member1200Activity }) {
+            let fallbackPack = DiamondPurchasePack(
+                id: DiamondProductID.member1200Activity,
+                title: "1,200 Diamonds",
+                price: "$69.99",
+                subtitle: "Limited subscriber offer",
+                diamondAmount: 1200,
+                isPurchasable: true
+            )
+            options.append(
+                DiamondPackOption(
+                    pack: fallbackPack,
+                    requiresMembership: !isMember
+                )
+            )
+        }
+
+        return options
     }
 
     private func visibleProductIDs() -> [String] {
@@ -330,7 +349,6 @@ final class DiamondPurchaseViewController: BaseViewController {
     private let limitedOfferCard = DiamondLimitedOfferCardView()
     private let dailyTitleLabel = UILabel()
     private let packStack = UIStackView()
-    private let confirmPurchaseButton = DiamondConfirmPurchaseButton()
     private let footnoteLabel = UILabel()
 
     private var packCards: [DiamondPackCardView] = []
@@ -451,9 +469,6 @@ final class DiamondPurchaseViewController: BaseViewController {
         packStack.axis = .vertical
         packStack.spacing = 12.7
 
-        confirmPurchaseButton.translatesAutoresizingMaskIntoConstraints = false
-        confirmPurchaseButton.addTarget(self, action: #selector(handleConfirmPurchase), for: .touchUpInside)
-
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
         contentView.addSubview(modeControl)
@@ -461,7 +476,6 @@ final class DiamondPurchaseViewController: BaseViewController {
         contentView.addSubview(limitedOfferCard)
         contentView.addSubview(dailyTitleLabel)
         contentView.addSubview(packStack)
-        contentView.addSubview(confirmPurchaseButton)
 
         let premiumHeightConstraint = premiumCard.heightAnchor.constraint(equalToConstant: 254)
         let limitedTopConstraint = limitedOfferCard.topAnchor.constraint(equalTo: premiumCard.bottomAnchor, constant: 20)
@@ -506,12 +520,7 @@ final class DiamondPurchaseViewController: BaseViewController {
 
             packStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 28.25),
             packStack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -28.25),
-            packStack.topAnchor.constraint(equalTo: dailyTitleLabel.bottomAnchor, constant: 16),
-
-            confirmPurchaseButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 28.25),
-            confirmPurchaseButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -28.25),
-            confirmPurchaseButton.topAnchor.constraint(equalTo: packStack.bottomAnchor, constant: 24),
-            confirmPurchaseButton.heightAnchor.constraint(equalToConstant: 72)
+            packStack.topAnchor.constraint(equalTo: dailyTitleLabel.bottomAnchor, constant: 16)
         ])
     }
 
@@ -528,7 +537,7 @@ final class DiamondPurchaseViewController: BaseViewController {
         NSLayoutConstraint.activate([
             footnoteLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 30),
             footnoteLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -30),
-            footnoteLabel.topAnchor.constraint(equalTo: confirmPurchaseButton.bottomAnchor, constant: 22),
+            footnoteLabel.topAnchor.constraint(equalTo: packStack.bottomAnchor, constant: 22),
             footnoteLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -40)
         ])
     }
@@ -555,7 +564,6 @@ final class DiamondPurchaseViewController: BaseViewController {
                 activityOffer: activityOffer,
                 selectedID: self.viewModel.state.value.selectedPackID
             )
-            self.updateConfirmPurchaseButton(selectedOption: self.viewModel.selectedOption)
             self.presentErrorIfNeeded(state.errorMessage)
             self.presentCompletionIfNeeded(state.completedMessage, packID: state.completedPackID)
         }
@@ -605,14 +613,6 @@ final class DiamondPurchaseViewController: BaseViewController {
         isSyncingSelection = true
         viewModel.select(packID: visibleOptions[0].id)
         isSyncingSelection = false
-    }
-
-    private func updateConfirmPurchaseButton(selectedOption: DiamondPackOption?) {
-        confirmPurchaseButton.configure(
-            title: "Confirm Purchase",
-            subtitle: selectedOption?.pack.price ?? "Select a package",
-            isEnabled: selectedOption != nil && !viewModel.state.value.isLoading
-        )
     }
 
     private func rebuildPacks(
@@ -750,16 +750,11 @@ final class DiamondPurchaseViewController: BaseViewController {
     }
 
     @objc private func handlePackTap(_ sender: DiamondPackCardView) {
-        selectPack(packID: sender.packID)
+        purchaseOrUnlock(packID: sender.packID)
     }
 
     @objc private func handleLimitedOfferTap(_ sender: DiamondLimitedOfferCardView) {
-        selectPack(packID: sender.packID)
-    }
-
-    @objc private func handleConfirmPurchase() {
-        guard let packID = viewModel.state.value.selectedPackID else { return }
-        purchaseOrUnlock(packID: packID)
+        purchaseOrUnlock(packID: sender.packID)
     }
 
     @objc private func handlePremiumTap() {
@@ -781,7 +776,6 @@ final class DiamondPurchaseViewController: BaseViewController {
             activityOffer: activityOffer,
             selectedID: viewModel.state.value.selectedPackID
         )
-        updateConfirmPurchaseButton(selectedOption: viewModel.selectedOption)
     }
 
     private func handleSubscriberModeTap() {
@@ -799,11 +793,6 @@ final class DiamondPurchaseViewController: BaseViewController {
             activityOffer: activityOffer,
             selectedID: viewModel.state.value.selectedPackID
         )
-        updateConfirmPurchaseButton(selectedOption: viewModel.selectedOption)
-    }
-
-    private func selectPack(packID: String) {
-        viewModel.select(packID: packID)
     }
 
     private func purchaseOrUnlock(packID: String) {
@@ -1062,78 +1051,11 @@ private final class DiamondPremiumCardView: UIControl {
     }
 }
 
-private final class DiamondConfirmPurchaseButton: UIControl {
-    private let titleLabel = UILabel()
-    private let subtitleLabel = UILabel()
-    private let labelStack = UIStackView()
-
-    override var isEnabled: Bool {
-        didSet {
-            alpha = isEnabled ? 1 : 0.55
-        }
-    }
-
-    override var isHighlighted: Bool {
-        didSet {
-            transform = isHighlighted ? CGAffineTransform(scaleX: 0.985, y: 0.985) : .identity
-        }
-    }
-
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        configureView()
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    func configure(title: String, subtitle: String, isEnabled: Bool) {
-        titleLabel.text = title
-        subtitleLabel.text = subtitle
-        self.isEnabled = isEnabled
-    }
-
-    private func configureView() {
-        backgroundColor = HomeDesignColor.accent
-        layer.cornerRadius = 21.2
-        clipsToBounds = true
-
-        labelStack.translatesAutoresizingMaskIntoConstraints = false
-        labelStack.axis = .vertical
-        labelStack.alignment = .center
-        labelStack.spacing = 3
-        labelStack.isUserInteractionEnabled = false
-
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.text = "Confirm Purchase"
-        titleLabel.textColor = HomeDesignColor.blackText
-        titleLabel.font = UIFont.systemFont(ofSize: 20.5, weight: .bold)
-        titleLabel.textAlignment = .center
-
-        subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
-        subtitleLabel.textColor = HomeDesignColor.blackText.withAlphaComponent(0.72)
-        subtitleLabel.font = UIFont.systemFont(ofSize: 14.1, weight: .semibold)
-        subtitleLabel.textAlignment = .center
-
-        addSubview(labelStack)
-        labelStack.addArrangedSubview(titleLabel)
-        labelStack.addArrangedSubview(subtitleLabel)
-
-        NSLayoutConstraint.activate([
-            labelStack.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 18),
-            labelStack.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -18),
-            labelStack.centerXAnchor.constraint(equalTo: centerXAnchor),
-            labelStack.centerYAnchor.constraint(equalTo: centerYAnchor)
-        ])
-    }
-}
-
 private final class DiamondLimitedOfferCardView: UIControl {
-    private let headerView = UIView()
+    private let headerView = DiamondOfferHeaderView()
     private let headerLabel = UILabel()
-    private let timerLabel = UILabel()
-    private let diamondIcon = UILabel()
+    private let countdownView = DiamondCountdownView()
+    private let diamondIcon = UIImageView(image: UIImage(systemName: "diamond.fill"))
     private let amountLabel = UILabel()
     private let bonusLabel = UILabel()
     private let priceLabel = UILabel()
@@ -1166,15 +1088,16 @@ private final class DiamondLimitedOfferCardView: UIControl {
         bonusLabel.isHidden = presentation.bonusText == nil
         priceLabel.text = option.pack.price
         soonLabel.text = "Will be \(comparisonPrice) soon"
-        backgroundColor = isSelected ? HomeDesignColor.accent.withAlphaComponent(0.06) : .clear
-        layer.borderWidth = isSelected ? 2 : 1
-        layer.borderColor = (isSelected ? HomeDesignColor.accent : HomeDesignColor.accent.withAlphaComponent(0.32)).cgColor
-        buttonLabel.text = isSelected ? "Selected" : "Select"
+        _ = isSelected
+        backgroundColor = .clear
+        layer.borderWidth = 1
+        layer.borderColor = HomeDesignColor.accent.withAlphaComponent(0.32).cgColor
+        buttonLabel.text = "Continue"
         updateRemainingTime(remainingTime)
     }
 
     func updateRemainingTime(_ remainingTime: TimeInterval) {
-        timerLabel.text = Self.timeText(remainingTime)
+        countdownView.update(remainingTime: remainingTime)
     }
 
     private func configureView() {
@@ -1184,7 +1107,7 @@ private final class DiamondLimitedOfferCardView: UIControl {
         clipsToBounds = true
 
         headerView.translatesAutoresizingMaskIntoConstraints = false
-        headerView.backgroundColor = HomeDesignColor.accent.withAlphaComponent(0.13)
+        headerView.isUserInteractionEnabled = false
 
         headerLabel.translatesAutoresizingMaskIntoConstraints = false
         headerLabel.text = "LIMITED OFFER"
@@ -1192,16 +1115,13 @@ private final class DiamondLimitedOfferCardView: UIControl {
         headerLabel.font = UIFont.systemFont(ofSize: 18.4, weight: .bold)
         headerLabel.letterSpacing = 0.37
 
-        timerLabel.translatesAutoresizingMaskIntoConstraints = false
-        timerLabel.text = "00 : 00 : 42"
-        timerLabel.textColor = HomeDesignColor.text
-        timerLabel.font = UIFont.monospacedDigitSystemFont(ofSize: 15.5, weight: .bold)
-        timerLabel.textAlignment = .right
+        countdownView.translatesAutoresizingMaskIntoConstraints = false
+        countdownView.isUserInteractionEnabled = false
 
         diamondIcon.translatesAutoresizingMaskIntoConstraints = false
-        diamondIcon.text = "💎"
-        diamondIcon.font = UIFont.systemFont(ofSize: 22)
-        diamondIcon.textAlignment = .center
+        diamondIcon.tintColor = HomeDesignColor.accent
+        diamondIcon.contentMode = .scaleAspectFit
+        diamondIcon.preferredSymbolConfiguration = UIImage.SymbolConfiguration(pointSize: 15.5, weight: .bold)
 
         amountLabel.translatesAutoresizingMaskIntoConstraints = false
         amountLabel.textColor = HomeDesignColor.text
@@ -1237,7 +1157,7 @@ private final class DiamondLimitedOfferCardView: UIControl {
 
         addSubview(headerView)
         headerView.addSubview(headerLabel)
-        headerView.addSubview(timerLabel)
+        headerView.addSubview(countdownView)
         addSubview(diamondIcon)
         addSubview(amountLabel)
         addSubview(bonusLabel)
@@ -1255,9 +1175,10 @@ private final class DiamondLimitedOfferCardView: UIControl {
             headerLabel.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 19.8),
             headerLabel.centerYAnchor.constraint(equalTo: headerView.centerYAnchor),
 
-            timerLabel.trailingAnchor.constraint(equalTo: headerView.trailingAnchor, constant: -20),
-            timerLabel.centerYAnchor.constraint(equalTo: headerView.centerYAnchor),
-            timerLabel.widthAnchor.constraint(equalToConstant: 138),
+            countdownView.trailingAnchor.constraint(equalTo: headerView.trailingAnchor, constant: -19.8),
+            countdownView.centerYAnchor.constraint(equalTo: headerView.centerYAnchor),
+            countdownView.widthAnchor.constraint(equalToConstant: 138),
+            countdownView.heightAnchor.constraint(equalToConstant: 30.5),
 
             diamondIcon.centerYAnchor.constraint(equalTo: amountLabel.centerYAnchor, constant: 1),
             diamondIcon.trailingAnchor.constraint(equalTo: amountLabel.leadingAnchor, constant: -8),
@@ -1288,13 +1209,98 @@ private final class DiamondLimitedOfferCardView: UIControl {
             buttonLabel.centerYAnchor.constraint(equalTo: buttonBackground.centerYAnchor)
         ])
     }
+}
 
-    private static func timeText(_ remainingTime: TimeInterval) -> String {
+private final class DiamondOfferHeaderView: UIView {
+    override class var layerClass: AnyClass { CAGradientLayer.self }
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        configureGradient()
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    private func configureGradient() {
+        guard let gradientLayer = layer as? CAGradientLayer else { return }
+        gradientLayer.colors = [
+            HomeDesignColor.accent.withAlphaComponent(0.18).cgColor,
+            HomeDesignColor.accent.withAlphaComponent(0.05).cgColor
+        ]
+        gradientLayer.startPoint = CGPoint(x: 0, y: 0.5)
+        gradientLayer.endPoint = CGPoint(x: 1, y: 0.5)
+    }
+}
+
+private final class DiamondCountdownView: UIView {
+    private let hoursLabel = DiamondCountdownView.makeValueLabel()
+    private let minutesLabel = DiamondCountdownView.makeValueLabel()
+    private let secondsLabel = DiamondCountdownView.makeValueLabel()
+    private let stack = UIStackView()
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        configureView()
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    func update(remainingTime: TimeInterval) {
         let totalSeconds = max(0, Int(ceil(remainingTime)))
-        let hours = totalSeconds / 3600
-        let minutes = (totalSeconds % 3600) / 60
-        let seconds = totalSeconds % 60
-        return String(format: "%02d : %02d : %02d", hours, minutes, seconds)
+        hoursLabel.text = String(format: "%02d", totalSeconds / 3600)
+        minutesLabel.text = String(format: "%02d", (totalSeconds % 3600) / 60)
+        secondsLabel.text = String(format: "%02d", totalSeconds % 60)
+    }
+
+    private func configureView() {
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        stack.axis = .horizontal
+        stack.alignment = .fill
+        stack.spacing = 4
+
+        let firstColon = Self.makeColonLabel()
+        let secondColon = Self.makeColonLabel()
+        [hoursLabel, firstColon, minutesLabel, secondColon, secondsLabel].forEach {
+            stack.addArrangedSubview($0)
+        }
+        addSubview(stack)
+
+        NSLayoutConstraint.activate([
+            stack.leadingAnchor.constraint(equalTo: leadingAnchor),
+            stack.trailingAnchor.constraint(equalTo: trailingAnchor),
+            stack.topAnchor.constraint(equalTo: topAnchor),
+            stack.bottomAnchor.constraint(equalTo: bottomAnchor),
+            hoursLabel.widthAnchor.constraint(equalToConstant: 34),
+            minutesLabel.widthAnchor.constraint(equalToConstant: 34),
+            secondsLabel.widthAnchor.constraint(equalToConstant: 34),
+            firstColon.widthAnchor.constraint(equalToConstant: 10),
+            secondColon.widthAnchor.constraint(equalToConstant: 10)
+        ])
+    }
+
+    private static func makeValueLabel() -> UILabel {
+        let label = UILabel()
+        label.backgroundColor = .black
+        label.textColor = HomeDesignColor.text
+        label.font = UIFont.monospacedDigitSystemFont(ofSize: 15.5, weight: .bold)
+        label.textAlignment = .center
+        label.layer.cornerRadius = 5.65
+        label.clipsToBounds = true
+        label.text = "00"
+        return label
+    }
+
+    private static func makeColonLabel() -> UILabel {
+        let label = UILabel()
+        label.text = ":"
+        label.textColor = HomeDesignColor.text
+        label.font = UIFont.monospacedDigitSystemFont(ofSize: 15.5, weight: .bold)
+        label.textAlignment = .center
+        return label
     }
 }
 
@@ -1303,7 +1309,7 @@ private final class DiamondPackCardView: UIControl {
     private let originalPriceLabel = UILabel()
     private let discountBadge = UILabel()
     private let discountStack = UIStackView()
-    private let diamondIcon = UILabel()
+    private let diamondIcon = UIImageView(image: UIImage(systemName: "diamond.fill"))
     private let amountLabel = UILabel()
     private let bonusLabel = UILabel()
     private var amountCenterYConstraint: NSLayoutConstraint?
@@ -1334,7 +1340,7 @@ private final class DiamondPackCardView: UIControl {
         originalPriceLabel.isHidden = presentation.originalPrice == nil
         discountBadge.text = presentation.discountText
         discountBadge.isHidden = presentation.discountText == nil
-        applySelectedState(isSelected)
+        applySelectedState(false)
     }
 
     private func applySelectedState(_ isSelected: Bool) {
@@ -1379,9 +1385,9 @@ private final class DiamondPackCardView: UIControl {
         discountStack.addArrangedSubview(discountBadge)
 
         diamondIcon.translatesAutoresizingMaskIntoConstraints = false
-        diamondIcon.text = "💎"
-        diamondIcon.font = UIFont.systemFont(ofSize: 18)
-        diamondIcon.textAlignment = .center
+        diamondIcon.tintColor = HomeDesignColor.accent
+        diamondIcon.contentMode = .scaleAspectFit
+        diamondIcon.preferredSymbolConfiguration = UIImage.SymbolConfiguration(pointSize: 14, weight: .bold)
 
         amountLabel.translatesAutoresizingMaskIntoConstraints = false
         amountLabel.textColor = HomeDesignColor.accent
@@ -1448,7 +1454,9 @@ private struct DiamondPricingPresentation {
     init(amount: Int?, isMember: Bool) {
         _ = isMember
         let amount = amount ?? 0
-        amountText = amount > 0 ? "\(amount)" : "--"
+        amountText = amount > 0
+            ? NumberFormatter.localizedString(from: NSNumber(value: amount), number: .decimal)
+            : "--"
 
         switch amount {
         case 15:
