@@ -72,8 +72,10 @@ final class AppCoordinator {
 
     private func showInitialExperience() {
         let completed = container.keyValueStore.bool(forKey: AppStorageKey.onboardingCompleted)
+        let onboardingEnabled = Bundle.main.object(forInfoDictionaryKey: "OnboardingEnabled") as? Bool
+            ?? false
 
-        if completed {
+        if completed || !onboardingEnabled {
             showMainInterface()
         } else {
             let onboarding = OnboardingViewController()
