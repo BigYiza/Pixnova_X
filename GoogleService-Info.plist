@@ -9,7 +9,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.personaltest.Pixnova</string>
+	<string>com.lainc.pixvidai</string>
 	<key>PROJECT_ID</key>
 	<string>pixnova-new</string>
 	<key>STORAGE_BUCKET</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:767690298151:ios:7c58dad5ac8f3eb9e68f02</string>
+	<string>1:767690298151:ios:44996a25f428f1e5e68f02</string>
 </dict>
 </plist>
