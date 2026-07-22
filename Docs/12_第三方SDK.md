@@ -1,77 +1,45 @@
 # 第三方 SDK
 
-## SDK 清单
+## 当前依赖
 
-| SDK/库 | 用途 |
-| --- | --- |
-| Firebase Core | Firebase 初始化 |
-| Firebase RemoteConfig | 远程配置 |
-| Firebase Storage | 图片上传 |
-| Firebase Messaging | FCM 推送 |
-| Firebase Analytics | 埋点 |
-| AppsFlyer | 归因和购买事件 |
-| SolarEngine | 归因、ATT、Remote Config |
-| TikTok Business SDK | 广告归因/事件 |
-| FacebookCore | Facebook 初始化/跳转支持 |
-| Moya | 网络请求 |
-| Alamofire | Reachability |
-| ObjectMapper | JSON 模型映射 |
-| Kingfisher | 图片下载缓存 |
-| ToastUI | SwiftUI toast |
-| SnapKit | UIKit 约束 |
-| Lottie | Gemini loading |
-| APNGKit | APNG 动画 |
-| FMDB / SQLite3 | 本地数据库 |
-| Down | Markdown 渲染 |
-| YYText | 富文本和图片 attachment |
-| StoreKit | Apple IAP |
+| SDK/库 | 接入方式 | 用途 |
+| --- | --- | --- |
+| Firebase | Swift Package Manager | 初始化、Analytics、Auth、Storage、Crashlytics 等 |
+| SolarEngine 海外版 1.3.2 | CocoaPods `SolarEngineSDKiOSInter` | 事件分析、广告归因、IAP、Deep Link、ATT |
+| StoreKit | 系统框架 | Apple IAP |
 
-## 初始化位置
+安装或更新 CocoaPods 依赖后，应从 `iPxavno.xcworkspace` 打开和构建工程，而不是直接打开 `.xcodeproj`。`Pods/` 不提交，`Podfile`、`Podfile.lock` 与 workspace 需要提交。
 
-| SDK | 初始化 |
-| --- | --- |
-| Firebase | `LaunchConfig.firebaseConfigure()` |
-| AppsFlyer | `LaunchConfig.appsFlyerConfigure()` |
-| SolarEngine | `LaunchConfig.InitSolarEngine()` |
-| TikTok | `LaunchConfig.initTikTok()` |
-| Facebook | `AppDelegate.didFinishLaunching` |
-| FCM | `AppDelegate.registerNotification()` |
+## SolarEngine 配置
 
-## 当前硬编码标识
+AppKey 通过 Xcode Target 的 User-Defined Build Setting `SOLAR_ENGINE_APP_KEY` 注入，Debug 和 Release 可分别设置；代码库不保存正式密钥。有效 AppKey 必须是 16 位，空值时 SDK 会保持关闭：
 
-| 项 | 值 |
-| --- | --- |
-| AppsFlyer DevKey | `2o84PsQnbv9B6FSjXibMeJ` |
-| Apple App ID | `6695729339` |
-| SolarEngine AppKey | `3afd5a68e1f2b3a4` |
-| TikTok appId | `6695729339` |
-| TikTok tiktokAppId | `7425241391091040274` |
-| CodoonAnalytics APP_ID | `pixnova` |
+```text
+SOLAR_ENGINE_APP_KEY = 待提供的16位AppKey
+```
 
-新产品应重新申请/替换这些标识，避免数据混淆和合规风险。
+`Info.plist` 中还定义了：
 
-## ATT
+| Key | 默认值 | 说明 |
+| --- | --- | --- |
+| `SolarEngineATTWaitingInterval` | `60` | SDK 等待 ATT 结果的秒数，代码限制为 0...120 |
+| `SolarEngineGDPRArea` | `false` | GDPR 地区发布或按地区构建时设为 `true` |
+| `SolarEngineEnableODMInfo` | `false` | 海外 SDK 的 ODM 信息采集开关，默认关闭 |
+| `NSUserTrackingUsageDescription` | 英文用途说明 | iOS ATT 系统弹窗文案 |
 
-当前：
+## 隐私、ATT 与归因时序
 
-- AppsFlyer 等待 ATT 60 秒。
-- SolarEngine 请求 ATT。
-- 授权后把 IDFA 写入 CodoonAnalytics preset properties。
+1. App 启动只调用 `preInit`；没有 AppKey 时不调用 SDK。
+2. 首次进入展示 App 自有的分析/广告归因同意框，拒绝不影响核心功能。
+3. 用户同意后才注册归因与初始化回调并启动 SDK。
+4. App 活跃时通过 SolarEngine 包装方法请求系统 ATT；归因回调在初始化前注册。
+5. 登录/退出同步 SolarEngine Account ID，URL 与 Universal Link 交给 SDK 处理 Deep Link 归因。
 
-新工程需要：
+SDK 自带 `PrivacyInfo.xcprivacy`。上线前仍需根据实际数据用途更新隐私政策、App Store App Privacy，并确认 GDPR 地区配置与 ATT 文案经过法务/产品审核。
 
-- 明确 ATT 弹窗触发时机。
-- 隐私说明中披露追踪用途。
-- 用户拒绝时功能不应受阻。
+## 事件约束
 
-## 移除建议
-
-新产品如果不需要：
-
-- Facebook 社交跳转。
-- TikTok Business。
-- SolarEngine。
-- 自研埋点。
-- Gemini Markdown/YYText。
-
-应直接移除，减少包体、隐私项和审核解释成本。
+- 业务只调用统一 `AnalyticsTracking`，不直接依赖 SolarEngine SDK。
+- 自定义事件采用小写下划线，长度不超过 40；属性 key 不以下划线开头。
+- 禁止上报密码、token、receipt、授权 Header、邮箱、手机号和用户输入。
+- SolarEngine 自动采集关闭，由统一框架提供页面和点击事件，避免重复计数。

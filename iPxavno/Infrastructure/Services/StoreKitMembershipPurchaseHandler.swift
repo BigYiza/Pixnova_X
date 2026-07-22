@@ -26,32 +26,39 @@ final class StoreKitMembershipPurchaseHandler: MembershipPurchaseHandling {
 
     func loadPlans(catalog: MembershipProductCatalog) async throws -> [MembershipPurchasePlan] {
         let productIDs = catalog.allProductIDs
-        guard !productIDs.isEmpty else { throw MembershipPurchaseError.productUnavailable }
+        analytics.trackIAP(productType: "membership", status: .productsLoading)
+        do {
+            guard !productIDs.isEmpty else { throw MembershipPurchaseError.productUnavailable }
 
-        let products = try await Product.products(for: productIDs)
-        #if DEBUG
-        let returnedProductIDs = Set(products.map(\.id))
-        let missingProductIDs = productIDs.filter { !returnedProductIDs.contains($0) }
-        print(
-            "[StoreKit][Membership] requested:",
-            productIDs,
-            "returned:",
-            products.map(\.id),
-            "missing:",
-            missingProductIDs
-        )
-        #endif
-        productsByID = Dictionary(uniqueKeysWithValues: products.map { ($0.id, $0) })
-        let plans = products
-            .map(Self.plan(from:))
-            .sorted { lhs, rhs in
-                if lhs.kind == .yearly, rhs.kind != .yearly { return false }
-                if lhs.kind != .yearly, rhs.kind == .yearly { return true }
-                return lhs.title < rhs.title
-            }
+            let products = try await Product.products(for: productIDs)
+            #if DEBUG
+            let returnedProductIDs = Set(products.map(\.id))
+            let missingProductIDs = productIDs.filter { !returnedProductIDs.contains($0) }
+            print(
+                "[StoreKit][Membership] requested:",
+                productIDs,
+                "returned:",
+                products.map(\.id),
+                "missing:",
+                missingProductIDs
+            )
+            #endif
+            productsByID = Dictionary(uniqueKeysWithValues: products.map { ($0.id, $0) })
+            let plans = products
+                .map(Self.plan(from:))
+                .sorted { lhs, rhs in
+                    if lhs.kind == .yearly, rhs.kind != .yearly { return false }
+                    if lhs.kind != .yearly, rhs.kind == .yearly { return true }
+                    return lhs.title < rhs.title
+                }
 
-        guard !plans.isEmpty else { throw MembershipPurchaseError.productUnavailable }
-        return plans
+            guard !plans.isEmpty else { throw MembershipPurchaseError.productUnavailable }
+            analytics.trackIAP(productType: "membership", status: .productsLoaded)
+            return plans
+        } catch {
+            analytics.trackIAP(productType: "membership", status: .productsLoadFailed, error: error)
+            throw error
+        }
     }
 
     func purchase(planID: String) async throws {
@@ -65,11 +72,18 @@ final class StoreKitMembershipPurchaseHandler: MembershipPurchaseHandling {
             Self.logProduct(product, stage: "selected product")
             #endif
 
+            analytics.trackIAP(productType: "membership", status: .orderCreating, productID: product.id)
             let order = try await paymentRepository.createOrder(
                 name: product.displayName,
                 description: product.description,
                 productID: product.id,
                 purchasePrice: product.displayPrice
+            )
+            analytics.trackIAP(
+                productType: "membership",
+                status: .orderCreated,
+                productID: product.id,
+                orderID: order.id
             )
             #if DEBUG
             Self.log("create order success productID=\(product.id) orderID=\(order.id) appAccountToken=\(order.appAccountToken.uuidString)")
@@ -85,15 +99,34 @@ final class StoreKitMembershipPurchaseHandler: MembershipPurchaseHandling {
             #if DEBUG
             Self.log("StoreKit purchase prompt begin productID=\(product.id) orderID=\(order.id)")
             #endif
+            analytics.trackIAP(
+                productType: "membership",
+                status: .storePresented,
+                productID: product.id,
+                orderID: order.id
+            )
             let result = try await product.purchase(options: [.appAccountToken(order.appAccountToken)])
 
             switch result {
             case let .success(verificationResult):
+                analytics.trackIAP(
+                    productType: "membership",
+                    status: .purchased,
+                    productID: product.id,
+                    orderID: order.id
+                )
                 #if DEBUG
                 Self.log("StoreKit purchase success returned, verifying transaction productID=\(product.id) orderID=\(order.id)")
                 #endif
 
                 let transaction = try Self.verifiedTransaction(from: verificationResult)
+                analytics.trackIAP(
+                    productType: "membership",
+                    status: .verified,
+                    productID: product.id,
+                    orderID: order.id,
+                    transactionID: String(transaction.id)
+                )
                 #if DEBUG
                 Self.logTransaction(transaction, stage: "verified transaction")
                 #endif
@@ -107,6 +140,13 @@ final class StoreKitMembershipPurchaseHandler: MembershipPurchaseHandling {
                     orderID: order.id,
                     transactionID: "\(transaction.id)",
                     receiptData: receipt
+                )
+                analytics.trackIAP(
+                    productType: "membership",
+                    status: .serverValidated,
+                    productID: product.id,
+                    orderID: order.id,
+                    transactionID: String(transaction.id)
                 )
                 #if DEBUG
                 Self.log("notify purchase success completed productID=\(product.id) orderID=\(order.id) transactionID=\(transaction.id)")
@@ -133,15 +173,27 @@ final class StoreKitMembershipPurchaseHandler: MembershipPurchaseHandling {
                         properties: ["product_id": product.id, "order_id": order.id]
                     )
                 )
+                analytics.trackIAP(
+                    productType: "membership",
+                    status: .finished,
+                    productID: product.id,
+                    productName: product.displayName,
+                    orderID: order.id,
+                    transactionID: String(transaction.id),
+                    payAmount: product.price,
+                    currency: product.priceFormatStyle.currencyCode
+                )
             case .userCancelled:
                 #if DEBUG
                 Self.log("StoreKit purchase cancelled productID=\(product.id) orderID=\(order.id)")
                 #endif
+                analytics.trackIAP(productType: "membership", status: .cancelled, productID: product.id, orderID: order.id)
                 throw MembershipPurchaseError.purchaseCancelled
             case .pending:
                 #if DEBUG
                 Self.log("StoreKit purchase pending productID=\(product.id) orderID=\(order.id)")
                 #endif
+                analytics.trackIAP(productType: "membership", status: .pending, productID: product.id, orderID: order.id)
                 throw MembershipPurchaseError.purchasePending
             @unknown default:
                 #if DEBUG
@@ -153,6 +205,9 @@ final class StoreKitMembershipPurchaseHandler: MembershipPurchaseHandling {
             #if DEBUG
             Self.logError(error, stage: "purchase failed planID=\(planID)")
             #endif
+            if !Self.isExpectedUnfinishedPurchase(error) {
+                analytics.trackIAP(productType: "membership", status: .failed, productID: planID, error: error)
+            }
             throw error
         }
     }
@@ -162,6 +217,7 @@ final class StoreKitMembershipPurchaseHandler: MembershipPurchaseHandling {
         Self.log("restore begin")
         #endif
 
+        analytics.trackIAP(productType: "membership", status: .restoreStarted)
         do {
             try await AppStore.sync()
             #if DEBUG
@@ -218,11 +274,26 @@ final class StoreKitMembershipPurchaseHandler: MembershipPurchaseHandling {
                     properties: ["product_id": transaction.productID]
                 )
             )
+            analytics.trackIAP(
+                productType: "membership",
+                status: .restoreFinished,
+                productID: transaction.productID,
+                transactionID: String(transaction.id)
+            )
         } catch {
             #if DEBUG
             Self.logError(error, stage: "restore failed")
             #endif
+            analytics.trackIAP(productType: "membership", status: .restoreFailed, error: error)
             throw error
+        }
+    }
+
+    private static func isExpectedUnfinishedPurchase(_ error: Error) -> Bool {
+        guard let purchaseError = error as? MembershipPurchaseError else { return false }
+        switch purchaseError {
+        case .purchaseCancelled, .purchasePending: return true
+        default: return false
         }
     }
 
@@ -393,39 +464,46 @@ final class StoreKitDiamondPurchaseHandler: DiamondPurchaseHandling {
 
     func loadPacks(catalog: DiamondProductCatalog) async throws -> [DiamondPurchasePack] {
         let productIDs = catalog.allProductIDs
-        guard !productIDs.isEmpty else { throw DiamondPurchaseError.productUnavailable }
+        analytics.trackIAP(productType: "diamonds", status: .productsLoading)
+        do {
+            guard !productIDs.isEmpty else { throw DiamondPurchaseError.productUnavailable }
 
-        let products = try await loadProducts(productIDs: productIDs)
-        #if DEBUG
-        let returnedProductIDs = Set(products.map(\.id))
-        let missingProductIDs = productIDs.filter { !returnedProductIDs.contains($0) }
-        print(
-            "[StoreKit][Diamonds] requested:",
-            productIDs,
-            "returned:",
-            products.map(\.id),
-            "missing:",
-            missingProductIDs
-        )
-        #endif
-        productsByID = Dictionary(uniqueKeysWithValues: products.map { ($0.id, $0) })
-        let packs = products
-            .map(Self.pack(from:))
-            .sorted { lhs, rhs in
-                switch (lhs.diamondAmount, rhs.diamondAmount) {
-                case let (lhsAmount?, rhsAmount?):
-                    return lhsAmount < rhsAmount
-                case (_?, nil):
-                    return true
-                case (nil, _?):
-                    return false
-                case (nil, nil):
-                    return lhs.title < rhs.title
+            let products = try await loadProducts(productIDs: productIDs)
+            #if DEBUG
+            let returnedProductIDs = Set(products.map(\.id))
+            let missingProductIDs = productIDs.filter { !returnedProductIDs.contains($0) }
+            print(
+                "[StoreKit][Diamonds] requested:",
+                productIDs,
+                "returned:",
+                products.map(\.id),
+                "missing:",
+                missingProductIDs
+            )
+            #endif
+            productsByID = Dictionary(uniqueKeysWithValues: products.map { ($0.id, $0) })
+            let packs = products
+                .map(Self.pack(from:))
+                .sorted { lhs, rhs in
+                    switch (lhs.diamondAmount, rhs.diamondAmount) {
+                    case let (lhsAmount?, rhsAmount?):
+                        return lhsAmount < rhsAmount
+                    case (_?, nil):
+                        return true
+                    case (nil, _?):
+                        return false
+                    case (nil, nil):
+                        return lhs.title < rhs.title
+                    }
                 }
-            }
 
-        guard !packs.isEmpty else { throw DiamondPurchaseError.productUnavailable }
-        return packs
+            guard !packs.isEmpty else { throw DiamondPurchaseError.productUnavailable }
+            analytics.trackIAP(productType: "diamonds", status: .productsLoaded)
+            return packs
+        } catch {
+            analytics.trackIAP(productType: "diamonds", status: .productsLoadFailed, error: error)
+            throw error
+        }
     }
 
     private func loadProducts(productIDs: [String]) async throws -> [Product] {
@@ -455,50 +533,83 @@ final class StoreKitDiamondPurchaseHandler: DiamondPurchaseHandling {
     }
 
     func purchase(packID: String) async throws {
-        let product = try await product(for: packID)
-        let order = try await paymentRepository.createOrder(
-            name: product.displayName,
-            description: product.description,
-            productID: product.id,
-            purchasePrice: product.displayPrice
-        )
-
-        analytics.record(
-            AnalyticsEvent(
-                name: "diamond_purchase_started",
-                properties: ["product_id": product.id, "order_id": order.id]
+        do {
+            let product = try await product(for: packID)
+            analytics.trackIAP(productType: "diamonds", status: .orderCreating, productID: product.id)
+            let order = try await paymentRepository.createOrder(
+                name: product.displayName,
+                description: product.description,
+                productID: product.id,
+                purchasePrice: product.displayPrice
             )
-        )
+            analytics.trackIAP(productType: "diamonds", status: .orderCreated, productID: product.id, orderID: order.id)
 
-        let result = try await product.purchase(options: [.appAccountToken(order.appAccountToken)])
-
-        switch result {
-        case let .success(verificationResult):
-            let transaction = try Self.verifiedTransaction(from: verificationResult)
-            let receipt = try Self.currentReceiptBase64()
-            try await paymentRepository.notifyPurchaseSuccess(
-                orderID: order.id,
-                transactionID: "\(transaction.id)",
-                receiptData: receipt
-            )
-            await transaction.finish()
-            try await waitForCompletedOrder(order.id)
-            _ = try await membershipHandler.membershipStatus(forceRefresh: true)
-            #if DEBUG
-            print("[StoreKit][Diamonds][Purchase] membership full refresh completed productID=\(product.id) orderID=\(order.id)")
-            #endif
             analytics.record(
                 AnalyticsEvent(
-                    name: "diamond_purchase_finished",
+                    name: "diamond_purchase_started",
                     properties: ["product_id": product.id, "order_id": order.id]
                 )
             )
-        case .userCancelled:
-            throw DiamondPurchaseError.purchaseCancelled
-        case .pending:
-            throw DiamondPurchaseError.purchasePending
-        @unknown default:
-            throw DiamondPurchaseError.verificationFailed
+
+            analytics.trackIAP(productType: "diamonds", status: .storePresented, productID: product.id, orderID: order.id)
+            let result = try await product.purchase(options: [.appAccountToken(order.appAccountToken)])
+
+            switch result {
+            case let .success(verificationResult):
+                analytics.trackIAP(productType: "diamonds", status: .purchased, productID: product.id, orderID: order.id)
+                let transaction = try Self.verifiedTransaction(from: verificationResult)
+                analytics.trackIAP(productType: "diamonds", status: .verified, productID: product.id, orderID: order.id, transactionID: String(transaction.id))
+                let receipt = try Self.currentReceiptBase64()
+                try await paymentRepository.notifyPurchaseSuccess(
+                    orderID: order.id,
+                    transactionID: "\(transaction.id)",
+                    receiptData: receipt
+                )
+                analytics.trackIAP(productType: "diamonds", status: .serverValidated, productID: product.id, orderID: order.id, transactionID: String(transaction.id))
+                await transaction.finish()
+                try await waitForCompletedOrder(order.id)
+                _ = try await membershipHandler.membershipStatus(forceRefresh: true)
+                #if DEBUG
+                print("[StoreKit][Diamonds][Purchase] membership full refresh completed productID=\(product.id) orderID=\(order.id)")
+                #endif
+                analytics.record(
+                    AnalyticsEvent(
+                        name: "diamond_purchase_finished",
+                        properties: ["product_id": product.id, "order_id": order.id]
+                    )
+                )
+                analytics.trackIAP(
+                    productType: "diamonds",
+                    status: .finished,
+                    productID: product.id,
+                    productName: product.displayName,
+                    orderID: order.id,
+                    transactionID: String(transaction.id),
+                    payAmount: product.price,
+                    currency: product.priceFormatStyle.currencyCode
+                )
+            case .userCancelled:
+                analytics.trackIAP(productType: "diamonds", status: .cancelled, productID: product.id, orderID: order.id)
+                throw DiamondPurchaseError.purchaseCancelled
+            case .pending:
+                analytics.trackIAP(productType: "diamonds", status: .pending, productID: product.id, orderID: order.id)
+                throw DiamondPurchaseError.purchasePending
+            @unknown default:
+                throw DiamondPurchaseError.verificationFailed
+            }
+        } catch {
+            if !Self.isExpectedUnfinishedPurchase(error) {
+                analytics.trackIAP(productType: "diamonds", status: .failed, productID: packID, error: error)
+            }
+            throw error
+        }
+    }
+
+    private static func isExpectedUnfinishedPurchase(_ error: Error) -> Bool {
+        guard let purchaseError = error as? DiamondPurchaseError else { return false }
+        switch purchaseError {
+        case .purchaseCancelled, .purchasePending: return true
+        default: return false
         }
     }
 

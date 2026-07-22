@@ -2,5 +2,6 @@ DerivedData/
 build/
 *.xcuserstate
 xcuserdata/
+Pods/
 
 !iPxavno/Info.plist
