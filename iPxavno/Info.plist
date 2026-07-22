@@ -4,6 +4,8 @@
 <dict>
 	<key>OnboardingEnabled</key>
 	<false/>
+	<key>UIRequiresFullScreen</key>
+	<true/>
 	<key>NSUserTrackingUsageDescription</key>
 	<string>Your data may be used to measure advertising performance and show more relevant promotions.</string>
 	<key>SolarEngineAppKey</key>
