@@ -2,6 +2,9 @@ DerivedData/
 build/
 *.xcuserstate
 xcuserdata/
-Pods/
+
+# 打包机没有 CocoaPods：覆盖开发机全局的 *.plist 忽略规则。
+!Pods/SolarEngineSDKiOSInter/**/*.plist
+!Pods/Target Support Files/**/*.plist
 
 !iPxavno/Info.plist

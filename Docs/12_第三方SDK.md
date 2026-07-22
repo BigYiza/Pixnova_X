@@ -29,10 +29,10 @@ SOLAR_ENGINE_APP_KEY = 待提供的16位AppKey
 
 ## 隐私、ATT 与归因时序
 
-1. App 启动只调用 `preInit`；没有 AppKey 时不调用 SDK。
-2. 首次进入展示 App 自有的分析/广告归因同意框，拒绝不影响核心功能。
-3. 用户同意后才注册归因与初始化回调并启动 SDK。
-4. App 活跃时通过 SolarEngine 包装方法请求系统 ATT；归因回调在初始化前注册。
+1. App 启动调用 `preInit`；没有 AppKey 时 SDK 保持关闭。
+2. 归因与初始化回调在初始化前注册，随后启动 SDK 并等待 ATT 结果。
+3. App 活跃时通过 SolarEngine 包装方法直接请求系统 ATT，不展示自定义前置授权弹窗。
+4. 用户拒绝 ATT 不影响核心功能，也不能进行跨 App/网站追踪。
 5. 登录/退出同步 SolarEngine Account ID，URL 与 Universal Link 交给 SDK 处理 Deep Link 归因。
 
 SDK 自带 `PrivacyInfo.xcprivacy`。上线前仍需根据实际数据用途更新隐私政策、App Store App Privacy，并确认 GDPR 地区配置与 ATT 文案经过法务/产品审核。
