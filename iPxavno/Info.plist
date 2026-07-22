@@ -2,6 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>PrivacyPolicyURL</key>
+	<string>https://www.pixnova.co/privacy-policy/</string>
+	<key>TermsOfServiceURL</key>
+	<string>https://www.pixnova.co/terms-of-service/</string>
+	<key>SubscriptionTermsURL</key>
+	<string>https://www.pixnova.co/subscription-terms/</string>
 	<key>DiamondConsumableProductIDs</key>
 	<array>
 		<string>com.lainc.picvidai.diamonds.10</string>
