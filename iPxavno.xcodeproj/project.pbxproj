@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		AB3000000000000000000002 /* SolarEngineAnalyticsDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB3000000000000000000001 /* SolarEngineAnalyticsDestination.swift */; };
 		05D86FD3DC3C20BCA40A5CB0 /* RemoteContentRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 615CBA10848930C1841FF078 /* RemoteContentRepository.swift */; };
 		063B22F587CA2CAFDFD53CBD /* Observable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36D8C2F2FAEE6C46ED498451 /* Observable.swift */; };
 		0AE03B337A5BE21D135034B1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9D719FB358B97C9BD2281192 /* Assets.xcassets */; };
@@ -74,6 +73,7 @@
 		AA2000000000000000000004 /* AnalyticsDestinations.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000003 /* AnalyticsDestinations.swift */; };
 		AA2000000000000000000006 /* AnalyticsAutoInstrumentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000005 /* AnalyticsAutoInstrumentation.swift */; };
 		AA2000000000000000000008 /* AnalyticsAppMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000007 /* AnalyticsAppMonitor.swift */; };
+		AB3000000000000000000002 /* SolarEngineAnalyticsDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB3000000000000000000001 /* SolarEngineAnalyticsDestination.swift */; };
 		B2E002336FB4EAFF167D3364 /* ConsoleAnalyticsTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 867DB66E94D1F0BC34CD2720 /* ConsoleAnalyticsTracker.swift */; };
 		B3F9E7E99E5B8D9970E0B503 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A951426D2B18B72D8202983 /* SceneDelegate.swift */; };
 		B6F1365F682D8F9120020288 /* ContentCatalogStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B47505387E471C12232CEE3 /* ContentCatalogStore.swift */; };
@@ -100,7 +100,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		AB3000000000000000000001 /* SolarEngineAnalyticsDestination.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SolarEngineAnalyticsDestination.swift; sourceTree = "<group>"; };
 		01761D8E61095BB3A4E78485 /* DependencyContainer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DependencyContainer.swift; sourceTree = "<group>"; };
 		09A67C03F2C45B0D1472D29E /* DefaultMembershipHandler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DefaultMembershipHandler.swift; sourceTree = "<group>"; };
 		0F398EBA97D9FE34821C1DAC /* Pods-iPxavno.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iPxavno.debug.xcconfig"; path = "Target Support Files/Pods-iPxavno/Pods-iPxavno.debug.xcconfig"; sourceTree = "<group>"; };
@@ -164,6 +163,7 @@
 		AA2000000000000000000003 /* AnalyticsDestinations.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AnalyticsDestinations.swift; sourceTree = "<group>"; };
 		AA2000000000000000000005 /* AnalyticsAutoInstrumentation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AnalyticsAutoInstrumentation.swift; sourceTree = "<group>"; };
 		AA2000000000000000000007 /* AnalyticsAppMonitor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AnalyticsAppMonitor.swift; sourceTree = "<group>"; };
+		AB3000000000000000000001 /* SolarEngineAnalyticsDestination.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SolarEngineAnalyticsDestination.swift; sourceTree = "<group>"; };
 		B50CE59AC50797769F95AFD8 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		B5DF84507A89836FCA7ECDD9 /* SessionProviding.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SessionProviding.swift; sourceTree = "<group>"; };
 		BA1000000000000000000001 /* HistoryTaskModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HistoryTaskModels.swift; sourceTree = "<group>"; };
@@ -254,7 +254,6 @@
 				0F398EBA97D9FE34821C1DAC /* Pods-iPxavno.debug.xcconfig */,
 				6254830D140D1F20A2A2DA04 /* Pods-iPxavno.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -610,9 +609,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-iPxavno/Pods-iPxavno-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-iPxavno/Pods-iPxavno-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -759,7 +762,7 @@
 				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.personaltest.pic;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SOLAR_ENGINE_APP_KEY = "";
+				SOLAR_ENGINE_APP_KEY = ae8a2d7a03eed075;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
@@ -797,7 +800,7 @@
 				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.personaltest.pic;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SOLAR_ENGINE_APP_KEY = "";
+				SOLAR_ENGINE_APP_KEY = ae8a2d7a03eed075;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
