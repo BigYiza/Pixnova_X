@@ -71,11 +71,6 @@ final class AppCoordinator {
     }
 
     private func showInitialExperience() {
-        guard container.solarEngine.hasPrivacyConsentDecision else {
-            presentAnalyticsConsent()
-            return
-        }
-
         let completed = container.keyValueStore.bool(forKey: AppStorageKey.onboardingCompleted)
 
         if completed {
@@ -88,32 +83,6 @@ final class AppCoordinator {
             }
             setRoot(onboarding)
         }
-    }
-
-    private func presentAnalyticsConsent() {
-        guard let presenter = window?.rootViewController else { return }
-        let alert = UIAlertController(
-            title: "Help improve Pixnova",
-            message:
-                "Allow analytics and advertising attribution to help us understand app performance and measure promotions. You can decline without losing access to core features. See Privacy Policy in Settings for details.",
-            preferredStyle: .alert
-        )
-        alert.addAction(
-            UIAlertAction(title: "Continue without analytics", style: .cancel) { [weak self] _ in
-                self?.container.solarEngine.setPrivacyConsent(granted: false)
-                self?.showInitialExperience()
-            }
-        )
-        alert.addAction(
-            UIAlertAction(title: "Allow analytics", style: .default) { [weak self] _ in
-                guard let self else { return }
-                self.container.solarEngine.setPrivacyConsent(granted: true)
-                // AnalyticsPipeline 可能已在 SDK 启动前广播过一次账号，启动后补齐。
-                self.container.analytics.setUserID(self.container.sessionVault.currentCredential?.userID)
-                self.showInitialExperience()
-            }
-        )
-        presenter.present(alert, animated: true)
     }
 
     private func showMainInterface() {

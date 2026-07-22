@@ -18,7 +18,7 @@ final class AppRuntime {
             FirebaseApp.configure()
         }
         container.solarEngine.preInitialize()
-        container.solarEngine.startIfConsented()
+        container.solarEngine.start()
         container.analytics.setUserID(container.sessionVault.currentCredential?.userID)
         AnalyticsAutoInstrumentation.start(tracker: container.analytics)
         analyticsMonitor.start(applicationState: application.applicationState)

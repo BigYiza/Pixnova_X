@@ -22,7 +22,7 @@ struct DependencyContainer {
         let deviceIdentifier = DeviceIdentifierProvider(keyValueStore: keyValueStore)
         let accountStore = UserDefaultsAccountStore(keyValueStore: keyValueStore)
         let contentCatalogStore = UserDefaultsContentCatalogStore(keyValueStore: keyValueStore)
-        let solarEngine = SolarEngineAnalyticsDestination(keyValueStore: keyValueStore)
+        let solarEngine = SolarEngineAnalyticsDestination()
         let analytics = AnalyticsPipeline(
             destinations: [
                 FirebaseAnalyticsDestination(),

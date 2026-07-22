@@ -37,32 +37,13 @@ final class SolarEngineAnalyticsDestination: AnalyticsDestination {
 
     weak var analytics: AnalyticsTracking?
 
-    private enum Consent: String {
-        case granted
-        case denied
-    }
-
     private let configuration: SolarEngineConfiguration
-    private let keyValueStore: KeyValueStore
     private let sdk = SolarEngineSDK.sharedInstance()
-    private let consentKey = "analytics.solar_engine.privacy_consent.v1"
     private var isStarted = false
     private var didRequestTracking = false
 
-    init(
-        configuration: SolarEngineConfiguration = .current(),
-        keyValueStore: KeyValueStore = UserDefaults.standard
-    ) {
+    init(configuration: SolarEngineConfiguration = .current()) {
         self.configuration = configuration
-        self.keyValueStore = keyValueStore
-    }
-
-    var hasPrivacyConsentDecision: Bool {
-        Consent(rawValue: keyValueStore.string(forKey: consentKey) ?? "") != nil
-    }
-
-    var isPrivacyConsentGranted: Bool {
-        keyValueStore.string(forKey: consentKey) == Consent.granted.rawValue
     }
 
     func preInitialize() {
@@ -73,22 +54,6 @@ final class SolarEngineAnalyticsDestination: AnalyticsDestination {
             return
         }
         sdk.preInit(withAppKey: configuration.appKey)
-    }
-
-    func startIfConsented() {
-        guard isPrivacyConsentGranted else { return }
-        start()
-    }
-
-    func setPrivacyConsent(granted: Bool) {
-        keyValueStore.set(
-            granted ? Consent.granted.rawValue : Consent.denied.rawValue,
-            forKey: consentKey
-        )
-        if granted {
-            start()
-            requestTrackingAuthorizationIfNeeded()
-        }
     }
 
     func requestTrackingAuthorizationIfNeeded() {
@@ -143,7 +108,7 @@ final class SolarEngineAnalyticsDestination: AnalyticsDestination {
         sdk.reportEventImmediately()
     }
 
-    private func start() {
+    func start() {
         guard configuration.isUsable, !isStarted else { return }
 
         sdk.setAttributionCallback { [weak self] code, data in
