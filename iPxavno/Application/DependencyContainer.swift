@@ -13,6 +13,7 @@ struct DependencyContainer {
     let generationMediaUploader: GenerationMediaUploading
     let generationWorkflowRunner: GenerationWorkflowRunning
     let analytics: AnalyticsTracking
+    let solarEngine: SolarEngineAnalyticsDestination
     let keyValueStore: KeyValueStore
 
     static func live() -> DependencyContainer {
@@ -21,13 +22,31 @@ struct DependencyContainer {
         let deviceIdentifier = DeviceIdentifierProvider(keyValueStore: keyValueStore)
         let accountStore = UserDefaultsAccountStore(keyValueStore: keyValueStore)
         let contentCatalogStore = UserDefaultsContentCatalogStore(keyValueStore: keyValueStore)
+        let solarEngine = SolarEngineAnalyticsDestination(keyValueStore: keyValueStore)
+        let analytics = AnalyticsPipeline(
+            destinations: [
+                FirebaseAnalyticsDestination(),
+                solarEngine,
+                ConsoleAnalyticsDestination(),
+            ],
+            propertyProviders: [
+                {
+                    ["device_id": deviceIdentifier.deviceID]
+                }
+            ]
+        )
+        solarEngine.analytics = analytics
         let environment = APIEnvironment.current
         let headerProvider = DefaultRequestHeaderProvider(
             sessionProvider: sessionVault,
             deviceIdentifier: deviceIdentifier,
             environment: environment
         )
-        let apiClient = APIClient(environment: environment, headerProvider: headerProvider)
+        let apiClient = APIClient(
+            environment: environment,
+            headerProvider: headerProvider,
+            analytics: analytics
+        )
         let remoteContent = RemoteContentRepository(
             apiClient: apiClient,
             catalogStore: contentCatalogStore
@@ -42,7 +61,6 @@ struct DependencyContainer {
         let generationRepository = RemoteGenerationRepository(apiClient: apiClient)
         let historyRepository = RemoteHistoryRepository(apiClient: apiClient)
         let mediaUploader = OSSGenerationMediaUploader(apiClient: apiClient)
-        let analytics = ConsoleAnalyticsTracker()
         let purchaseHandler = StoreKitMembershipPurchaseHandler(
             catalogProvider: { membershipHandler.cachedMembership.productCatalog },
             paymentRepository: paymentRepository,
@@ -82,6 +100,7 @@ struct DependencyContainer {
             generationMediaUploader: mediaUploader,
             generationWorkflowRunner: workflowRunner,
             analytics: analytics,
+            solarEngine: solarEngine,
             keyValueStore: keyValueStore
         )
     }

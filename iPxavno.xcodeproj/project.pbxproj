@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AB3000000000000000000002 /* SolarEngineAnalyticsDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB3000000000000000000001 /* SolarEngineAnalyticsDestination.swift */; };
 		05D86FD3DC3C20BCA40A5CB0 /* RemoteContentRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 615CBA10848930C1841FF078 /* RemoteContentRepository.swift */; };
 		063B22F587CA2CAFDFD53CBD /* Observable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36D8C2F2FAEE6C46ED498451 /* Observable.swift */; };
 		0AE03B337A5BE21D135034B1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9D719FB358B97C9BD2281192 /* Assets.xcassets */; };
@@ -66,8 +67,13 @@
 		99AFBE36F737DF5F665AB9C0 /* ProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D20A833F4D94D7C5F61A41D3 /* ProfileViewController.swift */; };
 		9C0C4668F7A6C4D7B7720BE6 /* DesignTabBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1B3E9F76C77087D7DCA1A03 /* DesignTabBarView.swift */; };
 		9D5E2D6B2791454696419284 /* GenerationParameterPricing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D5E2D6A2791454696419284 /* GenerationParameterPricing.swift */; };
+		A1C7B1327A06A7CC2E998760 /* libPods-iPxavno.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EE308C699017F8F1340D80B8 /* libPods-iPxavno.a */; };
 		A2D50E3D50EA3D230DFF615D /* ContentModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6580D153EF37146F52FD27C /* ContentModels.swift */; };
 		A677C23BF29DF71C21ADCB04 /* APIEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EE8304C102B8ABACC3A6518 /* APIEnvironment.swift */; };
+		AA2000000000000000000002 /* AnalyticsPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000001 /* AnalyticsPipeline.swift */; };
+		AA2000000000000000000004 /* AnalyticsDestinations.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000003 /* AnalyticsDestinations.swift */; };
+		AA2000000000000000000006 /* AnalyticsAutoInstrumentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000005 /* AnalyticsAutoInstrumentation.swift */; };
+		AA2000000000000000000008 /* AnalyticsAppMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000007 /* AnalyticsAppMonitor.swift */; };
 		B2E002336FB4EAFF167D3364 /* ConsoleAnalyticsTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 867DB66E94D1F0BC34CD2720 /* ConsoleAnalyticsTracker.swift */; };
 		B3F9E7E99E5B8D9970E0B503 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A951426D2B18B72D8202983 /* SceneDelegate.swift */; };
 		B6F1365F682D8F9120020288 /* ContentCatalogStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B47505387E471C12232CEE3 /* ContentCatalogStore.swift */; };
@@ -94,8 +100,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		AB3000000000000000000001 /* SolarEngineAnalyticsDestination.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SolarEngineAnalyticsDestination.swift; sourceTree = "<group>"; };
 		01761D8E61095BB3A4E78485 /* DependencyContainer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DependencyContainer.swift; sourceTree = "<group>"; };
 		09A67C03F2C45B0D1472D29E /* DefaultMembershipHandler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DefaultMembershipHandler.swift; sourceTree = "<group>"; };
+		0F398EBA97D9FE34821C1DAC /* Pods-iPxavno.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iPxavno.debug.xcconfig"; path = "Target Support Files/Pods-iPxavno/Pods-iPxavno.debug.xcconfig"; sourceTree = "<group>"; };
 		10F4E0C7B2B84B7DB84C5F01 /* MembershipPurchaseHandling.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MembershipPurchaseHandling.swift; sourceTree = "<group>"; };
 		13B0900C24C24321BE411D8E /* GenerationProgressViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GenerationProgressViewController.swift; sourceTree = "<group>"; };
 		15C585D72DC5DE85467CB058 /* RequestHeaderProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RequestHeaderProvider.swift; sourceTree = "<group>"; };
@@ -124,6 +132,7 @@
 		55BC748012E2695A74105EA8 /* DiscoverViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DiscoverViewController.swift; sourceTree = "<group>"; };
 		5A67D3A82CC3A22730118AFC /* ProfileViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ProfileViewModel.swift; sourceTree = "<group>"; };
 		615CBA10848930C1841FF078 /* RemoteContentRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RemoteContentRepository.swift; sourceTree = "<group>"; };
+		6254830D140D1F20A2A2DA04 /* Pods-iPxavno.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iPxavno.release.xcconfig"; path = "Target Support Files/Pods-iPxavno/Pods-iPxavno.release.xcconfig"; sourceTree = "<group>"; };
 		641AA187E01945D7B7052712 /* OSSGenerationMediaUploader.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OSSGenerationMediaUploader.swift; sourceTree = "<group>"; };
 		679D56C1EA13336CEE20D59B /* ContentNotifications.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ContentNotifications.swift; sourceTree = "<group>"; };
 		67C2201A59E4A1DE0FC104F0 /* AppDelegate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -151,6 +160,10 @@
 		A873ED240D656D21A573494F /* RemoteImageView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RemoteImageView.swift; sourceTree = "<group>"; };
 		A9F8B821F395D0C97BA36E44 /* MembershipHandling.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MembershipHandling.swift; sourceTree = "<group>"; };
 		AA1E14D0303CF51A3395116F /* ContentRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ContentRepository.swift; sourceTree = "<group>"; };
+		AA2000000000000000000001 /* AnalyticsPipeline.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AnalyticsPipeline.swift; sourceTree = "<group>"; };
+		AA2000000000000000000003 /* AnalyticsDestinations.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AnalyticsDestinations.swift; sourceTree = "<group>"; };
+		AA2000000000000000000005 /* AnalyticsAutoInstrumentation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AnalyticsAutoInstrumentation.swift; sourceTree = "<group>"; };
+		AA2000000000000000000007 /* AnalyticsAppMonitor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AnalyticsAppMonitor.swift; sourceTree = "<group>"; };
 		B50CE59AC50797769F95AFD8 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		B5DF84507A89836FCA7ECDD9 /* SessionProviding.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SessionProviding.swift; sourceTree = "<group>"; };
 		BA1000000000000000000001 /* HistoryTaskModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HistoryTaskModels.swift; sourceTree = "<group>"; };
@@ -169,6 +182,7 @@
 		E6580D153EF37146F52FD27C /* ContentModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ContentModels.swift; sourceTree = "<group>"; };
 		E70EDF840A1399A68781F738 /* CategoryTemplateListViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CategoryTemplateListViewController.swift; sourceTree = "<group>"; };
 		E82768F5C799BC7C6418A37F /* DiscoverViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DiscoverViewModel.swift; sourceTree = "<group>"; };
+		EE308C699017F8F1340D80B8 /* libPods-iPxavno.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-iPxavno.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F3B49DC19CA76E2E41CDD6D4 /* CreationHubViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CreationHubViewController.swift; sourceTree = "<group>"; };
 		F551F1E1B955414DB9777501 /* StoreKitMembershipPurchaseHandler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StoreKitMembershipPurchaseHandler.swift; sourceTree = "<group>"; };
 		F7099CA3ADBCA8058E7BECC9 /* AccountModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AccountModels.swift; sourceTree = "<group>"; };
@@ -187,6 +201,7 @@
 				2D5566762FF211D400C9F5DF /* FirebaseStorage in Frameworks */,
 				2D5566722FF211D400C9F5DF /* FirebaseCore in Frameworks */,
 				2D55666E2FF211D400C9F5DF /* FirebaseAnalyticsCore in Frameworks */,
+				A1C7B1327A06A7CC2E998760 /* libPods-iPxavno.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -204,6 +219,7 @@
 		0A38BC80B01F4C098AE18A1F /* Application */ = {
 			isa = PBXGroup;
 			children = (
+				AA2000000000000000000007 /* AnalyticsAppMonitor.swift */,
 				7E64D12005CBD10F373905ED /* AppCoordinator.swift */,
 				7F45EF11494B19359A0E706F /* AppRuntime.swift */,
 				01761D8E61095BB3A4E78485 /* DependencyContainer.swift */,
@@ -232,12 +248,24 @@
 			path = Infrastructure;
 			sourceTree = "<group>";
 		};
+		22C08BCE3A9B1C885DF33113 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				0F398EBA97D9FE34821C1DAC /* Pods-iPxavno.debug.xcconfig */,
+				6254830D140D1F20A2A2DA04 /* Pods-iPxavno.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
 		2DA779DD2FE23B6A004692D8 = {
 			isa = PBXGroup;
 			children = (
 				2DA779E72FE23B6A004692D8 /* Products */,
 				E0F19CDDE3A78BA6EE92C06D /* iPxavno */,
 				2D5567452FF25C0700C9F5DF /* GoogleService-Info.plist */,
+				22C08BCE3A9B1C885DF33113 /* Pods */,
+				9A76CC0CB775C395C515A9B2 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -298,6 +326,7 @@
 		5F8BD9C6939F39EC9961E8E4 /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				AA2000000000000000000005 /* AnalyticsAutoInstrumentation.swift */,
 				76F3C6F70089698F60CFDF4D /* AppTheme.swift */,
 				327E78347D9622501A5F42D8 /* BaseViewController.swift */,
 				7108E98F5CB04D1BA60C03BE /* ImageSelectionCoordinator.swift */,
@@ -354,9 +383,20 @@
 			path = Repositories;
 			sourceTree = "<group>";
 		};
+		9A76CC0CB775C395C515A9B2 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				EE308C699017F8F1340D80B8 /* libPods-iPxavno.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		AC593394F8F6D340EB63E811 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				AB3000000000000000000001 /* SolarEngineAnalyticsDestination.swift */,
+				AA2000000000000000000003 /* AnalyticsDestinations.swift */,
+				AA2000000000000000000001 /* AnalyticsPipeline.swift */,
 				17FC4EB3C55B0F1217D7FCFA /* AccountStore.swift */,
 				867DB66E94D1F0BC34CD2720 /* ConsoleAnalyticsTracker.swift */,
 				1B47505387E471C12232CEE3 /* ContentCatalogStore.swift */,
@@ -484,9 +524,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 2DA779F92FE23B6B004692D8 /* Build configuration list for PBXNativeTarget "iPxavno" */;
 			buildPhases = (
+				8E22E4957A8DE094AE9AF9A9 /* [CP] Check Pods Manifest.lock */,
 				2DA779E22FE23B6A004692D8 /* Sources */,
 				2DA779E32FE23B6A004692D8 /* Frameworks */,
 				2DA779E42FE23B6A004692D8 /* Resources */,
+				11ABF6B1477C944FBD522259 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -559,11 +601,58 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		11ABF6B1477C944FBD522259 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-iPxavno/Pods-iPxavno-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-iPxavno/Pods-iPxavno-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-iPxavno/Pods-iPxavno-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		8E22E4957A8DE094AE9AF9A9 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-iPxavno-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		2DA779E22FE23B6A004692D8 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AB3000000000000000000002 /* SolarEngineAnalyticsDestination.swift in Sources */,
+				AA2000000000000000000008 /* AnalyticsAppMonitor.swift in Sources */,
+				AA2000000000000000000006 /* AnalyticsAutoInstrumentation.swift in Sources */,
+				AA2000000000000000000004 /* AnalyticsDestinations.swift in Sources */,
+				AA2000000000000000000002 /* AnalyticsPipeline.swift in Sources */,
 				F7F7A5C2E8E36ECA5BE60D2E /* AppDelegate.swift in Sources */,
 				115D7D43C4616F6998B6181C /* AppCoordinator.swift in Sources */,
 				9472D6DEAF7CCD28C88160B3 /* AppRuntime.swift in Sources */,
@@ -645,6 +734,7 @@
 /* Begin XCBuildConfiguration section */
 		2DA779FA2FE23B6B004692D8 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0F398EBA97D9FE34821C1DAC /* Pods-iPxavno.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -667,10 +757,11 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lainc.picvidai;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SOLAR_ENGINE_APP_KEY = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
@@ -683,6 +774,7 @@
 		};
 		2DA779FB2FE23B6B004692D8 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 6254830D140D1F20A2A2DA04 /* Pods-iPxavno.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -706,11 +798,18 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+<<<<<<< HEAD
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lainc.picvidai;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = picvidai_release;
+=======
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.personaltest.pic;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SOLAR_ENGINE_APP_KEY = "";
+>>>>>>> origin/main
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
@@ -759,7 +858,7 @@
 				DEVELOPMENT_TEAM = P2328CN2XE;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -823,7 +922,7 @@
 				DEVELOPMENT_TEAM = P2328CN2XE;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;

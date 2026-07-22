@@ -230,16 +230,23 @@ final class MembershipPaywallViewController: BaseViewController {
 
     private func configureLegal() {
         legalStack.translatesAutoresizingMaskIntoConstraints = false
-        legalStack.axis = .horizontal
-        legalStack.alignment = .center
-        legalStack.distribution = .equalSpacing
-        legalStack.spacing = 10
+        legalStack.axis = .vertical
+        legalStack.alignment = .fill
+        legalStack.distribution = .fill
+        legalStack.spacing = 4
 
-        legalStack.addArrangedSubview(makeLegalButton(title: "Privacy Policy", action: #selector(handlePrivacy)))
-        legalStack.addArrangedSubview(makeDotLabel())
-        legalStack.addArrangedSubview(makeLegalButton(title: "User Agreement", action: #selector(handleTerms)))
-        legalStack.addArrangedSubview(makeDotLabel())
-        legalStack.addArrangedSubview(makeLegalButton(title: "Restore", action: #selector(handleRestore)))
+        legalStack.addArrangedSubview(makeLegalRow(
+            leadingTitle: "Privacy Policy",
+            leadingAction: #selector(handlePrivacy),
+            trailingTitle: "Terms of Service",
+            trailingAction: #selector(handleTerms)
+        ))
+        legalStack.addArrangedSubview(makeLegalRow(
+            leadingTitle: "Subscription Terms",
+            leadingAction: #selector(handleSubscriptionTerms),
+            trailingTitle: "Restore Purchases",
+            trailingAction: #selector(handleRestore)
+        ))
 
         contentView.addSubview(legalStack)
 
@@ -332,6 +339,25 @@ final class MembershipPaywallViewController: BaseViewController {
         return button
     }
 
+    private func makeLegalRow(
+        leadingTitle: String,
+        leadingAction: Selector,
+        trailingTitle: String,
+        trailingAction: Selector
+    ) -> UIStackView {
+        let row = UIStackView(arrangedSubviews: [
+            makeLegalButton(title: leadingTitle, action: leadingAction),
+            makeDotLabel(),
+            makeLegalButton(title: trailingTitle, action: trailingAction)
+        ])
+        row.axis = .horizontal
+        row.alignment = .center
+        row.distribution = .equalSpacing
+        row.spacing = 10
+        row.heightAnchor.constraint(greaterThanOrEqualToConstant: 34).isActive = true
+        return row
+    }
+
     private func makeDotLabel() -> UILabel {
         let label = UILabel()
         label.text = "·"
@@ -395,7 +421,11 @@ final class MembershipPaywallViewController: BaseViewController {
     }
 
     @objc private func handleTerms() {
-        openConfiguredURL(key: "UserAgreementURL")
+        openConfiguredURL(key: "TermsOfServiceURL")
+    }
+
+    @objc private func handleSubscriptionTerms() {
+        openConfiguredURL(key: "SubscriptionTermsURL")
     }
 }
 

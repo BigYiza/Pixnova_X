@@ -2,6 +2,22 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>Your data may be used to measure advertising performance and show more relevant promotions.</string>
+	<key>SolarEngineAppKey</key>
+	<string>$(SOLAR_ENGINE_APP_KEY)</string>
+	<key>SolarEngineATTWaitingInterval</key>
+	<integer>60</integer>
+	<key>SolarEngineGDPRArea</key>
+	<false/>
+	<key>SolarEngineEnableODMInfo</key>
+	<false/>
+	<key>PrivacyPolicyURL</key>
+	<string>https://www.pixnova.co/privacy-policy/</string>
+	<key>TermsOfServiceURL</key>
+	<string>https://www.pixnova.co/terms-of-service/</string>
+	<key>SubscriptionTermsURL</key>
+	<string>https://www.pixnova.co/subscription-terms/</string>
 	<key>DiamondConsumableProductIDs</key>
 	<array>
 		<string>com.lainc.picvidai.diamonds.10</string>

@@ -88,7 +88,7 @@ final class SettingsViewController: BaseViewController {
         )
         let legalHeader = makeSectionHeader("LEGAL")
         let privacyRow = SettingsRowView(title: "Privacy Policy", iconName: "doc")
-        let agreementRow = SettingsRowView(title: "User Agreement", iconName: "doc")
+        let agreementRow = SettingsRowView(title: "Terms of Service", iconName: "doc")
         let subscriptionTermsRow = SettingsRowView(title: "Subscription Terms", iconName: "doc")
         let contactRow = SettingsRowView(title: "Contact us", iconName: "square.and.arrow.up")
         let versionLabel = UILabel()
@@ -96,7 +96,7 @@ final class SettingsViewController: BaseViewController {
         manageSubscriptionRow.onTap = { [weak self] in self?.openSubscriptionManagement() }
         restorePurchasesRow.onTap = { [weak self] in self?.restorePurchases() }
         privacyRow.onTap = { [weak self] in self?.openConfiguredURL(key: "PrivacyPolicyURL") }
-        agreementRow.onTap = { [weak self] in self?.openConfiguredURL(key: "UserAgreementURL") }
+        agreementRow.onTap = { [weak self] in self?.openConfiguredURL(key: "TermsOfServiceURL") }
         subscriptionTermsRow.onTap = { [weak self] in self?.openConfiguredURL(key: "SubscriptionTermsURL") }
         contactRow.onTap = { [weak self] in self?.openConfiguredURL(key: "ContactURL") }
 

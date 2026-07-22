@@ -7,23 +7,27 @@ final class APIClient {
     private let headerProvider: RequestHeaderProviding
     private let session: URLSession
     private let decoder: JSONDecoder
+    private let analytics: AnalyticsTracking?
 
     init(
         environment: APIEnvironment,
         headerProvider: RequestHeaderProviding,
-        session: URLSession = .shared
+        session: URLSession = .shared,
+        analytics: AnalyticsTracking? = nil
     ) {
         self.environment = environment
         self.headerProvider = headerProvider
         self.session = session
+        self.analytics = analytics
         decoder = JSONDecoder()
     }
 
     func send<Response: Decodable>(_ endpoint: APIEndpoint<Response>) async throws -> Response {
         let request = try makeRequest(endpoint)
+        let startedAt = ProcessInfo.processInfo.systemUptime
         #if DEBUG
-        let requestID = Self.requestLogID()
-        Self.logRequest(request, requestID: requestID, responseType: Response.self)
+            let requestID = Self.requestLogID()
+            Self.logRequest(request, requestID: requestID, responseType: Response.self)
         #endif
         let data: Data
         let response: URLResponse
@@ -31,16 +35,33 @@ final class APIClient {
         do {
             (data, response) = try await session.data(for: request)
         } catch {
+            trackResponse(
+                endpoint: endpoint,
+                request: request,
+                startedAt: startedAt,
+                result: "transport_error",
+                error: error
+            )
             #if DEBUG
-            Self.logNetworkError(error, request: request, requestID: requestID)
+                Self.logNetworkError(error, request: request, requestID: requestID)
             #endif
             throw AppError.underlying(error)
         }
 
         guard let httpResponse = response as? HTTPURLResponse,
-              (200..<300).contains(httpResponse.statusCode) else {
+            (200..<300).contains(httpResponse.statusCode)
+        else {
+            trackResponse(
+                endpoint: endpoint,
+                request: request,
+                startedAt: startedAt,
+                result: "http_error",
+                statusCode: (response as? HTTPURLResponse)?.statusCode,
+                responseBytes: data.count
+            )
             #if DEBUG
-            Self.logInvalidResponse(response, data: data, request: request, requestID: requestID)
+                Self.logInvalidResponse(
+                    response, data: data, request: request, requestID: requestID)
             #endif
             throw AppError.invalidResponse
         }
@@ -48,18 +69,40 @@ final class APIClient {
         do {
             let decoded = try decoder.decode(Response.self, from: data)
             #if DEBUG
-            Self.logSuccess(httpResponse, data: data, request: request, requestID: requestID)
+                Self.logSuccess(httpResponse, data: data, request: request, requestID: requestID)
             #endif
+            trackResponse(
+                endpoint: endpoint,
+                request: request,
+                startedAt: startedAt,
+                result: "success",
+                statusCode: httpResponse.statusCode,
+                responseBytes: data.count
+            )
             return decoded
         } catch {
+            trackResponse(
+                endpoint: endpoint,
+                request: request,
+                startedAt: startedAt,
+                result: "decoding_error",
+                statusCode: httpResponse.statusCode,
+                responseBytes: data.count,
+                error: error
+            )
             #if DEBUG
-            Self.logDecodingError(error, response: httpResponse, data: data, request: request, requestID: requestID, responseType: Response.self)
+                Self.logDecodingError(
+                    error, response: httpResponse, data: data, request: request,
+                    requestID: requestID,
+                    responseType: Response.self)
             #endif
             throw AppError.decodingFailed
         }
     }
 
-    func sendService<Payload: Decodable>(_ endpoint: APIEndpoint<ServiceEnvelope<Payload>>) async throws -> Payload {
+    func sendService<Payload: Decodable>(_ endpoint: APIEndpoint<ServiceEnvelope<Payload>>)
+        async throws -> Payload
+    {
         do {
             return try await send(endpoint).requirePayload()
         } catch AppError.tokenExpired {
@@ -85,7 +128,9 @@ final class APIClient {
         return try await send(endpoint)
     }
 
-    private func makeRequest<Response: Decodable>(_ endpoint: APIEndpoint<Response>) throws -> URLRequest {
+    private func makeRequest<Response: Decodable>(_ endpoint: APIEndpoint<Response>) throws
+        -> URLRequest
+    {
         let baseURL: URL
 
         switch endpoint.host {
@@ -93,7 +138,7 @@ final class APIClient {
             baseURL = environment.serviceBaseURL
         case .payment:
             baseURL = environment.paymentBaseURL
-        case let .absolute(url):
+        case .absolute(let url):
             baseURL = url
         }
 
@@ -102,11 +147,14 @@ final class APIClient {
         if case .absolute = endpoint.host {
             url = baseURL
         } else {
-            let normalizedPath = endpoint.path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
-            guard var components = URLComponents(
-                url: baseURL.appendingPathComponent(normalizedPath),
-                resolvingAgainstBaseURL: false
-            ) else {
+            let normalizedPath = endpoint.path.trimmingCharacters(
+                in: CharacterSet(charactersIn: "/"))
+            guard
+                var components = URLComponents(
+                    url: baseURL.appendingPathComponent(normalizedPath),
+                    resolvingAgainstBaseURL: false
+                )
+            else {
                 throw AppError.invalidURL
             }
             components.queryItems = endpoint.queryItems.isEmpty ? nil : endpoint.queryItems
@@ -126,96 +174,132 @@ final class APIClient {
         }
         return request
     }
+
+    private func trackResponse<Response: Decodable>(
+        endpoint: APIEndpoint<Response>,
+        request: URLRequest,
+        startedAt: TimeInterval,
+        result: String,
+        statusCode: Int? = nil,
+        responseBytes: Int? = nil,
+        error: Error? = nil
+    ) {
+        var properties = [
+            "path": endpoint.path,
+            "method": endpoint.method.rawValue,
+            "host": request.url?.host ?? "unknown",
+            "result": result,
+            "duration_ms": String(Int((ProcessInfo.processInfo.systemUptime - startedAt) * 1_000)),
+        ]
+        properties["status_code"] = statusCode.map(String.init)
+        properties["response_bytes"] = responseBytes.map(String.init)
+        if let error {
+            let nsError = error as NSError
+            properties["error_domain"] = nsError.domain
+            properties["error_code"] = String(nsError.code)
+        }
+        analytics?.record(
+            AnalyticsEvent(name: "network_response", properties: properties, category: .network)
+        )
+    }
 }
 
 #if DEBUG
-private extension APIClient {
-    static func requestLogID() -> String {
-        String(UUID().uuidString.prefix(8))
-    }
+    extension APIClient {
+        fileprivate static func requestLogID() -> String {
+            String(UUID().uuidString.prefix(8))
+        }
 
-    static func logRequest<Response: Decodable>(_ request: URLRequest, requestID: String, responseType: Response.Type) {
-        print(
-            "[API][\(requestID)] ->",
-            request.httpMethod ?? "GET",
-            request.url?.absoluteString ?? "<nil-url>",
-            "responseType=\(responseType)"
-        )
-    }
-
-    static func logSuccess(_ response: HTTPURLResponse, data: Data, request: URLRequest, requestID: String) {
-        print(
-            "[API][\(requestID)] <-",
-            response.statusCode,
-            request.httpMethod ?? "GET",
-            request.url?.absoluteString ?? "<nil-url>",
-            "bytes=\(data.count)"
-        )
-    }
-
-    static func logNetworkError(_ error: Error, request: URLRequest, requestID: String) {
-        print(
-            "[API][\(requestID)][NetworkError]",
-            request.httpMethod ?? "GET",
-            request.url?.absoluteString ?? "<nil-url>",
-            errorDiagnostic(error)
-        )
-    }
-
-    static func logInvalidResponse(_ response: URLResponse, data: Data, request: URLRequest, requestID: String) {
-        let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
-        print(
-            "[API][\(requestID)][InvalidResponse]",
-            request.httpMethod ?? "GET",
-            request.url?.absoluteString ?? "<nil-url>",
-            "status=\(statusCode)",
-            "bytes=\(data.count)",
-            "body=\(responseBodyPreview(data))"
-        )
-    }
-
-    static func logDecodingError<Response: Decodable>(
-        _ error: Error,
-        response: HTTPURLResponse,
-        data: Data,
-        request: URLRequest,
-        requestID: String,
-        responseType: Response.Type
-    ) {
-        print(
-            "[API][\(requestID)][DecodingError]",
-            request.httpMethod ?? "GET",
-            request.url?.absoluteString ?? "<nil-url>",
-            "status=\(response.statusCode)",
-            "responseType=\(responseType)",
-            "bytes=\(data.count)",
-            "error=\(errorDiagnostic(error))",
-            "body=\(responseBodyPreview(data))"
-        )
-    }
-
-    static func responseBodyPreview(_ data: Data, limit: Int = 4_000) -> String {
-        guard !data.isEmpty else { return "<empty>" }
-        let text = String(data: data, encoding: .utf8) ?? "<non-utf8 \(data.count) bytes>"
-        guard text.count > limit else { return text }
-        return "\(text.prefix(limit))...<truncated \(text.count - limit) chars>"
-    }
-
-    static func errorDiagnostic(_ error: Error) -> String {
-        let nsError = error as NSError
-        var parts = [
-            "type=\(type(of: error))",
-            "domain=\(nsError.domain)",
-            "code=\(nsError.code)",
-            "description=\(error.localizedDescription)"
-        ]
-        if let underlying = nsError.userInfo[NSUnderlyingErrorKey] as? Error {
-            let underlyingError = underlying as NSError
-            parts.append(
-                "underlying={type=\(type(of: underlying)) domain=\(underlyingError.domain) code=\(underlyingError.code) description=\(underlying.localizedDescription)}"
+        fileprivate static func logRequest<Response: Decodable>(
+            _ request: URLRequest, requestID: String, responseType: Response.Type
+        ) {
+            print(
+                "[API][\(requestID)] ->",
+                request.httpMethod ?? "GET",
+                request.url?.absoluteString ?? "<nil-url>",
+                "responseType=\(responseType)"
             )
         }
-        return parts.joined(separator: " ")
+
+        fileprivate static func logSuccess(
+            _ response: HTTPURLResponse, data: Data, request: URLRequest, requestID: String
+        ) {
+            print(
+                "[API][\(requestID)] <-",
+                response.statusCode,
+                request.httpMethod ?? "GET",
+                request.url?.absoluteString ?? "<nil-url>",
+                "bytes=\(data.count)"
+            )
+        }
+
+        fileprivate static func logNetworkError(
+            _ error: Error, request: URLRequest, requestID: String
+        ) {
+            print(
+                "[API][\(requestID)][NetworkError]",
+                request.httpMethod ?? "GET",
+                request.url?.absoluteString ?? "<nil-url>",
+                errorDiagnostic(error)
+            )
+        }
+
+        fileprivate static func logInvalidResponse(
+            _ response: URLResponse, data: Data, request: URLRequest, requestID: String
+        ) {
+            let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
+            print(
+                "[API][\(requestID)][InvalidResponse]",
+                request.httpMethod ?? "GET",
+                request.url?.absoluteString ?? "<nil-url>",
+                "status=\(statusCode)",
+                "bytes=\(data.count)",
+                "body=\(responseBodyPreview(data))"
+            )
+        }
+
+        fileprivate static func logDecodingError<Response: Decodable>(
+            _ error: Error,
+            response: HTTPURLResponse,
+            data: Data,
+            request: URLRequest,
+            requestID: String,
+            responseType: Response.Type
+        ) {
+            print(
+                "[API][\(requestID)][DecodingError]",
+                request.httpMethod ?? "GET",
+                request.url?.absoluteString ?? "<nil-url>",
+                "status=\(response.statusCode)",
+                "responseType=\(responseType)",
+                "bytes=\(data.count)",
+                "error=\(errorDiagnostic(error))",
+                "body=\(responseBodyPreview(data))"
+            )
+        }
+
+        fileprivate static func responseBodyPreview(_ data: Data, limit: Int = 4_000) -> String {
+            guard !data.isEmpty else { return "<empty>" }
+            let text = String(data: data, encoding: .utf8) ?? "<non-utf8 \(data.count) bytes>"
+            guard text.count > limit else { return text }
+            return "\(text.prefix(limit))...<truncated \(text.count - limit) chars>"
+        }
+
+        fileprivate static func errorDiagnostic(_ error: Error) -> String {
+            let nsError = error as NSError
+            var parts = [
+                "type=\(type(of: error))",
+                "domain=\(nsError.domain)",
+                "code=\(nsError.code)",
+                "description=\(error.localizedDescription)",
+            ]
+            if let underlying = nsError.userInfo[NSUnderlyingErrorKey] as? Error {
+                let underlyingError = underlying as NSError
+                parts.append(
+                    "underlying={type=\(type(of: underlying)) domain=\(underlyingError.domain) code=\(underlyingError.code) description=\(underlying.localizedDescription)}"
+                )
+            }
+            return parts.joined(separator: " ")
+        }
     }
-}
 #endif

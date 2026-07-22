@@ -19,12 +19,30 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneWillEnterForeground(_ scene: UIScene) {
         Task {
             do {
-                try await AppRuntime.shared.container.membershipHandler.maintainStatusAfterSessionPrepared()
+                try await AppRuntime.shared.container.membershipHandler
+                    .maintainStatusAfterSessionPrepared()
             } catch {
                 AppRuntime.shared.container.analytics.record(
-                    AnalyticsEvent(name: "membership_foreground_refresh_failed", properties: ["reason": error.localizedDescription])
+                    AnalyticsEvent(
+                        name: "membership_foreground_refresh_failed",
+                        properties: ["reason": error.localizedDescription])
                 )
             }
         }
+    }
+
+    func sceneDidBecomeActive(_ scene: UIScene) {
+        AppRuntime.shared.container.solarEngine.requestTrackingAuthorizationIfNeeded()
+    }
+
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        URLContexts.forEach { context in
+            AppRuntime.shared.container.solarEngine.handleOpenURL(context.url)
+        }
+    }
+
+    func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
+        guard let url = userActivity.webpageURL else { return }
+        AppRuntime.shared.container.solarEngine.handleOpenURL(url)
     }
 }
