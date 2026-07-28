@@ -371,7 +371,7 @@ final class StoreKitMembershipPurchaseHandler: MembershipPurchaseHandling {
             kind: kind,
             title: isYearly ? "Yearly" : kind == .weekly ? "Weekly" : product.displayName,
             price: product.displayPrice,
-            subtitle: isYearly ? "up to 1840 diamonds/year" : "+30 diamonds / week",
+            subtitle: isYearly ? "up to 1560 diamonds/year" : "+30 diamonds / week",
             callToAction: hasIntroOffer ? "Start 3-Day Free Trial" : "Continue",
             renewalText: hasIntroOffer ? "then \(product.displayPrice)/year" : "auto-renews",
             hasIntroOffer: hasIntroOffer,
