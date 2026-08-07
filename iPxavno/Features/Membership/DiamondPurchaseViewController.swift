@@ -1320,7 +1320,7 @@ private final class DiamondPackCardView: UIControl {
         let hasBonus = presentation.bonusText != nil
         bonusLabel.isHidden = !hasBonus
         amountCenterYConstraint?.constant = hasBonus ? -8 : 0
-        originalPriceLabel.attributedText = presentation.originalPrice.map(Self.strikethroughText(_:))
+        originalPriceLabel.attributedText = presentation.originalPrice.map { Self.strikethroughText($0) }
         originalPriceLabel.isHidden = presentation.originalPrice == nil
         discountBadge.text = presentation.discountText
         discountBadge.isHidden = presentation.discountText == nil
