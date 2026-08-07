@@ -915,7 +915,6 @@ private final class DiamondModeSegmentedControl: UIView {
 }
 
 private final class DiamondPremiumCardView: UIControl {
-    private let badgeLabel = UILabel()
     private let iconBackground = UIView()
     private let crownIcon = UIImageView(image: UIImage(systemName: "crown.fill"))
     private let titleLabel = UILabel()
@@ -939,15 +938,6 @@ private final class DiamondPremiumCardView: UIControl {
         layer.cornerRadius = 22.6
         layer.borderWidth = 1
         layer.borderColor = HomeDesignColor.accent.withAlphaComponent(0.32).cgColor
-
-        badgeLabel.translatesAutoresizingMaskIntoConstraints = false
-        badgeLabel.text = "3-DAY FREE TRIAL"
-        badgeLabel.textColor = UIColor(hex: 0x06281C)
-        badgeLabel.font = UIFont.systemFont(ofSize: 12, weight: .heavy)
-        badgeLabel.textAlignment = .center
-        badgeLabel.backgroundColor = UIColor(hex: 0x34D399)
-        badgeLabel.layer.cornerRadius = 9.9
-        badgeLabel.clipsToBounds = true
 
         iconBackground.translatesAutoresizingMaskIntoConstraints = false
         iconBackground.backgroundColor = HomeDesignColor.accent
@@ -991,7 +981,6 @@ private final class DiamondPremiumCardView: UIControl {
         actionLabel.font = UIFont.systemFont(ofSize: 19.8, weight: .bold)
         actionLabel.textAlignment = .center
 
-        addSubview(badgeLabel)
         addSubview(iconBackground)
         iconBackground.addSubview(crownIcon)
         addSubview(titleLabel)
@@ -1003,13 +992,8 @@ private final class DiamondPremiumCardView: UIControl {
         actionBackground.addSubview(actionLabel)
 
         NSLayoutConstraint.activate([
-            badgeLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 19.8),
-            badgeLabel.topAnchor.constraint(equalTo: topAnchor, constant: 12),
-            badgeLabel.widthAnchor.constraint(equalToConstant: 143.7),
-            badgeLabel.heightAnchor.constraint(equalToConstant: 27.7),
-
             iconBackground.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 19.8),
-            iconBackground.topAnchor.constraint(equalTo: topAnchor, constant: 50),
+            iconBackground.topAnchor.constraint(equalTo: topAnchor, constant: 24),
             iconBackground.widthAnchor.constraint(equalToConstant: 48),
             iconBackground.heightAnchor.constraint(equalToConstant: 48),
 
@@ -1023,7 +1007,7 @@ private final class DiamondPremiumCardView: UIControl {
             titleLabel.centerYAnchor.constraint(equalTo: iconBackground.centerYAnchor),
 
             firstCheck.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 19.8),
-            firstCheck.topAnchor.constraint(equalTo: topAnchor, constant: 110),
+            firstCheck.topAnchor.constraint(equalTo: topAnchor, constant: 94),
             firstCheck.widthAnchor.constraint(equalToConstant: 18.4),
             firstCheck.heightAnchor.constraint(equalToConstant: 18.4),
 
