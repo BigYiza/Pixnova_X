@@ -293,7 +293,7 @@ final class MembershipPaywallViewController: BaseViewController {
     private func updateCTA() {
         let plan = viewModel.selectedPlan
         let title = plan?.callToAction ?? "Continue"
-        let subtitle = plan.map(Self.purchasePriceText(for:)) ?? "Select a plan"
+        let subtitle = plan.map { Self.purchasePriceText(for: $0) } ?? "Select a plan"
         let attributed = NSMutableAttributedString(
             string: title,
             attributes: [
