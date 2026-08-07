@@ -12,6 +12,7 @@ enum ImageSelectionError: LocalizedError {
     case cancelled
     case cameraUnavailable
     case permissionDenied(source: ImageSelectionCoordinator.Source)
+    case photoTooSmall
     case loadFailed
 
     var errorDescription: String? {
@@ -22,6 +23,8 @@ enum ImageSelectionError: LocalizedError {
             return "Camera is not available on this device."
         case let .permissionDenied(source):
             return "\(source.permissionTitle) permission is required."
+        case .photoTooSmall:
+            return "This photo is too small to create a good video. Please choose a clearer, higher-quality one."
         case .loadFailed:
             return "The selected image could not be loaded."
         }
@@ -29,6 +32,8 @@ enum ImageSelectionError: LocalizedError {
 }
 
 final class ImageSelectionCoordinator: NSObject {
+    private static let minimumImageSidePixels: CGFloat = 300
+
     enum Source {
         case camera
         case photoLibrary
@@ -203,6 +208,24 @@ final class ImageSelectionCoordinator: NSObject {
 
     private func selectedImage(from image: UIImage) -> SelectedImage {
         SelectedImage(image: image, localURL: writeTemporaryJPEG(from: image))
+    }
+
+    private func finishSelecting(_ image: UIImage) {
+        guard minimumPixelSide(of: image) > Self.minimumImageSidePixels else {
+            finish(.failure(.photoTooSmall))
+            return
+        }
+        finish(.success(selectedImage(from: image)))
+    }
+
+    private func minimumPixelSide(of image: UIImage) -> CGFloat {
+        if let cgImage = image.cgImage {
+            return CGFloat(min(cgImage.width, cgImage.height))
+        }
+        if let ciImage = image.ciImage {
+            return min(ciImage.extent.width, ciImage.extent.height)
+        }
+        return min(image.size.width, image.size.height) * image.scale
     }
 
     private func writeTemporaryJPEG(from image: UIImage) -> URL? {
@@ -522,7 +545,7 @@ extension ImageSelectionCoordinator: PHPickerViewControllerDelegate {
                     self?.finish(.failure(.loadFailed))
                     return
                 }
-                self.finish(.success(self.selectedImage(from: image)))
+                self.finishSelecting(image)
             }
         }
     }
@@ -539,7 +562,7 @@ extension ImageSelectionCoordinator: UIImagePickerControllerDelegate, UINavigati
             finish(.failure(.loadFailed))
             return
         }
-        finish(.success(selectedImage(from: image)))
+        finishSelecting(image)
     }
 
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {

@@ -373,7 +373,8 @@ private final class ProfileHistoryGradientView: UIView {
 private enum ProfileVideoThumbnailLoader {
     static func image(for url: URL) async -> UIImage? {
         await withCheckedContinuation { continuation in
-            let generator = AVAssetImageGenerator(asset: AVURLAsset(url: url))
+            let playbackURL = VideoCache.shared.playbackURL(for: url, cacheIfMissing: false)
+            let generator = AVAssetImageGenerator(asset: AVURLAsset(url: playbackURL))
             generator.appliesPreferredTrackTransform = true
             generator.generateCGImageAsynchronously(for: .zero) { image, _, _ in
                 continuation.resume(returning: image.map(UIImage.init(cgImage:)))

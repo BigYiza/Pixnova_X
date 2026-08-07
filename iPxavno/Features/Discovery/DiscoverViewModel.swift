@@ -47,6 +47,15 @@ enum HomeCardStyle {
         }
     }
 
+    var playsVideo: Bool {
+        switch self {
+        case .videoHorizontal, .videoSmallVertical, .videoBigVertical:
+            return true
+        case .bigRow, .littleRow, .oneBigWithFourSmall, .doubleLineSmall:
+            return false
+        }
+    }
+
     var sectionHeight: CGFloat {
         switch self {
         case .bigRow:

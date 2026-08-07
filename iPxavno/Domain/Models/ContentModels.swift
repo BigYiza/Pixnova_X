@@ -275,11 +275,16 @@ struct CreativeTemplate: Codable {
     var preferredImageURL: URL? {
         operationCoverURLs.first ?? coverURL ?? alternateCoverURL
     }
-    
+
+    var homePreviewImageURL: URL? {
+        operationCoverURLs.first(where: { !$0.hasVideoPathExtension })
+            ?? [alternateCoverURL, coverURL]
+                .compactMap { $0 }
+                .first(where: { !$0.hasVideoPathExtension })
+    }
+
     var preferredVideoURL: URL? {
-        operationCoverURLs.first(where: { url in
-            return url.absoluteString.hasSuffix(".mp4")
-        }) ?? coverURL ?? alternateCoverURL
+        operationCoverURLs.first(where: \.hasVideoPathExtension) ?? coverURL
     }
 
 
@@ -330,6 +335,12 @@ struct CreativeTemplate: Codable {
         try container.encodeIfPresent(maxInputImageCount, forKey: .maxInputImageCount)
         try container.encodeIfPresent(tint, forKey: .tint)
         try container.encodeIfPresent(cardID, forKey: .cardID)
+    }
+}
+
+private extension URL {
+    var hasVideoPathExtension: Bool {
+        ["mp4", "m4v", "mov", "webm", "m3u8"].contains(pathExtension.lowercased())
     }
 }
 

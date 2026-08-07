@@ -122,6 +122,8 @@ final class MainTabBarController: UIViewController {
 
         let previousController = children.first
         let nextController = childControllers[index]
+        ((previousController as? UINavigationController)?.topViewController as? DiscoverViewController)?
+            .pauseVisibleVideos()
         selectedIndex = index
         designTabBar.select(index: index)
         updateTabBarVisibility(for: nextController.topViewController, in: nextController, animated: false)
@@ -143,6 +145,7 @@ final class MainTabBarController: UIViewController {
             ])
             nextController.didMove(toParent: self)
             view.layoutIfNeeded()
+            (nextController.topViewController as? DiscoverViewController)?.resumeVisibleVideos()
         }
     }
 

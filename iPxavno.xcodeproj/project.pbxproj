@@ -39,6 +39,7 @@
 		2DA77A7F2FE38F5A004692D8 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 2DA77A7E2FE38F5A004692D8 /* Kingfisher */; };
 		2DA77A862FE3CD58004692D8 /* LookinServer in Frameworks */ = {isa = PBXBuildFile; productRef = 2DA77A852FE3CD58004692D8 /* LookinServer */; };
 		35EFEED2E6F90E96A4B6C6FE /* HomeContentCells.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBF0F075411716A76D5A6D92 /* HomeContentCells.swift */; };
+		35EFEED2E6F90E96A4B6C700 /* VideoCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBF0F075411716A76D5A6D93 /* VideoCache.swift */; };
 		3751F790E52B334E1941987F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B50CE59AC50797769F95AFD8 /* LaunchScreen.storyboard */; };
 		38C8FC6585B0E28D577AE426 /* CategoryTemplateListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 993B7B5123F94FE2DCBC16C3 /* CategoryTemplateListViewModel.swift */; };
 		42C1A92D97FBBE204AC2464B /* AppError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 214CE15A933EFA387FB714EC /* AppError.swift */; };
@@ -174,6 +175,7 @@
 		BBAA1C4EA2B7CF842C86BFA9 /* RemoteAccountRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RemoteAccountRepository.swift; sourceTree = "<group>"; };
 		BC87C25ED745CDC6CE7E4CB6 /* PrimaryButton.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PrimaryButton.swift; sourceTree = "<group>"; };
 		CBF0F075411716A76D5A6D92 /* HomeContentCells.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeContentCells.swift; sourceTree = "<group>"; };
+		CBF0F075411716A76D5A6D93 /* VideoCache.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VideoCache.swift; sourceTree = "<group>"; };
 		CF908F48255844F18352C2DA /* GenerationModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GenerationModels.swift; sourceTree = "<group>"; };
 		D1B3E9F76C77087D7DCA1A03 /* DesignTabBarView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DesignTabBarView.swift; sourceTree = "<group>"; };
 		D20A833F4D94D7C5F61A41D3 /* ProfileViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ProfileViewController.swift; sourceTree = "<group>"; };
@@ -427,6 +429,7 @@
 			isa = PBXGroup;
 			children = (
 				DA433CE0D4DB81B559360404 /* KeyValueStore.swift */,
+				CBF0F075411716A76D5A6D93 /* VideoCache.swift */,
 			);
 			path = Storage;
 			sourceTree = "<group>";
@@ -694,6 +697,7 @@
 				6475294B7CE3F60E9C3A26C7 /* DiscoverViewController.swift in Sources */,
 				5209F09158C7936C613217CD /* DiscoverViewModel.swift in Sources */,
 				35EFEED2E6F90E96A4B6C6FE /* HomeContentCells.swift in Sources */,
+				35EFEED2E6F90E96A4B6C700 /* VideoCache.swift in Sources */,
 				5B2566288124D2FC65A11E83 /* HomeDesignTokens.swift in Sources */,
 				D3624B0A281A98381AA69A29 /* HomeTopBarView.swift in Sources */,
 				BE6801895D2024D4AE9CB8E2 /* LaunchViewController.swift in Sources */,

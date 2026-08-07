@@ -578,7 +578,8 @@ private final class VideoTemplatePreviewView: UIView {
             print("[TemplateVideoGeneration] video resource URL: \(url.absoluteString)")
             imageView.isHidden = true
             playerLayer.isHidden = false
-            let player = AVPlayer(url: url)
+            let playbackURL = VideoCache.shared.playbackURL(for: url)
+            let player = AVPlayer(url: playbackURL)
             player.isMuted = true
             playerLayer.player = player
             self.player = player

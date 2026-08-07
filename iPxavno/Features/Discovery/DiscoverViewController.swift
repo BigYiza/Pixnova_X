@@ -1,3 +1,4 @@
+import AVFoundation
 import UIKit
 
 final class DiscoverViewController: BaseViewController {
@@ -23,7 +24,18 @@ final class DiscoverViewController: BaseViewController {
         navigationController?.setNavigationBarHidden(true, animated: false)
         configureView()
         bindViewModel()
+        observeApplicationLifecycle()
         viewModel.load()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        resumeVisibleVideos()
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        pauseVisibleVideos()
     }
 
     private func configureView() {
@@ -79,6 +91,78 @@ final class DiscoverViewController: BaseViewController {
             self.sections = state.sections
             self.collectionView.reloadData()
             self.presentErrorIfNeeded(state.errorMessage)
+        }
+    }
+
+    private func observeApplicationLifecycle() {
+        let center = NotificationCenter.default
+        center.addObserver(
+            self,
+            selector: #selector(handleApplicationWillResignActive),
+            name: UIApplication.willResignActiveNotification,
+            object: nil
+        )
+        center.addObserver(
+            self,
+            selector: #selector(handleApplicationDidBecomeActive),
+            name: UIApplication.didBecomeActiveNotification,
+            object: nil
+        )
+        center.addObserver(
+            self,
+            selector: #selector(handleAudioSessionInterruption(_:)),
+            name: AVAudioSession.interruptionNotification,
+            object: nil
+        )
+    }
+
+    @objc private func handleApplicationWillResignActive() {
+        pauseVisibleVideos()
+    }
+
+    @objc private func handleApplicationDidBecomeActive() {
+        guard viewIfLoaded?.window != nil else { return }
+        resumeVisibleVideos()
+    }
+
+    @objc private func handleAudioSessionInterruption(_ notification: Notification) {
+        guard
+            let rawType = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt,
+            let type = AVAudioSession.InterruptionType(rawValue: rawType)
+        else {
+            return
+        }
+
+        switch type {
+        case .began:
+            pauseVisibleVideos()
+        case .ended:
+            let rawOptions = notification.userInfo?[AVAudioSessionInterruptionOptionKey] as? UInt ?? 0
+            let options = AVAudioSession.InterruptionOptions(rawValue: rawOptions)
+            guard options.contains(.shouldResume), viewIfLoaded?.window != nil else { return }
+            resumeVisibleVideos()
+        @unknown default:
+            break
+        }
+    }
+
+    func pauseVisibleVideos() {
+        collectionView.visibleCells
+            .compactMap { $0 as? HomeTemplateCardCell }
+            .forEach { $0.pauseVideo() }
+    }
+
+    func resumeVisibleVideos() {
+        guard UIApplication.shared.applicationState == .active else { return }
+        for indexPath in collectionView.indexPathsForVisibleItems {
+            guard
+                sections.indices.contains(indexPath.section),
+                sections[indexPath.section].kind.playsVideo,
+                let cell = collectionView.cellForItem(at: indexPath) as? HomeTemplateCardCell
+            else {
+                continue
+            }
+            cell.playVideo()
         }
     }
 
@@ -197,12 +281,16 @@ extension DiscoverViewController: UICollectionViewDataSource {
             ) as? HomeMosaicCell
             cell?.configure(templates: section.templates)
             return cell ?? UICollectionViewCell()
-        case .horizontal, .doubleLine:
+        case let .horizontal(style), let .doubleLine(style):
             let cell = collectionView.dequeueReusableCell(
                 withReuseIdentifier: HomeTemplateCardCell.reuseIdentifier,
                 for: indexPath
             ) as? HomeTemplateCardCell
-            cell?.configure(template: section.templates[indexPath.item], showsHotBadge: indexPath.item == 0)
+            cell?.configure(
+                template: section.templates[indexPath.item],
+                showsHotBadge: indexPath.item == 0,
+                playsVideo: style.playsVideo
+            )
             return cell ?? UICollectionViewCell()
         }
     }
@@ -231,6 +319,30 @@ extension DiscoverViewController: UICollectionViewDataSource {
 }
 
 extension DiscoverViewController: UICollectionViewDelegate {
+    func collectionView(
+        _ collectionView: UICollectionView,
+        willDisplay cell: UICollectionViewCell,
+        forItemAt indexPath: IndexPath
+    ) {
+        guard
+            UIApplication.shared.applicationState == .active,
+            view.window != nil,
+            sections.indices.contains(indexPath.section),
+            sections[indexPath.section].kind.playsVideo
+        else {
+            return
+        }
+        (cell as? HomeTemplateCardCell)?.playVideo()
+    }
+
+    func collectionView(
+        _ collectionView: UICollectionView,
+        didEndDisplaying cell: UICollectionViewCell,
+        forItemAt indexPath: IndexPath
+    ) {
+        (cell as? HomeTemplateCardCell)?.pauseVideo()
+    }
+
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let section = sections[indexPath.section]
 
@@ -265,6 +377,15 @@ private extension HomeSectionKind {
             return true
         }
         return false
+    }
+
+    var playsVideo: Bool {
+        switch self {
+        case let .horizontal(style), let .doubleLine(style):
+            return style.playsVideo
+        case .mosaic:
+            return false
+        }
     }
 }
 

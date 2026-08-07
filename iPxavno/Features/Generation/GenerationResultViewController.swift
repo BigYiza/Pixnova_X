@@ -421,7 +421,8 @@ private final class GenerationResultMediaView: UIView {
             imageView.isHidden = true
             videoView.isHidden = false
             playIconContainer.isHidden = false
-            let player = AVPlayer(url: url)
+            let playbackURL = VideoCache.shared.playbackURL(for: url)
+            let player = AVPlayer(url: playbackURL)
             player.isMuted = true
             videoView.player = player
             self.player = player
