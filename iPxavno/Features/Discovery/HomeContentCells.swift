@@ -1,3 +1,4 @@
+import AVFoundation
 import UIKit
 
 final class HomeMosaicCell: UICollectionViewCell {
@@ -101,8 +102,21 @@ final class HomeTemplateCardCell: UICollectionViewCell {
         previewView.prepareForReuse()
     }
 
-    func configure(template: CreativeTemplate, showsHotBadge: Bool) {
-        previewView.configure(template: template, style: .regular, showsHotBadge: showsHotBadge)
+    func configure(template: CreativeTemplate, showsHotBadge: Bool, playsVideo: Bool) {
+        previewView.configure(
+            template: template,
+            style: .regular,
+            showsHotBadge: showsHotBadge,
+            playsVideo: playsVideo
+        )
+    }
+
+    func playVideo() {
+        previewView.playVideo()
+    }
+
+    func pauseVideo() {
+        previewView.pauseVideo()
     }
 }
 
@@ -217,11 +231,18 @@ private enum HomePreviewStyle {
 
 private final class HomeTemplatePreviewView: UIView {
     private let imageView = RemoteImageView()
+    private let videoSurfaceView = HomeVideoSurfaceView()
     private let gradientView = GradientOverlayView()
     private let hotBadge = UILabel()
     private let titleLabel = UILabel()
     private let vipBadgeView = UIView()
     private let vipIcon = UIImageView(image: UIImage(systemName: "crown"))
+    private let player = AVPlayer()
+    private var currentVideoURL: URL?
+    private var loadingVideoURL: URL?
+    private var itemStatusObservation: NSKeyValueObservation?
+    private var playbackEndObserver: NSObjectProtocol?
+    private var isPlaybackRequested = false
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -233,13 +254,20 @@ private final class HomeTemplatePreviewView: UIView {
     }
 
     func prepareForReuse() {
-        imageView.image = nil
+        imageView.setImage(url: nil)
         titleLabel.text = nil
         hotBadge.isHidden = true
         vipBadgeView.isHidden = true
+        resetVideo()
     }
 
-    func configure(template: CreativeTemplate?, style: HomePreviewStyle, showsHotBadge: Bool) {
+    func configure(
+        template: CreativeTemplate?,
+        style: HomePreviewStyle,
+        showsHotBadge: Bool,
+        playsVideo: Bool = false
+    ) {
+        resetVideo()
         layer.cornerRadius = style.cornerRadius
         imageView.layer.cornerRadius = style.cornerRadius
         titleLabel.font = style.titleFont
@@ -248,10 +276,98 @@ private final class HomeTemplatePreviewView: UIView {
         // hotBadge.isHidden = !showsHotBadge
         vipBadgeView.isHidden = template?.requiresMembership != true
 
-        if let coverURL = template?.preferredImageURL {
+        if let coverURL = template?.homePreviewImageURL {
             imageView.setImage(url: coverURL, placeholder: nil)
         } else {
             imageView.setImage(url: nil, placeholder: nil)
+        }
+        currentVideoURL = playsVideo ? template?.preferredVideoURL : nil
+    }
+
+    func playVideo() {
+        guard let remoteURL = currentVideoURL else { return }
+        isPlaybackRequested = true
+
+        if player.currentItem != nil, loadingVideoURL == nil {
+            playWhenReady()
+            return
+        }
+        guard loadingVideoURL != remoteURL else { return }
+
+        loadingVideoURL = remoteURL
+        VideoCache.shared.fetch(remoteURL) { [weak self] localURL in
+            guard let self, self.currentVideoURL == remoteURL else { return }
+            self.loadingVideoURL = nil
+            guard self.isPlaybackRequested, let localURL else { return }
+            self.replacePlayerItem(with: localURL)
+        }
+    }
+
+    func pauseVideo() {
+        isPlaybackRequested = false
+        player.pause()
+    }
+
+    private func replacePlayerItem(with localURL: URL) {
+        removePlayerItemObservers()
+
+        let item = AVPlayerItem(url: localURL)
+        itemStatusObservation = item.observe(\.status, options: [.initial, .new]) { [weak self, weak item] _, _ in
+            DispatchQueue.main.async {
+                guard let self, let item, self.player.currentItem === item else { return }
+                self.playWhenReady()
+            }
+        }
+        playbackEndObserver = NotificationCenter.default.addObserver(
+            forName: .AVPlayerItemDidPlayToEndTime,
+            object: item,
+            queue: .main
+        ) { [weak self, weak item] _ in
+            guard let self, let item, self.player.currentItem === item, self.isPlaybackRequested else { return }
+            self.player.seek(to: .zero)
+            self.player.play()
+        }
+        player.replaceCurrentItem(with: item)
+    }
+
+    private func playWhenReady() {
+        guard isPlaybackRequested, let item = player.currentItem else { return }
+        switch item.status {
+        case .readyToPlay:
+            videoSurfaceView.isHidden = false
+            player.play()
+        case .failed:
+            videoSurfaceView.isHidden = true
+            player.pause()
+            if let currentVideoURL {
+                VideoCache.shared.removeCachedVideo(for: currentVideoURL)
+            }
+            isPlaybackRequested = false
+            removePlayerItemObservers()
+            player.replaceCurrentItem(with: nil)
+        case .unknown:
+            break
+        @unknown default:
+            break
+        }
+    }
+
+    private func resetVideo() {
+        isPlaybackRequested = false
+        currentVideoURL = nil
+        loadingVideoURL = nil
+        videoSurfaceView.isHidden = true
+        player.pause()
+        removePlayerItemObservers()
+        player.replaceCurrentItem(with: nil)
+    }
+
+    private func removePlayerItemObservers() {
+        itemStatusObservation?.invalidate()
+        itemStatusObservation = nil
+        if let playbackEndObserver {
+            NotificationCenter.default.removeObserver(playbackEndObserver)
+            self.playbackEndObserver = nil
         }
     }
 
@@ -265,6 +381,12 @@ private final class HomeTemplatePreviewView: UIView {
         imageView.contentMode = .scaleAspectFill
         imageView.backgroundColor = HomeDesignColor.card
         imageView.clipsToBounds = true
+
+        player.isMuted = true
+        player.actionAtItemEnd = .none
+        videoSurfaceView.translatesAutoresizingMaskIntoConstraints = false
+        videoSurfaceView.player = player
+        videoSurfaceView.isHidden = true
 
         gradientView.translatesAutoresizingMaskIntoConstraints = false
 
@@ -296,6 +418,7 @@ private final class HomeTemplatePreviewView: UIView {
         vipIcon.preferredSymbolConfiguration = UIImage.SymbolConfiguration(pointSize: 12, weight: .medium)
 
         addSubview(imageView)
+        addSubview(videoSurfaceView)
         addSubview(gradientView)
         addSubview(hotBadge)
         addSubview(titleLabel)
@@ -307,6 +430,11 @@ private final class HomeTemplatePreviewView: UIView {
             imageView.trailingAnchor.constraint(equalTo: trailingAnchor),
             imageView.topAnchor.constraint(equalTo: topAnchor),
             imageView.bottomAnchor.constraint(equalTo: bottomAnchor),
+
+            videoSurfaceView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            videoSurfaceView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            videoSurfaceView.topAnchor.constraint(equalTo: topAnchor),
+            videoSurfaceView.bottomAnchor.constraint(equalTo: bottomAnchor),
 
             gradientView.leadingAnchor.constraint(equalTo: leadingAnchor),
             gradientView.trailingAnchor.constraint(equalTo: trailingAnchor),
@@ -332,6 +460,35 @@ private final class HomeTemplatePreviewView: UIView {
             vipIcon.widthAnchor.constraint(equalToConstant: 14),
             vipIcon.heightAnchor.constraint(equalToConstant: 14)
         ])
+    }
+
+    deinit {
+        removePlayerItemObservers()
+    }
+}
+
+private final class HomeVideoSurfaceView: UIView {
+    override class var layerClass: AnyClass {
+        AVPlayerLayer.self
+    }
+
+    var player: AVPlayer? {
+        get { playerLayer.player }
+        set { playerLayer.player = newValue }
+    }
+
+    private var playerLayer: AVPlayerLayer {
+        layer as! AVPlayerLayer
+    }
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        playerLayer.videoGravity = .resizeAspectFill
+        isUserInteractionEnabled = false
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 }
 
