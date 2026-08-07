@@ -936,6 +936,7 @@
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
+				OTHER_SWIFT_FLAGS = "$(inherited) -Xllvm -sil-disable-pass=EarlyPerfInliner";
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = incremental;
 				SWIFT_ENABLE_EXPLICIT_MODULES = NO;
