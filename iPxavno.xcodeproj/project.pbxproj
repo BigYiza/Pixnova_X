@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		05D86FD3DC3C20BCA40A5CB0 /* RemoteContentRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 615CBA10848930C1841FF078 /* RemoteContentRepository.swift */; };
-		063B22F587CA2CAFDFD53CBD /* Observable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36D8C2F2FAEE6C46ED498451 /* Observable.swift */; };
+		063B22F587CA2CAFDFD53CBD /* Observable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36D8C2F2FAEE6C46ED498451 /* Observable.swift */; settings = {COMPILER_FLAGS = "-Onone"; }; };
 		0AE03B337A5BE21D135034B1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9D719FB358B97C9BD2281192 /* Assets.xcassets */; };
 		101E79FF3958D329F544FD7F /* AccountNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E9951A1EDA519F52E6F3936 /* AccountNotifications.swift */; };
 		10C7A9F56B4D922AA1F33415 /* MembershipHandling.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9F8B821F395D0C97BA36E44 /* MembershipHandling.swift */; };
@@ -926,9 +926,9 @@
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
-				OTHER_SWIFT_FLAGS = "$(inherited) -Xllvm -sil-disable-pass=EarlyPerfInliner -Xllvm -sil-disable-pass=PerfInliner";
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = incremental;
+				SWIFT_ENABLE_BATCH_MODE = NO;
 				SWIFT_ENABLE_EXPLICIT_MODULES = NO;
 				VALIDATE_PRODUCT = YES;
 			};
