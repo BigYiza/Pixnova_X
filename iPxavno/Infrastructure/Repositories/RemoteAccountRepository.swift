@@ -26,6 +26,16 @@ final class RemoteAccountRepository: AccountRepository {
         accountStore.currentAccount
     }
 
+    func clearSession() {
+        accountStore.clear()
+        sessionVault.clear()
+        notificationCenter.post(
+            name: AccountNotifications.accountDidChange,
+            object: nil,
+            userInfo: [AccountNotificationUserInfoKey.account: AccountSnapshot.empty]
+        )
+    }
+
     @discardableResult
     func prepareSession() async throws -> AccountSnapshot {
         if let account = accountStore.currentAccount, let credential = account.credential, credential.isValid {
@@ -177,6 +187,43 @@ final class RemoteAccountRepository: AccountRepository {
         return accountStore.currentAccount ?? linkedAccount
     }
 
+    @discardableResult
+    func removeThirdPartyBindings() async throws -> AccountSnapshot {
+        _ = try await refreshSessionIfNeeded(force: false)
+        let platforms = Set(
+            (accountStore.currentAccount?.bindList ?? [])
+                .map { $0.platform.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() }
+                .filter { !$0.isEmpty }
+        )
+
+        do {
+            for platform in platforms {
+                let body = try JSONEncoder().encode(BindDeleteRequest(platform: platform))
+                let endpoint = APIEndpoint<ServiceEnvelope<BindDeletePayload>>(
+                    method: .post,
+                    path: "/api/bind_del",
+                    body: body
+                )
+                let payload = try await apiClient.sendService(endpoint)
+                var account = accountStore.currentAccount ?? .empty
+                account.bindList = payload.bindList
+                try persist(account)
+            }
+        } catch {
+            _ = try? await refreshUserProfile()
+            throw error
+        }
+
+        do {
+            return try await refreshUserProfile()
+        } catch {
+            guard let account = accountStore.currentAccount, !account.hasLinkedAccount else {
+                throw error
+            }
+            return account
+        }
+    }
+
     private func login() async throws -> AccountSnapshot {
         let endpoint = APIEndpoint<ServiceEnvelope<LoginPayload>>(
             method: .post,
@@ -254,5 +301,22 @@ private struct FirebaseLoginRequest: Encodable {
 
     enum CodingKeys: String, CodingKey {
         case idToken = "id_token"
+    }
+}
+
+private struct BindDeleteRequest: Encodable {
+    let platform: String
+}
+
+private struct BindDeletePayload: Decodable {
+    let bindList: [ThirdPartyBinding]
+
+    enum CodingKeys: String, CodingKey {
+        case bindList = "bind_list"
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        bindList = try container.decodeIfPresent([ThirdPartyBinding].self, forKey: .bindList) ?? []
     }
 }
