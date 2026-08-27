@@ -7,13 +7,13 @@
 	<key>OnboardingEnabled</key>
 	<false/>
 	<key>GIDClientID</key>
-	<string>767690298151-9sv0ilffvphsigqa9bpf3qao6laitv1l.apps.googleusercontent.com</string>
+	<string>636960850285-uciiacpdonptu3dnqlm08l2paolt6ntq.apps.googleusercontent.com</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.767690298151-9sv0ilffvphsigqa9bpf3qao6laitv1l</string>
+				<string>com.googleusercontent.apps.636960850285-uciiacpdonptu3dnqlm08l2paolt6ntq</string>
 			</array>
 		</dict>
 	</array>

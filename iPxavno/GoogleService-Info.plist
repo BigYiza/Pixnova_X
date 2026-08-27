@@ -3,21 +3,23 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>767690298151-9sv0ilffvphsigqa9bpf3qao6laitv1l.apps.googleusercontent.com</string>
+	<string>636960850285-uciiacpdonptu3dnqlm08l2paolt6ntq.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.767690298151-9sv0ilffvphsigqa9bpf3qao6laitv1l</string>
+	<string>com.googleusercontent.apps.636960850285-uciiacpdonptu3dnqlm08l2paolt6ntq</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>636960850285-il52ltme7b6g1bji18verur3tvpuohbo.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
-	<string>AIzaSyAH43ChjsB1sZuItgKmnWzTVRAgVpbOVks</string>
+	<string>AIzaSyAeOBUYnScuoHkaYgH0MN6z5YUkNMjAjsA</string>
 	<key>GCM_SENDER_ID</key>
-	<string>767690298151</string>
+	<string>636960850285</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.lainc.pixvidai</string>
+	<string>com.lainc.picvidai</string>
 	<key>PROJECT_ID</key>
-	<string>pixnova-new</string>
+	<string>pixnova-pro-d0317</string>
 	<key>STORAGE_BUCKET</key>
-	<string>pixnova-new.firebasestorage.app</string>
+	<string>pixnova-pro-d0317.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -29,6 +31,8 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:767690298151:ios:44996a25f428f1e5e68f02</string>
+	<string>1:636960850285:ios:3243f1ea2948298f455a64</string>
+	<key>DATABASE_URL</key>
+	<string>https://pixnova-pro-d0317-default-rtdb.firebaseio.com</string>
 </dict>
 </plist>
