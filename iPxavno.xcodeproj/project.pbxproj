@@ -981,20 +981,20 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		2D6883B3303FD0F30079A44D /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 9.2.0;
-			};
-		};
 		2D55666A2FF211D400C9F5DF /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 12.15.0;
+			};
+		};
+		2D6883B3303FD0F30079A44D /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.2.0;
 			};
 		};
 		2DA77A7D2FE38F5A004692D8 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
@@ -1016,11 +1016,6 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		2D6883B4303FD0F30079A44D /* GoogleSignIn */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 2D6883B3303FD0F30079A44D /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
-			productName = GoogleSignIn;
-		};
 		2D55666B2FF211D400C9F5DF /* FirebaseAnalytics */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 2D55666A2FF211D400C9F5DF /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
@@ -1050,6 +1045,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 2D55666A2FF211D400C9F5DF /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseStorage;
+		};
+		2D6883B4303FD0F30079A44D /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2D6883B3303FD0F30079A44D /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
 		};
 		2DA77A7E2FE38F5A004692D8 /* Kingfisher */ = {
 			isa = XCSwiftPackageProductDependency;
