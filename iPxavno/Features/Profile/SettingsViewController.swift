@@ -1,3 +1,5 @@
+import FirebaseAuth
+import GoogleSignIn
 import UIKit
 
 final class SettingsViewController: BaseViewController {
@@ -6,6 +8,7 @@ final class SettingsViewController: BaseViewController {
     private let contentStackView = UIStackView()
     private let backButton = UIButton(type: .system)
     private let titleLabel = UILabel()
+    private let signOutButton = UIButton(type: .system)
     private let toastView = UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterialDark))
     private let toastLabel = UILabel()
     private var restoreTask: Task<Void, Never>?
@@ -48,6 +51,13 @@ final class SettingsViewController: BaseViewController {
         titleLabel.textColor = HomeDesignColor.text
         titleLabel.font = UIFont.systemFont(ofSize: 22, weight: .semibold)
         titleLabel.textAlignment = .center
+        titleLabel.isUserInteractionEnabled = true
+        let copyUserIDGesture = UILongPressGestureRecognizer(
+            target: self,
+            action: #selector(handleTitleLongPress(_:))
+        )
+        copyUserIDGesture.minimumPressDuration = 6
+        titleLabel.addGestureRecognizer(copyUserIDGesture)
 
         view.addSubview(backButton)
         view.addSubview(titleLabel)
@@ -86,19 +96,14 @@ final class SettingsViewController: BaseViewController {
             title: "Restore purchases",
             iconName: "arrow.counterclockwise"
         )
-        let legalHeader = makeSectionHeader("LEGAL")
-        let privacyRow = SettingsRowView(title: "Privacy Policy", iconName: "doc")
-        let agreementRow = SettingsRowView(title: "Terms of Service", iconName: "doc")
-        let subscriptionTermsRow = SettingsRowView(title: "Subscription Terms", iconName: "doc")
-        let contactRow = SettingsRowView(title: "Contact us", iconName: "square.and.arrow.up")
+        let generalHeader = makeSectionHeader("GENERAL")
+        let aboutRow = SettingsRowView(title: "About Us", iconName: "info.circle")
+        let signOutContainer = makeSignOutButtonContainer()
         let versionLabel = UILabel()
 
         manageSubscriptionRow.onTap = { [weak self] in self?.openSubscriptionManagement() }
         restorePurchasesRow.onTap = { [weak self] in self?.restorePurchases() }
-        privacyRow.onTap = { [weak self] in self?.openConfiguredURL(key: "PrivacyPolicyURL") }
-        agreementRow.onTap = { [weak self] in self?.openConfiguredURL(key: "TermsOfServiceURL") }
-        subscriptionTermsRow.onTap = { [weak self] in self?.openConfiguredURL(key: "SubscriptionTermsURL") }
-        contactRow.onTap = { [weak self] in self?.openConfiguredURL(key: "ContactURL") }
+        aboutRow.onTap = { [weak self] in self?.presentAboutUs() }
 
         versionLabel.translatesAutoresizingMaskIntoConstraints = false
         versionLabel.text = "PixnovaAI · v\(Self.appVersion)"
@@ -113,12 +118,11 @@ final class SettingsViewController: BaseViewController {
             manageSubscriptionRow,
             restorePurchasesRow,
             makeSpacer(height: 25),
-            legalHeader,
+            generalHeader,
             makeSpacer(height: 11),
-            privacyRow,
-            agreementRow,
-            subscriptionTermsRow,
-            contactRow,
+            aboutRow,
+            makeSpacer(height: 24),
+            signOutContainer,
             makeSpacer(height: 28),
             versionLabel,
             makeSpacer(height: 31)
@@ -143,13 +147,39 @@ final class SettingsViewController: BaseViewController {
             subscriptionHeader.heightAnchor.constraint(equalToConstant: 18),
             manageSubscriptionRow.heightAnchor.constraint(equalToConstant: 71),
             restorePurchasesRow.heightAnchor.constraint(equalToConstant: 71),
-            legalHeader.heightAnchor.constraint(equalToConstant: 18),
-            privacyRow.heightAnchor.constraint(equalToConstant: 71),
-            agreementRow.heightAnchor.constraint(equalToConstant: 71),
-            subscriptionTermsRow.heightAnchor.constraint(equalToConstant: 71),
-            contactRow.heightAnchor.constraint(equalToConstant: 71),
+            generalHeader.heightAnchor.constraint(equalToConstant: 18),
+            aboutRow.heightAnchor.constraint(equalToConstant: 71),
+            signOutContainer.heightAnchor.constraint(equalToConstant: 54),
             versionLabel.heightAnchor.constraint(equalToConstant: 19)
         ])
+    }
+
+    private func makeSignOutButtonContainer() -> UIView {
+        let container = UIView()
+        var configuration = UIButton.Configuration.filled()
+        configuration.title = "Sign Out"
+        configuration.baseForegroundColor = UIColor(hex: 0xFF6B6B)
+        configuration.background.backgroundColor = UIColor.white.withAlphaComponent(0.07)
+        configuration.background.strokeColor = UIColor(hex: 0xFF6B6B).withAlphaComponent(0.45)
+        configuration.background.strokeWidth = 1
+        configuration.background.cornerRadius = 17
+        configuration.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
+            var outgoing = incoming
+            outgoing.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
+            return outgoing
+        }
+        signOutButton.configuration = configuration
+        signOutButton.translatesAutoresizingMaskIntoConstraints = false
+        signOutButton.addTarget(self, action: #selector(handleSignOut), for: .touchUpInside)
+
+        container.addSubview(signOutButton)
+        NSLayoutConstraint.activate([
+            signOutButton.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 28),
+            signOutButton.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -28),
+            signOutButton.topAnchor.constraint(equalTo: container.topAnchor),
+            signOutButton.bottomAnchor.constraint(equalTo: container.bottomAnchor)
+        ])
+        return container
     }
 
     private func configureToast() {
@@ -218,6 +248,10 @@ final class SettingsViewController: BaseViewController {
         UIApplication.shared.open(url)
     }
 
+    private func presentAboutUs() {
+        navigationController?.pushViewController(AboutUsViewController(), animated: true)
+    }
+
     private func restorePurchases() {
         let loginCoordinator = AppRuntime.shared.container.loginCoordinator
         guard loginCoordinator.requireLinkedAccount(
@@ -241,15 +275,6 @@ final class SettingsViewController: BaseViewController {
         }
     }
 
-    private func openConfiguredURL(key: String) {
-        guard let rawValue = Bundle.main.object(forInfoDictionaryKey: key) as? String,
-              let url = URL(string: rawValue) else {
-            showToast("This page is not available yet.")
-            return
-        }
-        UIApplication.shared.open(url)
-    }
-
     private func showToast(_ message: String) {
         toastLabel.text = message
         view.bringSubviewToFront(toastView)
@@ -264,6 +289,39 @@ final class SettingsViewController: BaseViewController {
 
     @objc private func handleBack() {
         navigationController?.popViewController(animated: true)
+    }
+
+    @objc private func handleTitleLongPress(_ gesture: UILongPressGestureRecognizer) {
+        guard gesture.state == .began else { return }
+        guard let userID = AppRuntime.shared.container.accountRepository.cachedAccount?.userID,
+              !userID.isEmpty else {
+            showToast("User ID is not available.")
+            return
+        }
+
+        UIPasteboard.general.string = userID
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        showToast("User ID copied.")
+    }
+
+    @objc private func handleSignOut() {
+        do {
+            try Auth.auth().signOut()
+            GIDSignIn.sharedInstance.signOut()
+            let container = AppRuntime.shared.container
+            container.accountRepository.clearSession()
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+            if let mainController = navigationController?.parent as? MainTabBarController {
+                mainController.showHomeAfterSignOut()
+            } else {
+                navigationController?.popToRootViewController(animated: true)
+            }
+            Task {
+                _ = try? await container.accountRepository.prepareSession()
+            }
+        } catch {
+            showToast(error.localizedDescription)
+        }
     }
 
     private static var appVersion: String {

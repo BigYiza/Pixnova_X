@@ -3,6 +3,8 @@ import Foundation
 protocol AccountRepository: AnyObject {
     var cachedAccount: AccountSnapshot? { get }
 
+    func clearSession()
+
     @discardableResult
     func prepareSession() async throws -> AccountSnapshot
 
@@ -26,4 +28,7 @@ protocol AccountRepository: AnyObject {
 
     @discardableResult
     func bindFirebaseAccount(idToken: String) async throws -> AccountSnapshot
+
+    @discardableResult
+    func removeThirdPartyBindings() async throws -> AccountSnapshot
 }

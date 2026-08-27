@@ -37,6 +37,7 @@
 		2D5567462FF25C0700C9F5DF /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2D5567452FF25C0700C9F5DF /* GoogleService-Info.plist */; };
 		2D6883B2303FD0F30079A44D /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D6883B1303FD0F30079A44D /* LoginViewController.swift */; };
 		2D6883B5303FD0F30079A44D /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 2D6883B4303FD0F30079A44D /* GoogleSignIn */; };
+		2D75A002304000000079A44D /* AboutUsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D75A001304000000079A44D /* AboutUsViewController.swift */; };
 		2D81F9410D42E63965FA4C24 /* DiamondPurchaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D81F9400D42E63965FA4C24 /* DiamondPurchaseViewController.swift */; };
 		2DA77A7F2FE38F5A004692D8 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 2DA77A7E2FE38F5A004692D8 /* Kingfisher */; };
 		2DA77A862FE3CD58004692D8 /* LookinServer in Frameworks */ = {isa = PBXBuildFile; productRef = 2DA77A852FE3CD58004692D8 /* LookinServer */; };
@@ -120,6 +121,7 @@
 		2AC1BA65246846D497189301 /* MembershipPaywallViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MembershipPaywallViewController.swift; sourceTree = "<group>"; };
 		2D5567452FF25C0700C9F5DF /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		2D6883B1303FD0F30079A44D /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
+		2D75A001304000000079A44D /* AboutUsViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AboutUsViewController.swift; sourceTree = "<group>"; };
 		2D81F9400D42E63965FA4C24 /* DiamondPurchaseViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DiamondPurchaseViewController.swift; sourceTree = "<group>"; };
 		2DA779E62FE23B6A004692D8 /* iPxavno.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iPxavno.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		327E78347D9622501A5F42D8 /* BaseViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BaseViewController.swift; sourceTree = "<group>"; };
@@ -459,6 +461,7 @@
 		C3C1A6FB6E8C22A472569DF9 /* Profile */ = {
 			isa = PBXGroup;
 			children = (
+				2D75A001304000000079A44D /* AboutUsViewController.swift */,
 				D20A833F4D94D7C5F61A41D3 /* ProfileViewController.swift */,
 				BA1000000000000000000007 /* ProfileHistoryCells.swift */,
 				BA1000000000000000000009 /* SettingsViewController.swift */,
@@ -730,6 +733,7 @@
 				99AFBE36F737DF5F665AB9C0 /* ProfileViewController.swift in Sources */,
 				BA1000000000000000000008 /* ProfileHistoryCells.swift in Sources */,
 				BA1000000000000000000010 /* SettingsViewController.swift in Sources */,
+				2D75A002304000000079A44D /* AboutUsViewController.swift in Sources */,
 				46C1A221DAFD9165C2A66BE5 /* ProfileViewModel.swift in Sources */,
 				74E91FC9E0EC3676FB9D68C3 /* APIClient.swift in Sources */,
 				E585039253903467F4886F6D /* APIEndpoint.swift in Sources */,

@@ -36,6 +36,12 @@ final class MainTabBarController: UIViewController {
         tabBarHeightConstraint?.constant = DesignTabBarView.contentHeight + view.safeAreaInsets.bottom
     }
 
+    func showHomeAfterSignOut() {
+        guard childControllers.indices.contains(0) else { return }
+        childControllers.last?.popToRootViewController(animated: false)
+        selectTab(at: 0)
+    }
+
     private func configureChildControllers() {
         let discover = DiscoverViewController(
             viewModel: DiscoverViewModel(
