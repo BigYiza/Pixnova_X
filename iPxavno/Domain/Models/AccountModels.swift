@@ -40,6 +40,7 @@ struct AccountSnapshot: Codable {
     var vipRewardInfo: VIPRewardInfo?
     var userGroupMap: [String: JSONValue]
     var user: RegisteredUserInfo?
+    var bindList: [ThirdPartyBinding]?
 
     enum CodingKeys: String, CodingKey {
         case accessToken
@@ -56,6 +57,7 @@ struct AccountSnapshot: Codable {
         case vipRewardInfo
         case userGroupMap
         case user
+        case bindList
     }
 
     static let empty = AccountSnapshot(
@@ -72,7 +74,8 @@ struct AccountSnapshot: Codable {
         displayInvitationInfo: nil,
         vipRewardInfo: nil,
         userGroupMap: [:],
-        user: nil
+        user: nil,
+        bindList: nil
     )
 
     var credential: AuthCredential? {
@@ -94,6 +97,10 @@ struct AccountSnapshot: Codable {
         }
 
         return Date().timeIntervalSince(registrationDate) > 3 * 24 * 60 * 60 ? .expired : .available
+    }
+
+    var hasLinkedAccount: Bool {
+        bindList?.isEmpty == false
     }
 
     mutating func applyLogin(_ payload: LoginPayload) {
@@ -122,6 +129,7 @@ struct AccountSnapshot: Codable {
         invitationInfo = payload.invitationInfo
         vipRewardInfo = payload.vipRewardInfo
         user = payload.user
+        bindList = payload.bindList
     }
 }
 
@@ -171,12 +179,27 @@ struct UserInfoPayload: Codable {
     let invitationInfo: InvitationInfo?
     let vipRewardInfo: VIPRewardInfo?
     let user: RegisteredUserInfo?
+    let bindList: [ThirdPartyBinding]
 
     enum CodingKeys: String, CodingKey {
         case invitationInfo = "invite_info"
         case vipRewardInfo = "vip_reward"
         case user
+        case bindList = "bind_list"
     }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        invitationInfo = try container.decodeIfPresent(InvitationInfo.self, forKey: .invitationInfo)
+        vipRewardInfo = try container.decodeIfPresent(VIPRewardInfo.self, forKey: .vipRewardInfo)
+        user = try container.decodeIfPresent(RegisteredUserInfo.self, forKey: .user)
+        bindList = try container.decodeIfPresent([ThirdPartyBinding].self, forKey: .bindList) ?? []
+    }
+}
+
+struct ThirdPartyBinding: Codable, Equatable {
+    let name: String
+    let platform: String
 }
 
 struct InvitationInfo: Codable {

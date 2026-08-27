@@ -153,6 +153,30 @@ final class RemoteAccountRepository: AccountRepository {
         return try await synchronizeAccount()
     }
 
+    @discardableResult
+    func bindFirebaseAccount(idToken: String) async throws -> AccountSnapshot {
+        _ = try await refreshSessionIfNeeded(force: false)
+        let body = try JSONEncoder().encode(FirebaseLoginRequest(idToken: idToken))
+        let endpoint = APIEndpoint<ServiceEnvelope<LoginPayload>>(
+            method: .post,
+            path: "/openapi/google_login",
+            body: body
+        )
+
+        let payload = try await apiClient.send(endpoint).requirePayload()
+        var account = accountStore.currentAccount ?? .empty
+        account.applyLogin(payload)
+        try persist(account)
+
+        _ = try? await refreshEntitlements()
+        let linkedAccount = try await refreshUserProfile()
+        _ = try? await fetchUserGroups(positions: [
+            AccountUserGroupPosition.membershipCloseButton,
+            AccountUserGroupPosition.membershipPaywall
+        ])
+        return accountStore.currentAccount ?? linkedAccount
+    }
+
     private func login() async throws -> AccountSnapshot {
         let endpoint = APIEndpoint<ServiceEnvelope<LoginPayload>>(
             method: .post,
@@ -222,5 +246,13 @@ private struct RestoreAccountRequest: Encodable {
 
     enum CodingKeys: String, CodingKey {
         case transactionIDs = "trans_id"
+    }
+}
+
+private struct FirebaseLoginRequest: Encodable {
+    let idToken: String
+
+    enum CodingKeys: String, CodingKey {
+        case idToken = "id_token"
     }
 }

@@ -22,30 +22,42 @@ final class AppCoordinator {
 
     private func bootstrap() async {
         async let minimumLaunchDelay: Void = waitForLaunchRhythm()
+        var shouldPromptLogin = false
 
         do {
-            let membership = try await container.membershipHandler
-                .maintainStatusAfterSessionPrepared()
-            container.analytics.record(
-                AnalyticsEvent(
-                    name: "launch_membership_maintained",
-                    properties: [
-                        "member": "\(membership.isVIP)", "diamonds": "\(membership.diamonds)",
-                    ]
+            _ = try await container.accountRepository.prepareSession()
+            let account = try await container.accountRepository.refreshUserProfile()
+            shouldPromptLogin = !account.hasLinkedAccount
+
+            if account.hasLinkedAccount {
+                let membership = try await container.membershipHandler
+                    .maintainStatusAfterSessionPrepared()
+                container.analytics.record(
+                    AnalyticsEvent(
+                        name: "launch_membership_maintained",
+                        properties: [
+                            "member": "\(membership.isVIP)", "diamonds": "\(membership.diamonds)",
+                        ]
+                    )
                 )
-            )
+            } else {
+                container.analytics.record(
+                    AnalyticsEvent(name: "launch_guest_session", properties: [:])
+                )
+            }
             refreshContentCatalog()
         } catch {
+            shouldPromptLogin = container.accountRepository.cachedAccount?.bindList?.isEmpty == true
             container.analytics.record(
                 AnalyticsEvent(
-                    name: "launch_membership_maintain_failed",
+                    name: "launch_account_prepare_failed",
                     properties: ["reason": error.localizedDescription])
             )
             refreshContentCatalog()
         }
 
         _ = await minimumLaunchDelay
-        showInitialExperience()
+        showInitialExperience(shouldPromptLogin: shouldPromptLogin)
     }
 
     private func waitForLaunchRhythm() async {
@@ -70,25 +82,32 @@ final class AppCoordinator {
         }
     }
 
-    private func showInitialExperience() {
+    private func showInitialExperience(shouldPromptLogin: Bool) {
         let completed = container.keyValueStore.bool(forKey: AppStorageKey.onboardingCompleted)
         let onboardingEnabled = Bundle.main.object(forInfoDictionaryKey: "OnboardingEnabled") as? Bool
             ?? false
 
         if completed || !onboardingEnabled {
-            showMainInterface()
+            showMainInterface(shouldPromptLogin: shouldPromptLogin)
         } else {
             let onboarding = OnboardingViewController()
             onboarding.onFinish = { [weak self] in
                 self?.container.keyValueStore.set(true, forKey: AppStorageKey.onboardingCompleted)
-                self?.showMainInterface()
+                self?.showMainInterface(shouldPromptLogin: shouldPromptLogin)
             }
             setRoot(onboarding)
         }
     }
 
-    private func showMainInterface() {
-        setRoot(MainTabBarController(container: container))
+    private func showMainInterface(shouldPromptLogin: Bool) {
+        let main = MainTabBarController(container: container)
+        setRoot(main)
+
+        guard shouldPromptLogin else { return }
+        DispatchQueue.main.async { [weak self, weak main] in
+            guard let self, let main else { return }
+            self.container.loginCoordinator.present(from: main, reason: .launch)
+        }
     }
 
     private func setRoot(_ viewController: UIViewController) {

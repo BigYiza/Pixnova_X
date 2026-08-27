@@ -409,10 +409,22 @@ final class MembershipPaywallViewController: BaseViewController {
     }
 
     @objc private func handlePurchase() {
+        let loginCoordinator = AppRuntime.shared.container.loginCoordinator
+        guard loginCoordinator.requireLinkedAccount(
+            from: self,
+            reason: .membership,
+            onAuthenticated: { [weak self] in self?.handlePurchase() }
+        ) else { return }
         viewModel.purchaseSelectedPlan()
     }
 
     @objc private func handleRestore() {
+        let loginCoordinator = AppRuntime.shared.container.loginCoordinator
+        guard loginCoordinator.requireLinkedAccount(
+            from: self,
+            reason: .restorePurchases,
+            onAuthenticated: { [weak self] in self?.handleRestore() }
+        ) else { return }
         viewModel.restorePurchases()
     }
 

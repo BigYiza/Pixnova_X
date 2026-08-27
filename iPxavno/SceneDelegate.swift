@@ -1,3 +1,4 @@
+import GoogleSignIn
 import UIKit
 
 final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
@@ -17,6 +18,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     func sceneWillEnterForeground(_ scene: UIScene) {
+        guard AppRuntime.shared.container.loginCoordinator.hasLinkedAccount else { return }
         Task {
             do {
                 try await AppRuntime.shared.container.membershipHandler
@@ -37,6 +39,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         URLContexts.forEach { context in
+            if GIDSignIn.sharedInstance.handle(context.url) { return }
             AppRuntime.shared.container.solarEngine.handleOpenURL(context.url)
         }
     }

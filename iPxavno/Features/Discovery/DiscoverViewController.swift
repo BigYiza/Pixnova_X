@@ -171,6 +171,13 @@ final class DiscoverViewController: BaseViewController {
     }
 
     private func presentMembershipPaywall() {
+        let loginCoordinator = AppRuntime.shared.container.loginCoordinator
+        guard loginCoordinator.requireLinkedAccount(
+            from: self,
+            reason: .membership,
+            onAuthenticated: { [weak self] in self?.presentMembershipPaywall() }
+        ) else { return }
+
         let viewController = viewModel.makeMembershipPaywallViewController()
         let navigationController = UINavigationController(rootViewController: viewController)
         navigationController.modalPresentationStyle = .fullScreen
@@ -178,6 +185,13 @@ final class DiscoverViewController: BaseViewController {
     }
 
     private func presentDiamondStore() {
+        let loginCoordinator = AppRuntime.shared.container.loginCoordinator
+        guard loginCoordinator.requireLinkedAccount(
+            from: self,
+            reason: .diamonds,
+            onAuthenticated: { [weak self] in self?.presentDiamondStore() }
+        ) else { return }
+
         let viewController = viewModel.makeDiamondPurchaseViewController()
         let navigationController = UINavigationController(rootViewController: viewController)
         navigationController.modalPresentationStyle = .fullScreen

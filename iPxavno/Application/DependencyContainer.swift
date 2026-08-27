@@ -12,6 +12,7 @@ struct DependencyContainer {
     let historyRepository: HistoryRepository
     let generationMediaUploader: GenerationMediaUploading
     let generationWorkflowRunner: GenerationWorkflowRunning
+    let loginCoordinator: LoginPresentationCoordinator
     let analytics: AnalyticsTracking
     let solarEngine: SolarEngineAnalyticsDestination
     let keyValueStore: KeyValueStore
@@ -56,6 +57,10 @@ struct DependencyContainer {
             sessionVault: sessionVault,
             accountStore: accountStore
         )
+        let loginCoordinator = LoginPresentationCoordinator(
+            accountRepository: accountRepository,
+            analytics: analytics
+        )
         let membershipHandler = DefaultMembershipHandler(accountRepository: accountRepository)
         let paymentRepository = RemoteMembershipPaymentRepository(apiClient: apiClient)
         let generationRepository = RemoteGenerationRepository(apiClient: apiClient)
@@ -99,6 +104,7 @@ struct DependencyContainer {
             historyRepository: historyRepository,
             generationMediaUploader: mediaUploader,
             generationWorkflowRunner: workflowRunner,
+            loginCoordinator: loginCoordinator,
             analytics: analytics,
             solarEngine: solarEngine,
             keyValueStore: keyValueStore
