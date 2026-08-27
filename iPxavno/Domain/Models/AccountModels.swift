@@ -200,6 +200,17 @@ struct UserInfoPayload: Codable {
 struct ThirdPartyBinding: Codable, Equatable {
     let name: String
     let platform: String
+
+    enum CodingKeys: String, CodingKey {
+        case name
+        case platform
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        name = try container.decodeIfPresent(String.self, forKey: .name) ?? ""
+        platform = try container.decodeIfPresent(String.self, forKey: .platform) ?? ""
+    }
 }
 
 struct InvitationInfo: Codable {

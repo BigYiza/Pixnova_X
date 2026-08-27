@@ -213,23 +213,29 @@ final class APIClient {
         fileprivate static func logRequest<Response: Decodable>(
             _ request: URLRequest, requestID: String, responseType: Response.Type
         ) {
-            print(
-                "[API][\(requestID)] ->",
-                request.httpMethod ?? "GET",
-                request.url?.absoluteString ?? "<nil-url>",
-                "responseType=\(responseType)"
-            )
+            let headers = formattedHeaders(request.allHTTPHeaderFields ?? [:])
+            let body = formattedBody(request.httpBody)
+            print("""
+            [API][\(requestID)] REQUEST
+            method: \(request.httpMethod ?? "GET")
+            url: \(sanitizedURL(request.url))
+            responseType: \(responseType)
+            headers:
+            \(headers)
+            body:
+            \(body)
+            """)
         }
 
         fileprivate static func logSuccess(
             _ response: HTTPURLResponse, data: Data, request: URLRequest, requestID: String
         ) {
-            print(
-                "[API][\(requestID)] <-",
-                response.statusCode,
-                request.httpMethod ?? "GET",
-                request.url?.absoluteString ?? "<nil-url>",
-                "bytes=\(data.count)"
+            logResponse(
+                response,
+                data: data,
+                request: request,
+                requestID: requestID,
+                result: "SUCCESS"
             )
         }
 
@@ -239,7 +245,7 @@ final class APIClient {
             print(
                 "[API][\(requestID)][NetworkError]",
                 request.httpMethod ?? "GET",
-                request.url?.absoluteString ?? "<nil-url>",
+                sanitizedURL(request.url),
                 errorDiagnostic(error)
             )
         }
@@ -247,14 +253,23 @@ final class APIClient {
         fileprivate static func logInvalidResponse(
             _ response: URLResponse, data: Data, request: URLRequest, requestID: String
         ) {
-            let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
-            print(
-                "[API][\(requestID)][InvalidResponse]",
-                request.httpMethod ?? "GET",
-                request.url?.absoluteString ?? "<nil-url>",
-                "status=\(statusCode)",
-                "bytes=\(data.count)",
-                "body=\(responseBodyPreview(data))"
+            guard let httpResponse = response as? HTTPURLResponse else {
+                print("""
+                [API][\(requestID)] RESPONSE INVALID
+                method: \(request.httpMethod ?? "GET")
+                url: \(sanitizedURL(request.url))
+                response: <not an HTTP response>
+                body:
+                \(formattedBody(data))
+                """)
+                return
+            }
+            logResponse(
+                httpResponse,
+                data: data,
+                request: request,
+                requestID: requestID,
+                result: "HTTP_ERROR"
             )
         }
 
@@ -266,23 +281,121 @@ final class APIClient {
             requestID: String,
             responseType: Response.Type
         ) {
-            print(
-                "[API][\(requestID)][DecodingError]",
-                request.httpMethod ?? "GET",
-                request.url?.absoluteString ?? "<nil-url>",
-                "status=\(response.statusCode)",
-                "responseType=\(responseType)",
-                "bytes=\(data.count)",
-                "error=\(errorDiagnostic(error))",
-                "body=\(responseBodyPreview(data))"
+            logResponse(
+                response,
+                data: data,
+                request: request,
+                requestID: requestID,
+                result: "DECODING_ERROR"
             )
+            print("""
+            [API][\(requestID)] DECODING ERROR
+            responseType: \(responseType)
+            error: \(errorDiagnostic(error))
+            """)
         }
 
-        fileprivate static func responseBodyPreview(_ data: Data, limit: Int = 4_000) -> String {
-            guard !data.isEmpty else { return "<empty>" }
-            let text = String(data: data, encoding: .utf8) ?? "<non-utf8 \(data.count) bytes>"
-            guard text.count > limit else { return text }
-            return "\(text.prefix(limit))...<truncated \(text.count - limit) chars>"
+        private static func logResponse(
+            _ response: HTTPURLResponse,
+            data: Data,
+            request: URLRequest,
+            requestID: String,
+            result: String
+        ) {
+            print("""
+            [API][\(requestID)] RESPONSE \(result)
+            method: \(request.httpMethod ?? "GET")
+            url: \(sanitizedURL(request.url))
+            status: \(response.statusCode)
+            bytes: \(data.count)
+            headers:
+            \(formattedHeaders(response.allHeaderFields))
+            body:
+            \(formattedBody(data))
+            """)
+        }
+
+        private static func formattedBody(_ data: Data?) -> String {
+            guard let data, !data.isEmpty else { return "<empty>" }
+
+            if let object = try? JSONSerialization.jsonObject(with: data),
+               JSONSerialization.isValidJSONObject(object),
+               let sanitizedData = try? JSONSerialization.data(
+                   withJSONObject: sanitizeJSONObject(object),
+                   options: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
+               ),
+               let text = String(data: sanitizedData, encoding: .utf8) {
+                return text
+            }
+
+            return String(data: data, encoding: .utf8) ?? "<non-utf8 \(data.count) bytes>"
+        }
+
+        private static func formattedHeaders(_ headers: [String: String]) -> String {
+            let values = headers.map { key, value in
+                "  \(key): \(isSensitiveKey(key) ? "<redacted>" : value)"
+            }
+            return values.sorted().isEmpty ? "<empty>" : values.sorted().joined(separator: "\n")
+        }
+
+        private static func formattedHeaders(_ headers: [AnyHashable: Any]) -> String {
+            let values = headers.map { key, value in
+                let name = String(describing: key)
+                let displayedValue = isSensitiveKey(name) ? "<redacted>" : String(describing: value)
+                return "  \(name): \(displayedValue)"
+            }
+            return values.sorted().isEmpty ? "<empty>" : values.sorted().joined(separator: "\n")
+        }
+
+        private static func sanitizeJSONObject(_ object: Any) -> Any {
+            if let dictionary = object as? [String: Any] {
+                return dictionary.reduce(into: [String: Any]()) { result, element in
+                    result[element.key] = isSensitiveKey(element.key)
+                        ? "<redacted>"
+                        : sanitizeJSONObject(element.value)
+                }
+            }
+            if let array = object as? [Any] {
+                return array.map(sanitizeJSONObject)
+            }
+            return object
+        }
+
+        private static func sanitizedURL(_ url: URL?) -> String {
+            guard let url, var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+            else { return "<nil-url>" }
+            components.queryItems = components.queryItems?.map { item in
+                URLQueryItem(
+                    name: item.name,
+                    value: isSensitiveKey(item.name) ? "<redacted>" : item.value
+                )
+            }
+            return components.url?.absoluteString ?? url.absoluteString
+        }
+
+        private static func isSensitiveKey(_ key: String) -> Bool {
+            let normalized = key.lowercased().filter { $0.isLetter || $0.isNumber }
+            let exactKeys: Set<String> = [
+                "authorization",
+                "accesstoken",
+                "refreshtoken",
+                "idtoken",
+                "firebasetoken",
+                "token",
+                "tokenid",
+                "receipt",
+                "transactionreceipt",
+                "signedtransactioninfo",
+                "signedrenewalinfo",
+                "clientsecret",
+                "ephemeralkey",
+                "password",
+                "secret",
+                "signature",
+                "setcookie",
+                "cookie"
+            ]
+            return exactKeys.contains(normalized)
         }
 
         fileprivate static func errorDiagnostic(_ error: Error) -> String {
