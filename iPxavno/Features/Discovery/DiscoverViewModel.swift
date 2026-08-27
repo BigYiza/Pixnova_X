@@ -198,10 +198,15 @@ final class DiscoverViewModel {
 
         Task {
             do {
-                _ = try await membershipHandler.membershipStatus(forceRefresh: false)
+                let hasLinkedAccount = membershipHandler.cachedMembership.account.hasLinkedAccount
+                if hasLinkedAccount {
+                    _ = try await membershipHandler.membershipStatus(forceRefresh: false)
+                }
                 let snapshot = try await contentRepository.fetchHomePage(tab: tab)
-                Task {
-                    _ = try? await membershipHandler.membershipStatus(forceRefresh: true)
+                if hasLinkedAccount {
+                    Task {
+                        _ = try? await membershipHandler.membershipStatus(forceRefresh: true)
+                    }
                 }
                 let resolvedMembership = currentMembershipState
 

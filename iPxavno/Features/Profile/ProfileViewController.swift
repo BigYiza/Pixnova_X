@@ -171,6 +171,12 @@ final class ProfileViewController: BaseViewController {
 
     @objc private func handleDiamondTap() {
         let container = AppRuntime.shared.container
+        guard container.loginCoordinator.requireLinkedAccount(
+            from: self,
+            reason: .diamonds,
+            onAuthenticated: { [weak self] in self?.handleDiamondTap() }
+        ) else { return }
+
         let controller = DiamondPurchaseViewController(
             viewModel: DiamondPurchaseViewModel(
                 catalog: .configured,
@@ -193,6 +199,12 @@ final class ProfileViewController: BaseViewController {
 
     private func presentMembershipPaywall() {
         let container = AppRuntime.shared.container
+        guard container.loginCoordinator.requireLinkedAccount(
+            from: self,
+            reason: .membership,
+            onAuthenticated: { [weak self] in self?.presentMembershipPaywall() }
+        ) else { return }
+
         let controller = MembershipPaywallViewController(
             viewModel: MembershipPaywallViewModel(
                 membershipHandler: container.membershipHandler,

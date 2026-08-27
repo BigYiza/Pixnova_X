@@ -35,6 +35,8 @@
 		2D5566742FF211D400C9F5DF /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 2D5566732FF211D400C9F5DF /* FirebaseCrashlytics */; };
 		2D5566762FF211D400C9F5DF /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 2D5566752FF211D400C9F5DF /* FirebaseStorage */; };
 		2D5567462FF25C0700C9F5DF /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2D5567452FF25C0700C9F5DF /* GoogleService-Info.plist */; };
+		2D6883B2303FD0F30079A44D /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D6883B1303FD0F30079A44D /* LoginViewController.swift */; };
+		2D6883B5303FD0F30079A44D /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 2D6883B4303FD0F30079A44D /* GoogleSignIn */; };
 		2D81F9410D42E63965FA4C24 /* DiamondPurchaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D81F9400D42E63965FA4C24 /* DiamondPurchaseViewController.swift */; };
 		2DA77A7F2FE38F5A004692D8 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 2DA77A7E2FE38F5A004692D8 /* Kingfisher */; };
 		2DA77A862FE3CD58004692D8 /* LookinServer in Frameworks */ = {isa = PBXBuildFile; productRef = 2DA77A852FE3CD58004692D8 /* LookinServer */; };
@@ -117,6 +119,7 @@
 		28E7C6F1A03D41D493AAE390 /* TemplateVideoGenerationViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TemplateVideoGenerationViewController.swift; sourceTree = "<group>"; };
 		2AC1BA65246846D497189301 /* MembershipPaywallViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MembershipPaywallViewController.swift; sourceTree = "<group>"; };
 		2D5567452FF25C0700C9F5DF /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		2D6883B1303FD0F30079A44D /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
 		2D81F9400D42E63965FA4C24 /* DiamondPurchaseViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DiamondPurchaseViewController.swift; sourceTree = "<group>"; };
 		2DA779E62FE23B6A004692D8 /* iPxavno.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iPxavno.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		327E78347D9622501A5F42D8 /* BaseViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BaseViewController.swift; sourceTree = "<group>"; };
@@ -195,6 +198,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2D6883B5303FD0F30079A44D /* GoogleSignIn in Frameworks */,
 				2DA77A7F2FE38F5A004692D8 /* Kingfisher in Frameworks */,
 				2D5566702FF211D400C9F5DF /* FirebaseAuth in Frameworks */,
 				2DA77A862FE3CD58004692D8 /* LookinServer in Frameworks */,
@@ -257,6 +261,14 @@
 				6254830D140D1F20A2A2DA04 /* Pods-iPxavno.release.xcconfig */,
 			);
 			path = Pods;
+			sourceTree = "<group>";
+		};
+		2D6883B0303FD0E80079A44D /* Login */ = {
+			isa = PBXGroup;
+			children = (
+				2D6883B1303FD0F30079A44D /* LoginViewController.swift */,
+			);
+			path = Login;
 			sourceTree = "<group>";
 		};
 		2DA779DD2FE23B6A004692D8 = {
@@ -413,6 +425,7 @@
 		B28BA91D1CD3AC822AF98601 /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				2D6883B0303FD0E80079A44D /* Login */,
 				B8F811744A76CED156BC0AAE /* Creation */,
 				5EF67B0549F8441DAAA733F3 /* Discovery */,
 				D7B3FE73681B5714D3455CF0 /* Generation */,
@@ -538,6 +551,7 @@
 			);
 			name = iPxavno;
 			packageProductDependencies = (
+				2D6883B4303FD0F30079A44D /* GoogleSignIn */,
 				2DA77A7E2FE38F5A004692D8 /* Kingfisher */,
 				2DA77A852FE3CD58004692D8 /* LookinServer */,
 				2D55666B2FF211D400C9F5DF /* FirebaseAnalytics */,
@@ -576,6 +590,7 @@
 			mainGroup = 2DA779DD2FE23B6A004692D8;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+				2D6883B3303FD0F30079A44D /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				2DA77A7D2FE38F5A004692D8 /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				2DA77A842FE3CD58004692D8 /* XCRemoteSwiftPackageReference "LookinServer" */,
 				2D55666A2FF211D400C9F5DF /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
@@ -612,9 +627,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-iPxavno/Pods-iPxavno-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-iPxavno/Pods-iPxavno-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -678,6 +697,7 @@
 				90025A7F3044ECA6374963B0 /* GenerationRepository.swift in Sources */,
 				101E79FF3958D329F544FD7F /* AccountNotifications.swift in Sources */,
 				E66DE3DB1A043ED1541B2AB3 /* AnalyticsTracking.swift in Sources */,
+				2D6883B2303FD0F30079A44D /* LoginViewController.swift in Sources */,
 				4A062348D0EF0B79150350A4 /* ContentNotifications.swift in Sources */,
 				5042C72B64C4C2773E6E0F25 /* DeviceIdentifying.swift in Sources */,
 				9D5E2D6B2791454696419284 /* GenerationParameterPricing.swift in Sources */,
@@ -741,6 +761,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = iPxavno/iPxavno.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = P2328CN2XE;
@@ -779,6 +800,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = iPxavno/iPxavno.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = P2328CN2XE;
@@ -959,6 +981,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		2D6883B3303FD0F30079A44D /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.2.0;
+			};
+		};
 		2D55666A2FF211D400C9F5DF /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
@@ -986,6 +1016,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		2D6883B4303FD0F30079A44D /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2D6883B3303FD0F30079A44D /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
 		2D55666B2FF211D400C9F5DF /* FirebaseAnalytics */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 2D55666A2FF211D400C9F5DF /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;

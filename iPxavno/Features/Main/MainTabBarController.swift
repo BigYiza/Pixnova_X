@@ -202,6 +202,15 @@ private final class SwipeBackNavigationController: UINavigationController, UIGes
 
 extension MainTabBarController: DesignTabBarViewDelegate {
     func designTabBarView(_ tabBarView: DesignTabBarView, didSelect index: Int) {
+        if index == 4,
+           !container.loginCoordinator.requireLinkedAccount(
+               from: self,
+               reason: .profile,
+               onAuthenticated: { [weak self] in self?.selectTab(at: index) }
+           ) {
+            tabBarView.select(index: selectedIndex)
+            return
+        }
         selectTab(at: index)
     }
 }

@@ -100,14 +100,19 @@ struct MembershipSnapshot {
 
     init(account: AccountSnapshot) {
         self.account = account
-        isVIP = account.isVIP
-        expirationTime = account.vipExpirationTime
-        videoTimes = account.videoTimes
-        giveAIVideosTimes = account.giveAIVideosTimes
-        freeVIPTimes = account.freeVIPTimes
-        diamonds = account.diamonds
-        closeButtonStrategy = MembershipSnapshot.closeButtonStrategy(from: account)
-        paywallGroup = account.userGroupMap[AccountUserGroupPosition.membershipPaywall]?.stringValue
+        let hasLinkedAccount = account.hasLinkedAccount
+        isVIP = hasLinkedAccount && account.isVIP
+        expirationTime = hasLinkedAccount ? account.vipExpirationTime : nil
+        videoTimes = hasLinkedAccount ? account.videoTimes : 0
+        giveAIVideosTimes = hasLinkedAccount ? account.giveAIVideosTimes : 0
+        freeVIPTimes = hasLinkedAccount ? account.freeVIPTimes : 0
+        diamonds = hasLinkedAccount ? account.diamonds : 0
+        closeButtonStrategy = hasLinkedAccount
+            ? MembershipSnapshot.closeButtonStrategy(from: account)
+            : .normal
+        paywallGroup = hasLinkedAccount
+            ? account.userGroupMap[AccountUserGroupPosition.membershipPaywall]?.stringValue
+            : nil
         productCatalog = .configured
     }
 

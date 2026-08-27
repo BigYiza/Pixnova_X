@@ -110,6 +110,13 @@ class BaseGenerationWorkflowViewController: BaseViewController {
     }
 
     func beginGenerationWorkflow() {
+        let loginCoordinator = AppRuntime.shared.container.loginCoordinator
+        guard loginCoordinator.requireLinkedAccount(
+            from: self,
+            reason: .generation,
+            onAuthenticated: { [weak self] in self?.beginGenerationWorkflow() }
+        ) else { return }
+
         workflowTask?.cancel()
         workflowTask = Task { [weak self] in
             await self?.runGenerationWorkflow()
@@ -164,6 +171,13 @@ class BaseGenerationWorkflowViewController: BaseViewController {
     }
 
     func presentMembershipPaywall(reason: MembershipBlockReason) {
+        let loginCoordinator = AppRuntime.shared.container.loginCoordinator
+        guard loginCoordinator.requireLinkedAccount(
+            from: progressViewController ?? self,
+            reason: .membership,
+            onAuthenticated: { [weak self] in self?.presentMembershipPaywall(reason: reason) }
+        ) else { return }
+
         let paywall = MembershipPaywallViewController(
             viewModel: MembershipPaywallViewModel(
                 membershipHandler: membershipHandler,
@@ -203,6 +217,13 @@ class BaseGenerationWorkflowViewController: BaseViewController {
     }
 
     func presentDiamondStore() {
+        let loginCoordinator = AppRuntime.shared.container.loginCoordinator
+        guard loginCoordinator.requireLinkedAccount(
+            from: self,
+            reason: .diamonds,
+            onAuthenticated: { [weak self] in self?.presentDiamondStore() }
+        ) else { return }
+
         let viewController = DiamondPurchaseViewController(
             viewModel: DiamondPurchaseViewModel(
                 catalog: .configured,

@@ -219,6 +219,13 @@ final class SettingsViewController: BaseViewController {
     }
 
     private func restorePurchases() {
+        let loginCoordinator = AppRuntime.shared.container.loginCoordinator
+        guard loginCoordinator.requireLinkedAccount(
+            from: self,
+            reason: .restorePurchases,
+            onAuthenticated: { [weak self] in self?.restorePurchases() }
+        ) else { return }
+
         guard restoreTask == nil else { return }
         restoreTask = Task { [weak self] in
             guard let self else { return }

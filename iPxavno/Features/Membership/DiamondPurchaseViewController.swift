@@ -796,6 +796,13 @@ final class DiamondPurchaseViewController: BaseViewController {
     }
 
     private func purchaseOrUnlock(packID: String) {
+        let loginCoordinator = AppRuntime.shared.container.loginCoordinator
+        guard loginCoordinator.requireLinkedAccount(
+            from: self,
+            reason: .diamonds,
+            onAuthenticated: { [weak self] in self?.purchaseOrUnlock(packID: packID) }
+        ) else { return }
+
         if viewModel.requiresMembership(packID: packID) {
             presentMembershipPaywall()
             return
@@ -806,6 +813,12 @@ final class DiamondPurchaseViewController: BaseViewController {
 
     private func presentMembershipPaywall() {
         let container = AppRuntime.shared.container
+        guard container.loginCoordinator.requireLinkedAccount(
+            from: self,
+            reason: .membership,
+            onAuthenticated: { [weak self] in self?.presentMembershipPaywall() }
+        ) else { return }
+
         let paywall = MembershipPaywallViewController(
             viewModel: MembershipPaywallViewModel(
                 membershipHandler: container.membershipHandler,
