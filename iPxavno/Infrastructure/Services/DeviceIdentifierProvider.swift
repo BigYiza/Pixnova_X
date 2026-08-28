@@ -26,6 +26,14 @@ final class DeviceIdentifierProvider: DeviceIdentifying {
         try? keychainStore.save(generatedID)
         return generatedID
     }
+
+    @discardableResult
+    func regenerateDeviceID() -> String {
+        let generatedID = UUID().uuidString
+        keyValueStore.set(generatedID, forKey: fallbackKey)
+        try? keychainStore.save(generatedID)
+        return generatedID
+    }
 }
 
 private struct KeychainStringStore {

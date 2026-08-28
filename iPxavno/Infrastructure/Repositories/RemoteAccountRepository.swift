@@ -4,17 +4,20 @@ final class RemoteAccountRepository: AccountRepository {
     private let apiClient: APIClient
     private let sessionVault: SessionVault
     private let accountStore: AccountStoring
+    private let deviceIdentifier: DeviceIdentifying
     private let notificationCenter: NotificationCenter
 
     init(
         apiClient: APIClient,
         sessionVault: SessionVault,
         accountStore: AccountStoring,
+        deviceIdentifier: DeviceIdentifying,
         notificationCenter: NotificationCenter = .default
     ) {
         self.apiClient = apiClient
         self.sessionVault = sessionVault
         self.accountStore = accountStore
+        self.deviceIdentifier = deviceIdentifier
         self.notificationCenter = notificationCenter
 
         if let credential = accountStore.currentAccount?.credential {
@@ -235,13 +238,36 @@ final class RemoteAccountRepository: AccountRepository {
             throw error
         }
 
+        let account: AccountSnapshot
         do {
-            return try await refreshUserProfile()
+            account = try await refreshUserProfile()
         } catch {
-            guard let account = accountStore.currentAccount, !account.hasLinkedAccount else {
+            guard let cachedAccount = accountStore.currentAccount, !cachedAccount.hasLinkedAccount else {
                 throw error
             }
-            return account
+            account = cachedAccount
+        }
+
+        if !account.hasLinkedAccount {
+            _ = deviceIdentifier.regenerateDeviceID()
+            clearSession()
+            return await prepareFreshGuestSession()
+        }
+        return account
+    }
+
+    private func prepareFreshGuestSession() async -> AccountSnapshot {
+        do {
+            let guestAccount = try await login()
+            _ = try? await refreshUserProfile()
+            _ = try? await refreshEntitlements()
+            _ = try? await fetchUserGroups(positions: [
+                AccountUserGroupPosition.membershipCloseButton,
+                AccountUserGroupPosition.membershipPaywall
+            ])
+            return accountStore.currentAccount ?? guestAccount
+        } catch {
+            return accountStore.currentAccount ?? .empty
         }
     }
 
