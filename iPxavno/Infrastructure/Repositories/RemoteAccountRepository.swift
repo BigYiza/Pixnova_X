@@ -164,7 +164,7 @@ final class RemoteAccountRepository: AccountRepository {
     }
 
     @discardableResult
-    func bindFirebaseAccount(idToken: String) async throws -> AccountSnapshot {
+    func bindFirebaseAccount(idToken: String, platform: String) async throws -> AccountSnapshot {
         _ = try await refreshSessionIfNeeded(force: false)
         let body = try JSONEncoder().encode(FirebaseLoginRequest(idToken: idToken))
         let endpoint = APIEndpoint<ServiceEnvelope<LoginPayload>>(
@@ -176,6 +176,13 @@ final class RemoteAccountRepository: AccountRepository {
         let payload = try await apiClient.send(endpoint).requirePayload()
         var account = accountStore.currentAccount ?? .empty
         account.applyLogin(payload)
+        let normalizedPlatform = platform.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        var bindings = account.bindList ?? []
+        if !normalizedPlatform.isEmpty,
+           !bindings.contains(where: { $0.platform.lowercased() == normalizedPlatform }) {
+            bindings.append(ThirdPartyBinding(name: "", platform: normalizedPlatform))
+        }
+        account.bindList = bindings
         try persist(account)
 
         _ = try? await refreshEntitlements()

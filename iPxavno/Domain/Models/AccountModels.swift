@@ -129,7 +129,9 @@ struct AccountSnapshot: Codable {
         invitationInfo = payload.invitationInfo
         vipRewardInfo = payload.vipRewardInfo
         user = payload.user
-        bindList = payload.bindList
+        if let updatedBindList = payload.bindList {
+            bindList = updatedBindList
+        }
     }
 }
 
@@ -179,7 +181,7 @@ struct UserInfoPayload: Codable {
     let invitationInfo: InvitationInfo?
     let vipRewardInfo: VIPRewardInfo?
     let user: RegisteredUserInfo?
-    let bindList: [ThirdPartyBinding]
+    let bindList: [ThirdPartyBinding]?
 
     enum CodingKeys: String, CodingKey {
         case invitationInfo = "invite_info"
@@ -193,7 +195,7 @@ struct UserInfoPayload: Codable {
         invitationInfo = try container.decodeIfPresent(InvitationInfo.self, forKey: .invitationInfo)
         vipRewardInfo = try container.decodeIfPresent(VIPRewardInfo.self, forKey: .vipRewardInfo)
         user = try container.decodeIfPresent(RegisteredUserInfo.self, forKey: .user)
-        bindList = try container.decodeIfPresent([ThirdPartyBinding].self, forKey: .bindList) ?? []
+        bindList = try container.decodeIfPresent([ThirdPartyBinding].self, forKey: .bindList)
     }
 }
 
@@ -204,6 +206,11 @@ struct ThirdPartyBinding: Codable, Equatable {
     enum CodingKeys: String, CodingKey {
         case name
         case platform
+    }
+
+    init(name: String, platform: String) {
+        self.name = name
+        self.platform = platform
     }
 
     init(from decoder: Decoder) throws {
@@ -288,9 +295,35 @@ struct RegisteredUserInfo: Codable {
         case registrationTime = "reg_time"
     }
 
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        userID = try container.decodeIfPresent(String.self, forKey: .userID)
+
+        if let timestamp = try? container.decode(TimeInterval.self, forKey: .registrationTime) {
+            registrationTime = timestamp
+        } else if let value = try? container.decode(String.self, forKey: .registrationTime) {
+            registrationTime = Self.parseRegistrationTime(value)
+        } else {
+            registrationTime = nil
+        }
+    }
+
     var registrationDate: Date? {
         guard let registrationTime else { return nil }
         return Date(timeIntervalSince1970: registrationTime)
+    }
+
+    private static func parseRegistrationTime(_ value: String) -> TimeInterval? {
+        if let timestamp = TimeInterval(value) {
+            return timestamp
+        }
+
+        let formatter = DateFormatter()
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone(secondsFromGMT: 0)
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        return formatter.date(from: value)?.timeIntervalSince1970
     }
 }
 

@@ -125,7 +125,7 @@ private final class FirebaseAuthenticationService: NSObject {
             rawNonce: nonce,
             fullName: appleCredential.fullName
         )
-        return try await authenticateWithFirebase(credential)
+        return try await authenticateWithFirebase(credential, platform: "apple")
     }
 
     func signInWithGoogle(presenting viewController: UIViewController) async throws -> AccountSnapshot {
@@ -147,14 +147,20 @@ private final class FirebaseAuthenticationService: NSObject {
             withIDToken: googleIDToken,
             accessToken: result.user.accessToken.tokenString
         )
-        return try await authenticateWithFirebase(credential)
+        return try await authenticateWithFirebase(credential, platform: "google")
     }
 
-    private func authenticateWithFirebase(_ credential: FirebaseAuth.AuthCredential) async throws -> AccountSnapshot {
+    private func authenticateWithFirebase(
+        _ credential: FirebaseAuth.AuthCredential,
+        platform: String
+    ) async throws -> AccountSnapshot {
         do {
             let result = try await Auth.auth().signIn(with: credential)
             let firebaseIDToken = try await result.user.getIDToken()
-            return try await accountRepository.bindFirebaseAccount(idToken: firebaseIDToken)
+            return try await accountRepository.bindFirebaseAccount(
+                idToken: firebaseIDToken,
+                platform: platform
+            )
         } catch {
             try? Auth.auth().signOut()
             GIDSignIn.sharedInstance.signOut()
