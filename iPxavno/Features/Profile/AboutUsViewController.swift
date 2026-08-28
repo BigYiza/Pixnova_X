@@ -315,7 +315,9 @@ final class AboutUsViewController: BaseViewController {
             guard let self else { return }
             self.setLoading(true)
             do {
-                let account = try await container.accountRepository.removeThirdPartyBindings()
+                let account = try await container.accountRepository.removeThirdPartyBindings(
+                    fallbackPlatform: Self.currentFirebasePlatform
+                )
                 guard !account.hasLinkedAccount else {
                     throw AppError.server(
                         message: "The account could not be deleted. Please try again.",
@@ -341,6 +343,16 @@ final class AboutUsViewController: BaseViewController {
         } else {
             navigationController?.popToRootViewController(animated: true)
         }
+    }
+
+    private static var currentFirebasePlatform: String? {
+        Auth.auth().currentUser?.providerData.lazy.compactMap { provider in
+            switch provider.providerID {
+            case "google.com": return "google"
+            case "apple.com": return "apple"
+            default: return nil
+            }
+        }.first
     }
 
     @objc private func handleBack() {

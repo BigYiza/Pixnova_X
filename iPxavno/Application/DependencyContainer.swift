@@ -55,7 +55,8 @@ struct DependencyContainer {
         let accountRepository = RemoteAccountRepository(
             apiClient: apiClient,
             sessionVault: sessionVault,
-            accountStore: accountStore
+            accountStore: accountStore,
+            deviceIdentifier: deviceIdentifier
         )
         let loginCoordinator = LoginPresentationCoordinator(
             accountRepository: accountRepository,

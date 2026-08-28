@@ -30,5 +30,5 @@ protocol AccountRepository: AnyObject {
     func bindFirebaseAccount(idToken: String, platform: String) async throws -> AccountSnapshot
 
     @discardableResult
-    func removeThirdPartyBindings() async throws -> AccountSnapshot
+    func removeThirdPartyBindings(fallbackPlatform: String?) async throws -> AccountSnapshot
 }

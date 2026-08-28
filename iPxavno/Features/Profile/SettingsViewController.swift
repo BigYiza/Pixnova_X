@@ -12,6 +12,7 @@ final class SettingsViewController: BaseViewController {
     private let toastView = UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterialDark))
     private let toastLabel = UILabel()
     private var restoreTask: Task<Void, Never>?
+    private var signOutTask: Task<Void, Never>?
 
     init(purchaseHandler: MembershipPurchaseHandling) {
         self.purchaseHandler = purchaseHandler
@@ -305,23 +306,49 @@ final class SettingsViewController: BaseViewController {
     }
 
     @objc private func handleSignOut() {
-        do {
-            try Auth.auth().signOut()
-            GIDSignIn.sharedInstance.signOut()
-            let container = AppRuntime.shared.container
-            container.accountRepository.clearSession()
-            UINotificationFeedbackGenerator().notificationOccurred(.success)
-            if let mainController = navigationController?.parent as? MainTabBarController {
-                mainController.showHomeAfterSignOut()
-            } else {
-                navigationController?.popToRootViewController(animated: true)
+        guard signOutTask == nil else { return }
+        let container = AppRuntime.shared.container
+        signOutButton.isEnabled = false
+        setLoading(true)
+
+        signOutTask = Task { [weak self] in
+            guard let self else { return }
+            do {
+                let account = try await container.accountRepository.removeThirdPartyBindings(
+                    fallbackPlatform: Self.currentFirebasePlatform
+                )
+                guard !account.hasLinkedAccount else {
+                    throw AppError.server(
+                        message: "The account could not be signed out. Please try again.",
+                        code: -1
+                    )
+                }
+
+                try? Auth.auth().signOut()
+                GIDSignIn.sharedInstance.signOut()
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+                if let mainController = self.navigationController?.parent as? MainTabBarController {
+                    mainController.showHomeAfterSignOut()
+                } else {
+                    self.navigationController?.popToRootViewController(animated: true)
+                }
+            } catch {
+                self.setLoading(false)
+                self.signOutButton.isEnabled = true
+                self.showToast(error.localizedDescription)
             }
-            Task {
-                _ = try? await container.accountRepository.prepareSession()
-            }
-        } catch {
-            showToast(error.localizedDescription)
+            self.signOutTask = nil
         }
+    }
+
+    private static var currentFirebasePlatform: String? {
+        Auth.auth().currentUser?.providerData.lazy.compactMap { provider in
+            switch provider.providerID {
+            case "google.com": return "google"
+            case "apple.com": return "apple"
+            default: return nil
+            }
+        }.first
     }
 
     private static var appVersion: String {
