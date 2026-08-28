@@ -195,13 +195,27 @@ final class RemoteAccountRepository: AccountRepository {
     }
 
     @discardableResult
-    func removeThirdPartyBindings() async throws -> AccountSnapshot {
+    func removeThirdPartyBindings(fallbackPlatform: String?) async throws -> AccountSnapshot {
         _ = try await refreshSessionIfNeeded(force: false)
-        let platforms = Set(
+        var platforms = Set(
             (accountStore.currentAccount?.bindList ?? [])
                 .map { $0.platform.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() }
                 .filter { !$0.isEmpty }
         )
+        if let fallbackPlatform {
+            let normalizedFallback = fallbackPlatform
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+                .lowercased()
+            if !normalizedFallback.isEmpty {
+                platforms.insert(normalizedFallback)
+            }
+        }
+        guard !platforms.isEmpty else {
+            throw AppError.server(
+                message: "The linked account provider could not be identified.",
+                code: -1
+            )
+        }
 
         do {
             for platform in platforms {
