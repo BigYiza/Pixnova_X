@@ -27,7 +27,7 @@ protocol AccountRepository: AnyObject {
     func restoreAccount(using transactionIDs: [String]) async throws -> AccountSnapshot
 
     @discardableResult
-    func bindFirebaseAccount(idToken: String) async throws -> AccountSnapshot
+    func bindFirebaseAccount(idToken: String, platform: String) async throws -> AccountSnapshot
 
     @discardableResult
     func removeThirdPartyBindings() async throws -> AccountSnapshot
