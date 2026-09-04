@@ -92,6 +92,7 @@
 		C0D3A1000000000000000001 /* PostHogAnalyticsDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0D3A1000000000000000002 /* PostHogAnalyticsDestination.swift */; };
 		C0D3A1000000000000000003 /* PostHog in Frameworks */ = {isa = PBXBuildFile; productRef = C0D3A1000000000000000005 /* PostHog */; };
 		C0D3A2000000000000000001 /* AppsFlyerAnalyticsDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0D3A2000000000000000002 /* AppsFlyerAnalyticsDestination.swift */; };
+		C0D3A3000000000000000001 /* TrackingAuthorizationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0D3A3000000000000000002 /* TrackingAuthorizationCoordinator.swift */; };
 		C0D3A2000000000000000003 /* AppsFlyerLib-Static in Frameworks */ = {isa = PBXBuildFile; productRef = C0D3A2000000000000000005 /* AppsFlyerLib-Static */; };
 		C601C56A0B2FE5E9B842D7B9 /* AccountModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7099CA3ADBCA8058E7BECC9 /* AccountModels.swift */; };
 		CD17EC7B999073D88ED69569 /* GenerationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF908F48255844F18352C2DA /* GenerationModels.swift */; };
@@ -185,6 +186,7 @@
 		BC87C25ED745CDC6CE7E4CB6 /* PrimaryButton.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PrimaryButton.swift; sourceTree = "<group>"; };
 		C0D3A1000000000000000002 /* PostHogAnalyticsDestination.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PostHogAnalyticsDestination.swift; sourceTree = "<group>"; };
 		C0D3A2000000000000000002 /* AppsFlyerAnalyticsDestination.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppsFlyerAnalyticsDestination.swift; sourceTree = "<group>"; };
+		C0D3A3000000000000000002 /* TrackingAuthorizationCoordinator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TrackingAuthorizationCoordinator.swift; sourceTree = "<group>"; };
 		CBF0F075411716A76D5A6D92 /* HomeContentCells.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeContentCells.swift; sourceTree = "<group>"; };
 		CBF0F075411716A76D5A6D93 /* VideoCache.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VideoCache.swift; sourceTree = "<group>"; };
 		CF908F48255844F18352C2DA /* GenerationModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GenerationModels.swift; sourceTree = "<group>"; };
@@ -417,6 +419,7 @@
 		AC593394F8F6D340EB63E811 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				C0D3A3000000000000000002 /* TrackingAuthorizationCoordinator.swift */,
 				C0D3A2000000000000000002 /* AppsFlyerAnalyticsDestination.swift */,
 				C0D3A1000000000000000002 /* PostHogAnalyticsDestination.swift */,
 				AB3000000000000000000001 /* SolarEngineAnalyticsDestination.swift */,
@@ -686,6 +689,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C0D3A3000000000000000001 /* TrackingAuthorizationCoordinator.swift in Sources */,
 				C0D3A2000000000000000001 /* AppsFlyerAnalyticsDestination.swift in Sources */,
 				C0D3A1000000000000000001 /* PostHogAnalyticsDestination.swift in Sources */,
 				AB3000000000000000000002 /* SolarEngineAnalyticsDestination.swift in Sources */,

@@ -1,4 +1,3 @@
-import AppTrackingTransparency
 import Foundation
 import SolarEngineSDK
 import UIKit
@@ -40,7 +39,6 @@ final class SolarEngineAnalyticsDestination: AnalyticsDestination {
     private let configuration: SolarEngineConfiguration
     private let sdk = SolarEngineSDK.sharedInstance()
     private var isStarted = false
-    private var didRequestTracking = false
 
     init(configuration: SolarEngineConfiguration = .current()) {
         self.configuration = configuration
@@ -54,29 +52,6 @@ final class SolarEngineAnalyticsDestination: AnalyticsDestination {
             return
         }
         sdk.preInit(withAppKey: configuration.appKey)
-    }
-
-    func requestTrackingAuthorizationIfNeeded() {
-        guard isStarted,
-            !didRequestTracking,
-            ATTrackingManager.trackingAuthorizationStatus == .notDetermined
-        else { return }
-        didRequestTracking = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-            guard let self, UIApplication.shared.applicationState == .active else {
-                self?.didRequestTracking = false
-                return
-            }
-            self.sdk.requestTrackingAuthorization { [weak self] status in
-                self?.analytics?.record(
-                    AnalyticsEvent(
-                        name: "tracking_authorization",
-                        properties: ["status": Self.authorizationName(status)],
-                        category: .lifecycle
-                    )
-                )
-            }
-        }
     }
 
     func handleOpenURL(_ url: URL) {
@@ -175,16 +150,6 @@ final class SolarEngineAnalyticsDestination: AnalyticsDestination {
         attribute.payStatus = .success
         attribute.customProperties = event.properties
         sdk.trackIAP(withAttributes: attribute)
-    }
-
-    private static func authorizationName(_ status: UInt) -> String {
-        switch status {
-        case 0: return "not_determined"
-        case 1: return "restricted"
-        case 2: return "denied"
-        case 3: return "authorized"
-        default: return "system_error"
-        }
     }
 
     private static func validPropertyName(_ value: String) -> String {

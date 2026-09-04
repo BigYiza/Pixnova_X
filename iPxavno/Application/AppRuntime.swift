@@ -19,7 +19,8 @@ final class AppRuntime {
         }
         container.appsFlyer.initialize(
             launchOptions: launchOptions,
-            initialUserID: container.sessionVault.currentCredential?.userID
+            initialUserID: container.sessionVault.currentCredential?.userID,
+            trackingAuthorization: container.trackingAuthorization
         )
         container.postHog.start()
         container.solarEngine.preInitialize()

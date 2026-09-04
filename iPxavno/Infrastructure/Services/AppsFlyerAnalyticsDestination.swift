@@ -42,7 +42,8 @@ final class AppsFlyerAnalyticsDestination: AnalyticsDestination {
 
     func initialize(
         launchOptions: [UIApplication.LaunchOptionsKey: Any]?,
-        initialUserID: String?
+        initialUserID: String?,
+        trackingAuthorization: TrackingAuthorizationCoordinator
     ) {
         guard configuration.isUsable else {
             #if DEBUG
@@ -68,7 +69,9 @@ final class AppsFlyerAnalyticsDestination: AnalyticsDestination {
         sdk.registerSessionReadyListener { [weak self] in
             guard let self else { return }
             self.sdk.customerUserID = self.userID
-            self.sdk.start()
+            trackingAuthorization.whenResolved { [weak self] in
+                self?.sdk.start()
+            }
         }
     }
 
