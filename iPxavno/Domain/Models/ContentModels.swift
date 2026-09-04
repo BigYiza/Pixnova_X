@@ -53,7 +53,7 @@ struct DiscoverySnapshot: Codable {
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        let decodedSections = try container.decodeIfPresent([ContentSection].self, forKey: .sections) ?? []
+        let decodedSections = container.decodeLossyArray(ContentSection.self, forKey: .sections)
         sections = decodedSections.map { $0.permeatingCardID() }
     }
 
@@ -127,7 +127,7 @@ struct ContentSection: Codable {
         title = try container.decodeIfPresent(String.self, forKey: .title) ?? "Collection"
         homeStyle = try container.decodeFlexibleInt(forKey: .homeStyle) ?? 1
         category = try container.decodeIfPresent(CreativeKind.self, forKey: .category) ?? .unknown
-        templates = try container.decodeIfPresent([CreativeTemplate].self, forKey: .templates) ?? []
+        templates = container.decodeLossyArray(CreativeTemplate.self, forKey: .templates)
         relationCardID = try container.decodeFlexibleInt(forKey: .relationCardID)
         relationCardMedia = try container.decodeIfPresent(String.self, forKey: .relationCardMedia)
         showPositions = try container.decodeFlexibleIntArray(forKey: .showPosition)
@@ -457,6 +457,24 @@ struct GenerationParameterRestriction: Codable, Equatable {
 }
 
 private extension KeyedDecodingContainer {
+    func decodeLossyArray<Element: Decodable>(
+        _ type: Element.Type,
+        forKey key: Key
+    ) -> [Element] {
+        guard var container = try? nestedUnkeyedContainer(forKey: key) else {
+            return []
+        }
+
+        var elements: [Element] = []
+        while !container.isAtEnd {
+            guard let decoder = try? container.superDecoder() else { break }
+            if let element = try? Element(from: decoder) {
+                elements.append(element)
+            }
+        }
+        return elements
+    }
+
     func decodeFlexibleInt(forKey key: Key) throws -> Int? {
         if let value = try decodeIfPresent(Int.self, forKey: key) {
             return value

@@ -89,6 +89,10 @@
 		BA6FA57D017C466A947D4DDC /* RemoteImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A873ED240D656D21A573494F /* RemoteImageView.swift */; };
 		BE6801895D2024D4AE9CB8E2 /* LaunchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E035461EB0290629F77103 /* LaunchViewController.swift */; };
 		BF8D05CA9BB9A1A4330B2FC1 /* KeyValueStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA433CE0D4DB81B559360404 /* KeyValueStore.swift */; };
+		C0D3A1000000000000000001 /* PostHogAnalyticsDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0D3A1000000000000000002 /* PostHogAnalyticsDestination.swift */; };
+		C0D3A1000000000000000003 /* PostHog in Frameworks */ = {isa = PBXBuildFile; productRef = C0D3A1000000000000000005 /* PostHog */; };
+		C0D3A2000000000000000001 /* AppsFlyerAnalyticsDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0D3A2000000000000000002 /* AppsFlyerAnalyticsDestination.swift */; };
+		C0D3A2000000000000000003 /* AppsFlyerLib-Static in Frameworks */ = {isa = PBXBuildFile; productRef = C0D3A2000000000000000005 /* AppsFlyerLib-Static */; };
 		C601C56A0B2FE5E9B842D7B9 /* AccountModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7099CA3ADBCA8058E7BECC9 /* AccountModels.swift */; };
 		CD17EC7B999073D88ED69569 /* GenerationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF908F48255844F18352C2DA /* GenerationModels.swift */; };
 		D3624B0A281A98381AA69A29 /* HomeTopBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 807213956C27F4654F2F3861 /* HomeTopBarView.swift */; };
@@ -179,6 +183,8 @@
 		BA1000000000000000000009 /* SettingsViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		BBAA1C4EA2B7CF842C86BFA9 /* RemoteAccountRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RemoteAccountRepository.swift; sourceTree = "<group>"; };
 		BC87C25ED745CDC6CE7E4CB6 /* PrimaryButton.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PrimaryButton.swift; sourceTree = "<group>"; };
+		C0D3A1000000000000000002 /* PostHogAnalyticsDestination.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PostHogAnalyticsDestination.swift; sourceTree = "<group>"; };
+		C0D3A2000000000000000002 /* AppsFlyerAnalyticsDestination.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppsFlyerAnalyticsDestination.swift; sourceTree = "<group>"; };
 		CBF0F075411716A76D5A6D92 /* HomeContentCells.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeContentCells.swift; sourceTree = "<group>"; };
 		CBF0F075411716A76D5A6D93 /* VideoCache.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VideoCache.swift; sourceTree = "<group>"; };
 		CF908F48255844F18352C2DA /* GenerationModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GenerationModels.swift; sourceTree = "<group>"; };
@@ -200,6 +206,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C0D3A2000000000000000003 /* AppsFlyerLib-Static in Frameworks */,
+				C0D3A1000000000000000003 /* PostHog in Frameworks */,
 				2D6883B5303FD0F30079A44D /* GoogleSignIn in Frameworks */,
 				2DA77A7F2FE38F5A004692D8 /* Kingfisher in Frameworks */,
 				2D5566702FF211D400C9F5DF /* FirebaseAuth in Frameworks */,
@@ -409,6 +417,8 @@
 		AC593394F8F6D340EB63E811 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				C0D3A2000000000000000002 /* AppsFlyerAnalyticsDestination.swift */,
+				C0D3A1000000000000000002 /* PostHogAnalyticsDestination.swift */,
 				AB3000000000000000000001 /* SolarEngineAnalyticsDestination.swift */,
 				AA2000000000000000000003 /* AnalyticsDestinations.swift */,
 				AA2000000000000000000001 /* AnalyticsPipeline.swift */,
@@ -554,6 +564,8 @@
 			);
 			name = iPxavno;
 			packageProductDependencies = (
+				C0D3A2000000000000000005 /* AppsFlyerLib-Static */,
+				C0D3A1000000000000000005 /* PostHog */,
 				2D6883B4303FD0F30079A44D /* GoogleSignIn */,
 				2DA77A7E2FE38F5A004692D8 /* Kingfisher */,
 				2DA77A852FE3CD58004692D8 /* LookinServer */,
@@ -593,6 +605,8 @@
 			mainGroup = 2DA779DD2FE23B6A004692D8;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+				C0D3A2000000000000000004 /* XCRemoteSwiftPackageReference "AppsFlyerFramework-Static" */,
+				C0D3A1000000000000000004 /* XCRemoteSwiftPackageReference "posthog-ios" */,
 				2D6883B3303FD0F30079A44D /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				2DA77A7D2FE38F5A004692D8 /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				2DA77A842FE3CD58004692D8 /* XCRemoteSwiftPackageReference "LookinServer" */,
@@ -672,6 +686,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C0D3A2000000000000000001 /* AppsFlyerAnalyticsDestination.swift in Sources */,
+				C0D3A1000000000000000001 /* PostHogAnalyticsDestination.swift in Sources */,
 				AB3000000000000000000002 /* SolarEngineAnalyticsDestination.swift in Sources */,
 				AA2000000000000000000008 /* AnalyticsAppMonitor.swift in Sources */,
 				AA2000000000000000000006 /* AnalyticsAutoInstrumentation.swift in Sources */,
@@ -763,6 +779,8 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 0F398EBA97D9FE34821C1DAC /* Pods-iPxavno.debug.xcconfig */;
 			buildSettings = {
+				APPSFLYER_APP_ID = 6790359236;
+				APPSFLYER_DEV_KEY = 2o84PsQnbv9B6FSjXibMeJ;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = iPxavno/iPxavno.entitlements;
@@ -802,6 +820,8 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 6254830D140D1F20A2A2DA04 /* Pods-iPxavno.release.xcconfig */;
 			buildSettings = {
+				APPSFLYER_APP_ID = 6790359236;
+				APPSFLYER_DEV_KEY = 2o84PsQnbv9B6FSjXibMeJ;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = iPxavno/iPxavno.entitlements;
@@ -1017,6 +1037,22 @@
 				minimumVersion = 1.2.8;
 			};
 		};
+		C0D3A1000000000000000004 /* XCRemoteSwiftPackageReference "posthog-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/PostHog/posthog-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.69.8;
+			};
+		};
+		C0D3A2000000000000000004 /* XCRemoteSwiftPackageReference "AppsFlyerFramework-Static" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/AppsFlyerSDK/AppsFlyerFramework-Static";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 7.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1064,6 +1100,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 2DA77A842FE3CD58004692D8 /* XCRemoteSwiftPackageReference "LookinServer" */;
 			productName = LookinServer;
+		};
+		C0D3A1000000000000000005 /* PostHog */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C0D3A1000000000000000004 /* XCRemoteSwiftPackageReference "posthog-ios" */;
+			productName = PostHog;
+		};
+		C0D3A2000000000000000005 /* AppsFlyerLib-Static */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C0D3A2000000000000000004 /* XCRemoteSwiftPackageReference "AppsFlyerFramework-Static" */;
+			productName = "AppsFlyerLib-Static";
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -40,12 +40,14 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         URLContexts.forEach { context in
             if GIDSignIn.sharedInstance.handle(context.url) { return }
+            AppRuntime.shared.container.appsFlyer.handleOpenURL(context.url)
             AppRuntime.shared.container.solarEngine.handleOpenURL(context.url)
         }
     }
 
     func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
         guard let url = userActivity.webpageURL else { return }
+        AppRuntime.shared.container.appsFlyer.handleUserActivity(userActivity)
         AppRuntime.shared.container.solarEngine.handleOpenURL(url)
     }
 }

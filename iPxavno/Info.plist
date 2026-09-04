@@ -21,6 +21,10 @@
 	<true/>
 	<key>NSUserTrackingUsageDescription</key>
 	<string>Your data may be used to measure advertising performance and show more relevant promotions.</string>
+	<key>AppsFlyerDevKey</key>
+	<string>$(APPSFLYER_DEV_KEY)</string>
+	<key>AppsFlyerAppleAppID</key>
+	<string>$(APPSFLYER_APP_ID)</string>
 	<key>SolarEngineAppKey</key>
 	<string>$(SOLAR_ENGINE_APP_KEY)</string>
 	<key>SolarEngineATTWaitingInterval</key>

@@ -252,6 +252,7 @@ final class TemplateVideoGenerationViewController: BaseGenerationWorkflowViewCon
     private func configurePhotoArea() {
         photoArea.translatesAutoresizingMaskIntoConstraints = false
         photoArea.axis = selectedImages.count == 1 ? .vertical : .horizontal
+        photoArea.isHidden = selectedImages.isEmpty
         photoArea.spacing = 14
         photoArea.distribution = .fillEqually
         contentView.addSubview(photoArea)
@@ -260,7 +261,9 @@ final class TemplateVideoGenerationViewController: BaseGenerationWorkflowViewCon
             photoArea.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 28),
             photoArea.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -28),
             photoArea.topAnchor.constraint(equalTo: previewView.bottomAnchor, constant: 18),
-            photoArea.heightAnchor.constraint(equalToConstant: selectedImages.count == 1 ? 88 : 136)
+            photoArea.heightAnchor.constraint(
+                equalToConstant: selectedImages.isEmpty ? 0 : (selectedImages.count == 1 ? 88 : 136)
+            )
         ])
     }
 
@@ -516,6 +519,10 @@ final class TemplateVideoGenerationViewController: BaseGenerationWorkflowViewCon
 
     private static func requiredImageCount(for template: CreativeTemplate) -> Int {
         let inputCount = template.inputRequirement?.imageCount
+
+        if template.kind == .textToVideo {
+            return 0
+        }
 
         if template.kind == .multiImageToVideo {
             return min(max(inputCount ?? 2, 1), 2)

@@ -1,5 +1,5 @@
 {
-  "originHash" : "bf82772f310bd97bf37c444f501e8dc3452c37fa07e283d299adeac9fe156efe",
+  "originHash" : "8998e88b749c7391c9d94fb34ba9247c76019b2de9accb97e4d7724f61197a18",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -26,6 +26,15 @@
       "state" : {
         "revision" : "a7caeda164dc5108bf4649472b28a5af65dc6f33",
         "version" : "2.1.0"
+      }
+    },
+    {
+      "identity" : "appsflyerframework-static",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/AppsFlyerSDK/AppsFlyerFramework-Static",
+      "state" : {
+        "revision" : "14ab04fdb7cfd40623477e111698fe1cad888728",
+        "version" : "7.0.2"
       }
     },
     {
@@ -152,6 +161,15 @@
       "state" : {
         "revision" : "3851d94a41890dea16dc3db34caf60e585cb4163",
         "version" : "2.30910.1"
+      }
+    },
+    {
+      "identity" : "posthog-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/PostHog/posthog-ios",
+      "state" : {
+        "revision" : "8551035fe72d8d6605cb077dd853867dc04283ec",
+        "version" : "3.71.4"
       }
     },
     {
