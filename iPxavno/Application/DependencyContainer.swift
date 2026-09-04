@@ -14,6 +14,8 @@ struct DependencyContainer {
     let generationWorkflowRunner: GenerationWorkflowRunning
     let loginCoordinator: LoginPresentationCoordinator
     let analytics: AnalyticsTracking
+    let appsFlyer: AppsFlyerAnalyticsDestination
+    let postHog: PostHogAnalyticsDestination
     let solarEngine: SolarEngineAnalyticsDestination
     let keyValueStore: KeyValueStore
 
@@ -23,10 +25,14 @@ struct DependencyContainer {
         let deviceIdentifier = DeviceIdentifierProvider(keyValueStore: keyValueStore)
         let accountStore = UserDefaultsAccountStore(keyValueStore: keyValueStore)
         let contentCatalogStore = UserDefaultsContentCatalogStore(keyValueStore: keyValueStore)
+        let appsFlyer = AppsFlyerAnalyticsDestination()
+        let postHog = PostHogAnalyticsDestination()
         let solarEngine = SolarEngineAnalyticsDestination()
         let analytics = AnalyticsPipeline(
             destinations: [
                 FirebaseAnalyticsDestination(),
+                appsFlyer,
+                postHog,
                 solarEngine,
                 ConsoleAnalyticsDestination(),
             ],
@@ -107,6 +113,8 @@ struct DependencyContainer {
             generationWorkflowRunner: workflowRunner,
             loginCoordinator: loginCoordinator,
             analytics: analytics,
+            appsFlyer: appsFlyer,
+            postHog: postHog,
             solarEngine: solarEngine,
             keyValueStore: keyValueStore
         )

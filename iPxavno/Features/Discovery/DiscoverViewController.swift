@@ -89,7 +89,11 @@ final class DiscoverViewController: BaseViewController {
             }
             self.topBarView.configure(membership: self.viewModel.currentMembershipState)
             self.sections = state.sections
-            self.collectionView.reloadData()
+            UIView.performWithoutAnimation {
+                self.collectionView.setCollectionViewLayout(self.makeLayout(), animated: false)
+                self.collectionView.reloadData()
+                self.collectionView.layoutIfNeeded()
+            }
             self.presentErrorIfNeeded(state.errorMessage)
         }
     }
@@ -406,9 +410,9 @@ private extension HomeSectionKind {
 private extension CreativeTemplate {
     var isTemplateVideoGenerationWorkflow: Bool {
         switch kind {
-        case .imageToVideo, .multiImageToVideo, .video:
+        case .textToVideo, .imageToVideo, .multiImageToVideo, .video:
             return true
-        case .textToVideo, .videoEnhance, .filter, .hair, .cutout, .photo, .avatar, .outfit, .baby, .collection, .makeup, .textToImage, .imageToImage, .unknown:
+        case .videoEnhance, .filter, .hair, .cutout, .photo, .avatar, .outfit, .baby, .collection, .makeup, .textToImage, .imageToImage, .unknown:
             return false
         }
     }

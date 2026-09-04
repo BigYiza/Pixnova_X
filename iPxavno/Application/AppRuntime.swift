@@ -17,6 +17,11 @@ final class AppRuntime {
         if FirebaseApp.app() == nil {
             FirebaseApp.configure()
         }
+        container.appsFlyer.initialize(
+            launchOptions: launchOptions,
+            initialUserID: container.sessionVault.currentCredential?.userID
+        )
+        container.postHog.start()
         container.solarEngine.preInitialize()
         container.solarEngine.start()
         container.analytics.setUserID(container.sessionVault.currentCredential?.userID)
