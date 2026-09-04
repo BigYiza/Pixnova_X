@@ -14,6 +14,7 @@ struct DependencyContainer {
     let generationWorkflowRunner: GenerationWorkflowRunning
     let loginCoordinator: LoginPresentationCoordinator
     let analytics: AnalyticsTracking
+    let trackingAuthorization: TrackingAuthorizationCoordinator
     let appsFlyer: AppsFlyerAnalyticsDestination
     let postHog: PostHogAnalyticsDestination
     let solarEngine: SolarEngineAnalyticsDestination
@@ -25,6 +26,7 @@ struct DependencyContainer {
         let deviceIdentifier = DeviceIdentifierProvider(keyValueStore: keyValueStore)
         let accountStore = UserDefaultsAccountStore(keyValueStore: keyValueStore)
         let contentCatalogStore = UserDefaultsContentCatalogStore(keyValueStore: keyValueStore)
+        let trackingAuthorization = TrackingAuthorizationCoordinator()
         let appsFlyer = AppsFlyerAnalyticsDestination()
         let postHog = PostHogAnalyticsDestination()
         let solarEngine = SolarEngineAnalyticsDestination()
@@ -42,6 +44,7 @@ struct DependencyContainer {
                 }
             ]
         )
+        trackingAuthorization.analytics = analytics
         solarEngine.analytics = analytics
         let environment = APIEnvironment.current
         let headerProvider = DefaultRequestHeaderProvider(
@@ -113,6 +116,7 @@ struct DependencyContainer {
             generationWorkflowRunner: workflowRunner,
             loginCoordinator: loginCoordinator,
             analytics: analytics,
+            trackingAuthorization: trackingAuthorization,
             appsFlyer: appsFlyer,
             postHog: postHog,
             solarEngine: solarEngine,

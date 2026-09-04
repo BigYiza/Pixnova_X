@@ -34,7 +34,11 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     func sceneDidBecomeActive(_ scene: UIScene) {
-        AppRuntime.shared.container.solarEngine.requestTrackingAuthorizationIfNeeded()
+        AppRuntime.shared.container.trackingAuthorization.requestIfNeeded()
+    }
+
+    func sceneWillResignActive(_ scene: UIScene) {
+        AppRuntime.shared.container.trackingAuthorization.sceneWillResignActive()
     }
 
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
