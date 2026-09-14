@@ -21,6 +21,10 @@
 	<true/>
 	<key>NSUserTrackingUsageDescription</key>
 	<string>Your data may be used to measure advertising performance and show more relevant promotions.</string>
+	<key>NSAdvertisingAttributionReportEndpoint</key>
+	<string>https://appsflyer-skadnetwork.com/</string>
+	<key>AttributionCopyEndpoint</key>
+	<string>https://appsflyer-skadnetwork.com/</string>
 	<key>AppsFlyerDevKey</key>
 	<string>$(APPSFLYER_DEV_KEY)</string>
 	<key>AppsFlyerAppleAppID</key>
