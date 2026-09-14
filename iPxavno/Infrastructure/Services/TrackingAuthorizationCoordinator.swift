@@ -6,17 +6,25 @@ final class TrackingAuthorizationCoordinator {
     weak var analytics: AnalyticsTracking?
 
     private let stableActiveDelay: TimeInterval
+    private let authorizationWaitTimeout: TimeInterval
     private var pendingRequest: DispatchWorkItem?
+    private var waitTimeoutRequest: DispatchWorkItem?
     private var isRequestInFlight = false
     private var hasResolved = false
+    private var hasWaitTimedOut = false
     private var resolutionHandlers: [() -> Void] = []
 
-    init(stableActiveDelay: TimeInterval = 1) {
+    init(
+        stableActiveDelay: TimeInterval = 1,
+        authorizationWaitTimeout: TimeInterval = 60
+    ) {
         self.stableActiveDelay = stableActiveDelay
+        self.authorizationWaitTimeout = authorizationWaitTimeout
     }
 
     /// 每次 Scene 进入 Active 都调用。只有持续 Active 一小段时间后才发起 ATT。
     func requestIfNeeded() {
+        releaseTimedOutHandlersIfPossible()
         guard !hasResolved,
             ATTrackingManager.trackingAuthorizationStatus == .notDetermined,
             !isRequestInFlight
@@ -42,13 +50,49 @@ final class TrackingAuthorizationCoordinator {
         pendingRequest = nil
     }
 
-    /// 归因 SDK 可在 ATT 已确定后启动，避免首个会话早于用户选择发送。
+    /// 归因 SDK 优先在 ATT 已确定后启动；等待超时后放行，避免 SKAN 和首个会话被无限阻塞。
     func whenResolved(_ handler: @escaping () -> Void) {
         guard ATTrackingManager.trackingAuthorizationStatus == .notDetermined else {
             handler()
             return
         }
         resolutionHandlers.append(handler)
+        guard !hasWaitTimedOut else {
+            releaseTimedOutHandlersIfPossible()
+            return
+        }
+        scheduleWaitTimeoutIfNeeded()
+    }
+
+    private func scheduleWaitTimeoutIfNeeded() {
+        guard waitTimeoutRequest == nil else { return }
+        let request = DispatchWorkItem { [weak self] in
+            self?.handleWaitTimeout()
+        }
+        waitTimeoutRequest = request
+        DispatchQueue.main.asyncAfter(
+            deadline: .now() + authorizationWaitTimeout,
+            execute: request
+        )
+    }
+
+    private func handleWaitTimeout() {
+        waitTimeoutRequest = nil
+        guard !hasResolved, !hasWaitTimedOut else { return }
+        hasWaitTimedOut = true
+        analytics?.record(
+            AnalyticsEvent(
+                name: "tracking_authorization_wait_timeout",
+                properties: ["timeout_seconds": String(authorizationWaitTimeout)],
+                category: .lifecycle
+            )
+        )
+        releaseTimedOutHandlersIfPossible()
+    }
+
+    private func releaseTimedOutHandlersIfPossible() {
+        guard hasWaitTimedOut, UIApplication.shared.applicationState == .active else { return }
+        releaseResolutionHandlers()
     }
 
     private func performRequestIfPossible() {
@@ -90,6 +134,8 @@ final class TrackingAuthorizationCoordinator {
         hasResolved = true
         pendingRequest?.cancel()
         pendingRequest = nil
+        waitTimeoutRequest?.cancel()
+        waitTimeoutRequest = nil
         analytics?.record(
             AnalyticsEvent(
                 name: "tracking_authorization",
@@ -98,6 +144,10 @@ final class TrackingAuthorizationCoordinator {
             )
         )
 
+        releaseResolutionHandlers()
+    }
+
+    private func releaseResolutionHandlers() {
         let handlers = resolutionHandlers
         resolutionHandlers.removeAll()
         handlers.forEach { $0() }
