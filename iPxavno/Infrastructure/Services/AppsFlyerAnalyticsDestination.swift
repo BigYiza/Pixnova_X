@@ -25,6 +25,7 @@ struct AppsFlyerConfiguration {
 /// AppsFlyer 只接收归因相关业务事件与 IAP，避免上传页面、点击、性能和网络噪声。
 final class AppsFlyerAnalyticsDestination: AnalyticsDestination {
     let identifier = "appsflyer"
+    var appsFlyerIDDidBecomeAvailable: ((String) -> Void)?
 
     private let configuration: AppsFlyerConfiguration
     private let sdk: AppsFlyerLib
@@ -65,12 +66,16 @@ final class AppsFlyerAnalyticsDestination: AnalyticsDestination {
             sdk.isDebug = true
         #endif
         sdk.initialize(devKey: configuration.devKey, appId: configuration.appleAppID)
+        publishAppsFlyerIDIfAvailable()
         sdk.handleLaunchOptions(launchOptions)
         sdk.registerSessionReadyListener { [weak self] in
             guard let self else { return }
             self.sdk.customerUserID = self.userID
+            self.publishAppsFlyerIDIfAvailable()
             trackingAuthorization.whenResolved { [weak self] in
-                self?.sdk.start()
+                guard let self else { return }
+                self.sdk.start()
+                self.publishAppsFlyerIDIfAvailable()
             }
         }
     }
@@ -118,6 +123,18 @@ final class AppsFlyerAnalyticsDestination: AnalyticsDestination {
         stateLock.lock()
         defer { stateLock.unlock() }
         return currentUserID
+    }
+
+    var appsFlyerID: String? {
+        guard isInitialized else { return nil }
+        let value = sdk.getAppsFlyerUID().trimmingCharacters(in: .whitespacesAndNewlines)
+        return value.isEmpty ? nil : value
+    }
+
+    private func publishAppsFlyerIDIfAvailable() {
+        if let appsFlyerID {
+            appsFlyerIDDidBecomeAvailable?(appsFlyerID)
+        }
     }
 
     private func trackCompletedPurchase(_ event: AnalyticsEvent) {

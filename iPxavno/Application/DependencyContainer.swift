@@ -18,6 +18,7 @@ struct DependencyContainer {
     let appsFlyer: AppsFlyerAnalyticsDestination
     let postHog: PostHogAnalyticsDestination
     let solarEngine: SolarEngineAnalyticsDestination
+    let attributionReporter: PaymentAttributionReporter
     let keyValueStore: KeyValueStore
 
     static func live() -> DependencyContainer {
@@ -30,9 +31,10 @@ struct DependencyContainer {
         let appsFlyer = AppsFlyerAnalyticsDestination()
         let postHog = PostHogAnalyticsDestination()
         let solarEngine = SolarEngineAnalyticsDestination()
+        let firebase = FirebaseAnalyticsDestination()
         let analytics = AnalyticsPipeline(
             destinations: [
-                FirebaseAnalyticsDestination(),
+                firebase,
                 appsFlyer,
                 postHog,
                 solarEngine,
@@ -73,6 +75,20 @@ struct DependencyContainer {
         )
         let membershipHandler = DefaultMembershipHandler(accountRepository: accountRepository)
         let paymentRepository = RemoteMembershipPaymentRepository(apiClient: apiClient)
+        let attributionReporter = PaymentAttributionReporter(
+            paymentRepository: paymentRepository,
+            sessionProvider: sessionVault,
+            analytics: analytics,
+            distinctIDProvider: { [weak solarEngine] in solarEngine?.distinctID },
+            appsFlyerIDProvider: { [weak appsFlyer] in appsFlyer?.appsFlyerID },
+            gaClientIDProvider: { [weak firebase] in firebase?.appInstanceID }
+        )
+        solarEngine.distinctIDDidBecomeAvailable = { [weak attributionReporter] distinctID in
+            attributionReporter?.receiveIOSDistinctID(distinctID)
+        }
+        appsFlyer.appsFlyerIDDidBecomeAvailable = { [weak attributionReporter] appsFlyerID in
+            attributionReporter?.receiveIOSAppsFlyerID(appsFlyerID)
+        }
         let generationRepository = RemoteGenerationRepository(apiClient: apiClient)
         let historyRepository = RemoteHistoryRepository(apiClient: apiClient)
         let mediaUploader = OSSGenerationMediaUploader(apiClient: apiClient)
@@ -120,6 +136,7 @@ struct DependencyContainer {
             appsFlyer: appsFlyer,
             postHog: postHog,
             solarEngine: solarEngine,
+            attributionReporter: attributionReporter,
             keyValueStore: keyValueStore
         )
     }

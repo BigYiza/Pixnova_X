@@ -23,8 +23,10 @@ final class AppRuntime {
             trackingAuthorization: container.trackingAuthorization
         )
         container.postHog.start()
+        container.attributionReporter.start()
         container.solarEngine.preInitialize()
         container.solarEngine.start()
+        container.attributionReporter.refresh()
         container.analytics.setUserID(container.sessionVault.currentCredential?.userID)
         AnalyticsAutoInstrumentation.start(tracker: container.analytics)
         analyticsMonitor.start(applicationState: application.applicationState)
