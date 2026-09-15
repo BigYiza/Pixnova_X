@@ -4,6 +4,15 @@ import Foundation
 final class FirebaseAnalyticsDestination: AnalyticsDestination {
     let identifier = "firebase"
 
+    var appInstanceID: String? {
+        guard
+            let value = FirebaseAnalytics.Analytics.appInstanceID()?
+                .trimmingCharacters(in: .whitespacesAndNewlines),
+            !value.isEmpty
+        else { return nil }
+        return value
+    }
+
     func send(_ event: AnalyticsEvent) {
         FirebaseAnalytics.Analytics.logEvent(event.name, parameters: event.properties)
     }

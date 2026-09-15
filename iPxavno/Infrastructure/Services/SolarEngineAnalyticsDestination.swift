@@ -35,6 +35,7 @@ final class SolarEngineAnalyticsDestination: AnalyticsDestination {
     let identifier = "solar_engine"
 
     weak var analytics: AnalyticsTracking?
+    var distinctIDDidBecomeAvailable: ((String) -> Void)?
 
     private let configuration: SolarEngineConfiguration
     private let sdk = SolarEngineSDK.sharedInstance()
@@ -83,6 +84,13 @@ final class SolarEngineAnalyticsDestination: AnalyticsDestination {
         sdk.reportEventImmediately()
     }
 
+    var distinctID: String? {
+        guard isStarted else { return nil }
+        let value = sdk.getDistinctId().trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !value.isEmpty else { return nil }
+        return value
+    }
+
     func start() {
         guard configuration.isUsable, !isStarted else { return }
 
@@ -104,13 +112,17 @@ final class SolarEngineAnalyticsDestination: AnalyticsDestination {
             )
         }
         sdk.setInitCompletedCallback { [weak self] code in
-            self?.analytics?.record(
+            guard let self else { return }
+            self.analytics?.record(
                 AnalyticsEvent(
                     name: "solar_init",
                     properties: ["code": String(code)],
                     category: .lifecycle
                 )
             )
+            if let distinctID = self.distinctID {
+                self.distinctIDDidBecomeAvailable?(distinctID)
+            }
         }
 
         let config = SEConfig()
